@@ -84,7 +84,7 @@
   padding: 14px 28px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 12px;
 }
 .topbar h1 {
   font-size: 18px;
@@ -92,7 +92,29 @@
 .topbar .meta {
   color: var(--color-text-muted);
   font-size: 13px;
+  margin-left: auto;
 }
+
+.hamburger {
+  display: none;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-size: 18px;
+  line-height: 1;
+}
+.hamburger:hover { background: var(--color-bg); }
+
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 90;
+}
+.sidebar-backdrop.show { display: block; }
 
 .content {
   padding: 24px 28px;
@@ -242,3 +264,104 @@ table.data-table th.num {
   color: var(--color-text);
   box-shadow: var(--shadow-sm);
 }
+
+/* ---------- Mobile (≤768px) ---------- */
+@media (max-width: 768px) {
+  .app-layout {
+    display: block;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 260px;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    z-index: 100;
+  }
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .hamburger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .topbar {
+    padding: 12px 16px;
+    flex-wrap: wrap;
+  }
+  .topbar h1 {
+    font-size: 16px;
+  }
+  .topbar .meta {
+    font-size: 11px;
+    width: 100%;
+    margin-left: 0;
+    padding-left: 42px;
+  }
+
+  .content {
+    padding: 16px;
+  }
+
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .kpi-card {
+    padding: 14px;
+  }
+  .kpi-card .kpi-value {
+    font-size: 20px;
+  }
+  .kpi-card .kpi-label {
+    font-size: 11px;
+  }
+
+  .panel {
+    margin-bottom: 14px;
+  }
+  .panel-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 12px 14px;
+  }
+  .panel-header > div {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .panel-header > div > button {
+    flex: 1;
+  }
+  .panel-body {
+    padding: 14px;
+  }
+
+  .panel-body.dense {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .panel-body.dense table.data-table {
+    min-width: 640px;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+  .form-actions button {
+    width: 100%;
+  }
+}
+
