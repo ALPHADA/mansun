@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>입찰 · 중매인</title>
+  <link rel="stylesheet" href="../assets/common.css" />
+  <link rel="stylesheet" href="../assets/broker.css" />
+</head>
+<body class="broker">
+  <div class="mobile-frame">
+    <header class="mobile-header">
+      <button class="back-btn" onclick="history.back()">←</button>
+      <h1 id="title">고등어 입찰</h1>
+      <span class="header-icon" style="visibility:hidden;">·</span>
+    </header>
+
+    <div class="mobile-content">
+      <div class="detail-section">
+        <h2 id="fishHeader">🐟 고등어 · A등급</h2>
+        <div class="detail-row">
+          <span class="label">경매번호</span>
+          <span class="value" id="auctionId">A01</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">선박 / 선주</span>
+          <span class="value">제3만선호 / 박성진</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">중량</span>
+          <span class="value">320 kg</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">입찰 단위</span>
+          <span class="value">kg당 단가</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">참고사항</span>
+          <span class="value">활어 · 선도 우수</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">마감까지</span>
+          <span class="value" style="color:var(--color-danger);font-weight:600;" id="bidTimer">⏱ 03:00</span>
+        </div>
+      </div>
+
+      <div class="notice-box">
+        🔒 <div>
+          <strong>밀봉 입찰</strong> 입니다. 다른 중매인의 입찰가는 마감 전까지 공개되지 않습니다.
+          서버 시각 기준으로 마감되며, 마감 후 입찰은 무효 처리됩니다.
+        </div>
+      </div>
+
+      <div class="bid-input-wrap">
+        <div class="input-label">입찰가 (kg당)</div>
+        <div class="input-row">
+          <input type="number" id="bidPrice" placeholder="0" inputmode="numeric" />
+          <span class="currency">원 / kg</span>
+        </div>
+        <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="btn-secondary" onclick="setBid(7500)">+7,500</button>
+          <button class="btn-secondary" onclick="setBid(8000)">+8,000</button>
+          <button class="btn-secondary" onclick="setBid(8500)">+8,500</button>
+          <button class="btn-secondary" onclick="setBid(9000)">+9,000</button>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:var(--color-text-muted);" id="totalPreview">
+          총액 미리보기: — 원
+        </div>
+      </div>
+
+      <button class="btn-bid" onclick="submitBid()">🔨 입찰하기</button>
+      <button class="btn-secondary" style="width:100%;margin-top:10px;" onclick="history.back()">취소</button>
+
+      <div style="margin-top:20px;padding:12px;background:#f1f5f9;border-radius:8px;font-size:12px;color:var(--color-text-muted);line-height:1.6;">
+        <strong style="color:var(--color-text);">📋 입찰 정책 안내</strong><br />
+        • 동일 최고가 발생 시 <strong>선착순 낙찰</strong><br />
+        • 마감 전까지 입찰가 <strong>수정 가능</strong> (최종값만 유효)<br />
+        • 디지털 마감 후 현장 호가식 경매와 비교하여 <strong>더 높은 가격</strong>이 최종 낙찰
+      </div>
+    </div>
+
+    <nav class="bottom-tabs">
+      <a href="auctions.html" class="active">
+        <span class="tab-icon">🐟</span><span>경매</span>
+      </a>
+      <a href="results.html">
+        <span class="tab-icon">📋</span><span>내 입찰</span>
+      </a>
+      <a href="#" onclick="alert('마이페이지 (목업 미구현)');return false;">
+        <span class="tab-icon">👤</span><span>마이</span>
+      </a>
+    </nav>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    var WEIGHT = 320;
+    function pad(n) { return String(n).padStart(2, '0'); }
+
+    function setBid(v) {
+      document.getElementById('bidPrice').value = v;
+      updatePreview();
+    }
+    function updatePreview() {
+      var v = Number(document.getElementById('bidPrice').value || 0);
+      var label = v > 0 ? (v * WEIGHT).toLocaleString() + ' 원' : '— 원';
+      document.getElementById('totalPreview').textContent = '총액 미리보기: ' + label;
+    }
+    document.getElementById('bidPrice').addEventListener('input', updatePreview);
+
+    function submitBid() {
+      var v = Number(document.getElementById('bidPrice').value || 0);
+      if (v <= 0) {
+        alert('입찰가를 입력해주세요.');
+        return;
+      }
+      if (!confirm('kg당 ' + v.toLocaleString() + '원 (총 ' + (v * WEIGHT).toLocaleString() + '원)으로 입찰하시겠습니까?\n\n* 마감 전까지 수정 가능합니다.')) return;
+      var t = document.getElementById('toast');
+      t.textContent = '✅ 입찰 완료 · 결과는 마감 후 알림';
+      t.classList.add('show');
+      setTimeout(function () { window.location.href = 'results.html'; }, 1200);
+    }
+
+    var remain = 180;
+    function tick() {
+      remain = Math.max(0, remain - 1);
+      document.getElementById('bidTimer').textContent =
+        remain === 0 ? '마감됨' : '⏱ ' + pad(Math.floor(remain / 60)) + ':' + pad(remain % 60);
+      if (remain === 0) {
+        document.querySelector('.btn-bid').disabled = true;
+        document.querySelector('.btn-bid').textContent = '⛔ 마감됨';
+      }
+    }
+    setInterval(tick, 1000);
+  </script>
+</body>
+</html>

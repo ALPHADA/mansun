@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>대시보드 · 운영자</title>
+  <link rel="stylesheet" href="../assets/common.css" />
+  <link rel="stylesheet" href="../assets/operator.css" />
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        🐟 MANSUN <span class="brand-tag">OPS</span>
+      </div>
+      <ul class="sidebar-nav">
+        <li><a href="dashboard.html" class="active"><span class="nav-icon">📊</span> 대시보드</a></li>
+        <li><a href="intake.html"><span class="nav-icon">📥</span> 입고 등록</a></li>
+        <li><a href="notice.html"><span class="nav-icon">📢</span> 경매 공지</a></li>
+        <li><a href="results.html"><span class="nav-icon">🔨</span> 개찰 · 결과</a></li>
+        <li><a href="settlement.html"><span class="nav-icon">💰</span> 정산</a></li>
+      </ul>
+      <div class="sidebar-user">
+        김운영 / 운영자<br />
+        <a href="../index.html">로그아웃</a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <h1>대시보드</h1>
+        <div class="meta">2026-05-12 (월) · 강구항 위판장</div>
+      </div>
+      <div class="content">
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-label">오늘 입고 건수</div>
+            <div class="kpi-value">14</div>
+            <div class="kpi-delta">▲ 전일 대비 +3</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">진행중 경매</div>
+            <div class="kpi-value">6</div>
+            <div class="kpi-delta">마감 임박 2건</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">오늘 낙찰 금액</div>
+            <div class="kpi-value">42.7M</div>
+            <div class="kpi-delta">원</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">정산 대기</div>
+            <div class="kpi-value">8</div>
+            <div class="kpi-delta down">처리 필요</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h2>오늘 입항 선박</h2>
+            <a href="intake.html">입고 등록 →</a>
+          </div>
+          <div class="panel-body dense">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>도착시각</th>
+                  <th>선박명</th>
+                  <th>선주</th>
+                  <th>품목 수</th>
+                  <th class="num">총 중량(kg)</th>
+                  <th>상태</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>04:20</td>
+                  <td>제3만선호</td>
+                  <td>박성진</td>
+                  <td>3</td>
+                  <td class="num">820</td>
+                  <td><span class="badge badge-info">입고완료</span></td>
+                </tr>
+                <tr>
+                  <td>04:55</td>
+                  <td>동해호</td>
+                  <td>이상철</td>
+                  <td>2</td>
+                  <td class="num">540</td>
+                  <td><span class="badge badge-success">경매중</span></td>
+                </tr>
+                <tr>
+                  <td>05:10</td>
+                  <td>백호1호</td>
+                  <td>최영수</td>
+                  <td>4</td>
+                  <td class="num">1,120</td>
+                  <td><span class="badge badge-success">경매중</span></td>
+                </tr>
+                <tr>
+                  <td>05:40</td>
+                  <td>해랑호</td>
+                  <td>김영길</td>
+                  <td>2</td>
+                  <td class="num">380</td>
+                  <td><span class="badge badge-warning">입고대기</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h2>최근 활동 로그</h2>
+          </div>
+          <div class="panel-body dense">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>시각</th>
+                  <th>구분</th>
+                  <th>내용</th>
+                  <th>처리자</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>06:01</td><td><span class="badge badge-info">공지</span></td><td>5월 12일 새벽 경매 공지 자동 발송 (대상 142명)</td><td>SYSTEM</td></tr>
+                <tr><td>05:45</td><td><span class="badge badge-warning">입고</span></td><td>백호1호 광어 230kg 입고 등록</td><td>김운영</td></tr>
+                <tr><td>05:30</td><td><span class="badge badge-success">낙찰</span></td><td>제3만선호 고등어 1번 — 김중매(M-201) 낙찰</td><td>SYSTEM</td></tr>
+                <tr><td>05:25</td><td><span class="badge badge-muted">개찰</span></td><td>5/12-001 경매 자동 개찰</td><td>SYSTEM</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

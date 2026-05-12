@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MANSUN — 로그인</title>
+  <link rel="stylesheet" href="assets/common.css" />
+  <style>
+    body {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #0e7490 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .login-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 36px 32px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+    .brand {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .brand .logo {
+      font-size: 36px;
+      margin-bottom: 8px;
+    }
+    .brand h1 {
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+    .brand p {
+      color: var(--color-text-muted);
+      font-size: 13px;
+      margin: 0;
+    }
+    .role-options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .role-btn {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px;
+      background: #fff;
+      border: 2px solid var(--color-border);
+      border-radius: 12px;
+      text-align: left;
+      width: 100%;
+      color: var(--color-text);
+      transition: all 0.15s ease;
+    }
+    .role-btn:hover {
+      border-color: var(--color-primary);
+      background: #f8fafc;
+      text-decoration: none;
+    }
+    .role-btn .role-icon {
+      font-size: 28px;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f1f5f9;
+      border-radius: 10px;
+      flex-shrink: 0;
+    }
+    .role-btn .role-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    .role-btn .role-desc {
+      font-size: 12px;
+      color: var(--color-text-muted);
+    }
+    .role-btn.broker .role-icon { background: #ecfeff; }
+    .role-btn.operator .role-icon { background: #eff6ff; }
+    .disabled-roles {
+      border-top: 1px solid var(--color-border);
+      padding-top: 14px;
+      text-align: center;
+    }
+    .disabled-roles p {
+      font-size: 11px;
+      color: var(--color-text-muted);
+      margin: 0 0 6px;
+    }
+    .disabled-roles .role-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+    }
+    .role-pill {
+      font-size: 11px;
+      padding: 4px 10px;
+      background: #f1f5f9;
+      color: #94a3b8;
+      border-radius: 999px;
+    }
+    .footer-note {
+      text-align: center;
+      color: rgba(255,255,255,0.7);
+      font-size: 12px;
+      margin-top: 18px;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <div class="login-card">
+      <div class="brand">
+        <div class="logo">🐟</div>
+        <h1>MANSUN</h1>
+        <p>수산물 경매 시스템 · 입항부터 정산까지 디지털 위판장</p>
+      </div>
+
+      <div class="role-options">
+        <a href="operator/dashboard.html" class="role-btn operator">
+          <div class="role-icon">💼</div>
+          <div>
+            <div class="role-title">운영자로 로그인</div>
+            <div class="role-desc">입고 · 공지 · 개찰 · 정산 관리</div>
+          </div>
+        </a>
+        <a href="broker/auctions.html" class="role-btn broker">
+          <div class="role-icon">📱</div>
+          <div>
+            <div class="role-title">중매인으로 로그인</div>
+            <div class="role-desc">진행중 경매 조회 · 입찰</div>
+          </div>
+        </a>
+      </div>
+
+      <div class="disabled-roles">
+        <p>다른 역할 (목업 미구현)</p>
+        <div class="role-pills">
+          <span class="role-pill">관리자</span>
+          <span class="role-pill">입고 담당자</span>
+          <span class="role-pill">선주</span>
+          <span class="role-pill">노조</span>
+        </div>
+      </div>
+    </div>
+    <div class="footer-note">v0.3 mockup · 2026.05</div>
+  </div>
+</body>
+</html>

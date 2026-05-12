@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>정산 · 운영자</title>
+  <link rel="stylesheet" href="../assets/common.css" />
+  <link rel="stylesheet" href="../assets/operator.css" />
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="sidebar-brand">🐟 MANSUN <span class="brand-tag">OPS</span></div>
+      <ul class="sidebar-nav">
+        <li><a href="dashboard.html"><span class="nav-icon">📊</span> 대시보드</a></li>
+        <li><a href="intake.html"><span class="nav-icon">📥</span> 입고 등록</a></li>
+        <li><a href="notice.html"><span class="nav-icon">📢</span> 경매 공지</a></li>
+        <li><a href="results.html"><span class="nav-icon">🔨</span> 개찰 · 결과</a></li>
+        <li><a href="settlement.html" class="active"><span class="nav-icon">💰</span> 정산</a></li>
+      </ul>
+      <div class="sidebar-user">김운영 / 운영자<br /><a href="../index.html">로그아웃</a></div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <h1>정산 <span style="color:#9ca3af;font-weight:400;font-size:14px;">UC-06</span></h1>
+        <div class="meta">정산 일자 2026-05-12 · 회계 시스템 연동 대기</div>
+      </div>
+      <div class="content">
+
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-label">낙찰 총액</div>
+            <div class="kpi-value">42,720,000</div>
+            <div class="kpi-delta">원</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">위판 수수료 (4%)</div>
+            <div class="kpi-value">1,708,800</div>
+            <div class="kpi-delta">원</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">중매인 수수료 (1.5%)</div>
+            <div class="kpi-value">640,800</div>
+            <div class="kpi-delta">원</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">선주 지급액</div>
+            <div class="kpi-value">41,011,200</div>
+            <div class="kpi-delta">원</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h2>선주별 정산 (4명)</h2>
+            <div>
+              <button class="btn-secondary" onclick="toast('PDF 출력 (목업)')">📄 PDF 출력</button>
+              <button class="btn-primary" onclick="confirmSettle()">정산 확정 · 회계 연동</button>
+            </div>
+          </div>
+          <div class="panel-body dense">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>선주</th>
+                  <th>선박</th>
+                  <th class="num">낙찰 건수</th>
+                  <th class="num">낙찰 총액</th>
+                  <th class="num">위판수수료</th>
+                  <th class="num">지급액</th>
+                  <th>상태</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>박성진</td><td>제3만선호</td>
+                  <td class="num">3</td><td class="num">12,840,000</td>
+                  <td class="num">513,600</td><td class="num">12,326,400</td>
+                  <td><span class="badge badge-warning">대기</span></td>
+                </tr>
+                <tr>
+                  <td>이상철</td><td>동해호</td>
+                  <td class="num">2</td><td class="num">9,720,000</td>
+                  <td class="num">388,800</td><td class="num">9,331,200</td>
+                  <td><span class="badge badge-warning">대기</span></td>
+                </tr>
+                <tr>
+                  <td>최영수</td><td>백호1호</td>
+                  <td class="num">4</td><td class="num">15,540,000</td>
+                  <td class="num">621,600</td><td class="num">14,918,400</td>
+                  <td><span class="badge badge-warning">대기</span></td>
+                </tr>
+                <tr>
+                  <td>김영길</td><td>해랑호</td>
+                  <td class="num">2</td><td class="num">4,620,000</td>
+                  <td class="num">184,800</td><td class="num">4,435,200</td>
+                  <td><span class="badge badge-warning">대기</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header"><h2>중매인별 정산</h2></div>
+          <div class="panel-body dense">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>중매인</th><th>면허번호</th>
+                  <th class="num">낙찰 건수</th>
+                  <th class="num">낙찰 총액</th>
+                  <th class="num">중매수수료(1.5%)</th>
+                  <th class="num">청구액</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>김중매</td><td>M-201</td>
+                  <td class="num">3</td><td class="num">14,920,000</td>
+                  <td class="num">223,800</td><td class="num">15,143,800</td>
+                </tr>
+                <tr>
+                  <td>이상철</td><td>M-205</td>
+                  <td class="num">2</td><td class="num">11,750,000</td>
+                  <td class="num">176,250</td><td class="num">11,926,250</td>
+                </tr>
+                <tr>
+                  <td>박철수</td><td>M-218</td>
+                  <td class="num">2</td><td class="num">8,200,000</td>
+                  <td class="num">123,000</td><td class="num">8,323,000</td>
+                </tr>
+                <tr>
+                  <td>최영수</td><td>M-302</td>
+                  <td class="num">2</td><td class="num">7,850,000</td>
+                  <td class="num">117,750</td><td class="num">7,967,750</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    function toast(msg) {
+      var t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2000);
+    }
+    function confirmSettle() {
+      if (confirm('정산을 확정하고 수협 회계 시스템에 전송합니까?')) {
+        document.querySelectorAll('.badge-warning').forEach(function (b) {
+          if (b.textContent.trim() === '대기') {
+            b.textContent = '확정';
+            b.className = 'badge badge-success';
+          }
+        });
+        toast('✅ 정산 확정 · 회계 시스템 전송 완료');
+      }
+    }
+  </script>
+</body>
+</html>

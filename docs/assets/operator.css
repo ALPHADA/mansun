@@ -1,0 +1,244 @@
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  background: #0f172a;
+  color: #e2e8f0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-brand {
+  padding: 20px 18px;
+  font-size: 16px;
+  font-weight: 700;
+  border-bottom: 1px solid #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sidebar-brand .brand-tag {
+  font-size: 11px;
+  font-weight: 500;
+  color: #94a3b8;
+  background: #1e293b;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.sidebar-nav {
+  list-style: none;
+  margin: 0;
+  padding: 8px 0;
+  flex: 1;
+}
+
+.sidebar-nav li a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  color: #cbd5e1;
+  font-size: 14px;
+  border-left: 3px solid transparent;
+}
+.sidebar-nav li a:hover {
+  background: #1e293b;
+  text-decoration: none;
+}
+.sidebar-nav li a.active {
+  background: #1e293b;
+  color: #fff;
+  border-left-color: var(--color-primary);
+}
+.sidebar-nav .nav-icon {
+  width: 18px;
+  text-align: center;
+}
+
+.sidebar-user {
+  padding: 14px 18px;
+  border-top: 1px solid #1e293b;
+  font-size: 12px;
+  color: #94a3b8;
+}
+.sidebar-user a {
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.topbar {
+  background: #fff;
+  border-bottom: 1px solid var(--color-border);
+  padding: 14px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.topbar h1 {
+  font-size: 18px;
+}
+.topbar .meta {
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.content {
+  padding: 24px 28px;
+  flex: 1;
+}
+
+/* KPI 카드 */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.kpi-card {
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  box-shadow: var(--shadow-sm);
+}
+.kpi-card .kpi-label {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin-bottom: 6px;
+}
+.kpi-card .kpi-value {
+  font-size: 26px;
+  font-weight: 700;
+}
+.kpi-card .kpi-delta {
+  font-size: 12px;
+  margin-top: 4px;
+  color: var(--color-success);
+}
+.kpi-card .kpi-delta.down { color: var(--color-danger); }
+
+/* 카드 / 패널 */
+.panel {
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+.panel-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.panel-header h2 {
+  font-size: 15px;
+}
+.panel-body {
+  padding: 18px;
+}
+.panel-body.dense {
+  padding: 0;
+}
+
+/* 테이블 */
+table.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+table.data-table th,
+table.data-table td {
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+}
+table.data-table th {
+  background: #f9fafb;
+  color: var(--color-text-muted);
+  font-weight: 500;
+  font-size: 12px;
+  text-transform: none;
+}
+table.data-table tr:last-child td {
+  border-bottom: none;
+}
+table.data-table td.num,
+table.data-table th.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 폼 */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+}
+.form-row {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.form-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  padding-top: 8px;
+  border-top: 1px solid var(--color-border);
+  margin-top: 16px;
+  padding-top: 16px;
+}
+
+/* 체크박스 라인 */
+.checkbox-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 4px;
+}
+.checkbox-row label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--color-text);
+  margin: 0;
+}
+.checkbox-row input[type="checkbox"] {
+  width: auto;
+}
+
+/* 토글 */
+.toggle-row {
+  display: flex;
+  gap: 0;
+  background: #f3f4f6;
+  border-radius: var(--radius-sm);
+  padding: 3px;
+  width: fit-content;
+}
+.toggle-row button {
+  background: transparent;
+  color: var(--color-text-muted);
+  padding: 6px 14px;
+  font-size: 13px;
+}
+.toggle-row button.active {
+  background: #fff;
+  color: var(--color-text);
+  box-shadow: var(--shadow-sm);
+}

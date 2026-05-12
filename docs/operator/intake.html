@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>입고 등록 · 운영자</title>
+  <link rel="stylesheet" href="../assets/common.css" />
+  <link rel="stylesheet" href="../assets/operator.css" />
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="sidebar-brand">🐟 MANSUN <span class="brand-tag">OPS</span></div>
+      <ul class="sidebar-nav">
+        <li><a href="dashboard.html"><span class="nav-icon">📊</span> 대시보드</a></li>
+        <li><a href="intake.html" class="active"><span class="nav-icon">📥</span> 입고 등록</a></li>
+        <li><a href="notice.html"><span class="nav-icon">📢</span> 경매 공지</a></li>
+        <li><a href="results.html"><span class="nav-icon">🔨</span> 개찰 · 결과</a></li>
+        <li><a href="settlement.html"><span class="nav-icon">💰</span> 정산</a></li>
+      </ul>
+      <div class="sidebar-user">김운영 / 운영자<br /><a href="../index.html">로그아웃</a></div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <h1>입고 등록 <span style="color:#9ca3af;font-weight:400;font-size:14px;">UC-01</span></h1>
+        <div class="meta">2026-05-12 04:55 · 동해호</div>
+      </div>
+      <div class="content">
+
+        <div class="panel">
+          <div class="panel-header"><h2>선박 정보</h2></div>
+          <div class="panel-body">
+            <div class="form-grid">
+              <div>
+                <label>선박명</label>
+                <input type="text" value="동해호" />
+              </div>
+              <div>
+                <label>선주</label>
+                <input type="text" value="이상철" />
+              </div>
+              <div>
+                <label>도착 시각</label>
+                <input type="datetime-local" value="2026-05-12T04:55" />
+              </div>
+              <div>
+                <label>경매 회차</label>
+                <select>
+                  <option>5/12 오전 1회차 (07:00 마감)</option>
+                  <option>5/12 오전 2회차 (09:00 마감)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h2>입고 품목 추가</h2>
+          </div>
+          <div class="panel-body">
+            <div class="form-grid">
+              <div>
+                <label>물탱크 번호</label>
+                <input type="text" id="tank" placeholder="예: T-04" />
+              </div>
+              <div>
+                <label>어종</label>
+                <select id="fish">
+                  <option>고등어</option>
+                  <option>갈치</option>
+                  <option>오징어</option>
+                  <option>광어</option>
+                  <option>참돔</option>
+                </select>
+              </div>
+              <div>
+                <label>중량 (kg)</label>
+                <input type="number" id="weight" placeholder="예: 230" />
+              </div>
+              <div>
+                <label>입찰 단위</label>
+                <select id="unit">
+                  <option value="kg">kg (킬로그램)</option>
+                  <option value="box">박스</option>
+                  <option value="ea">마리</option>
+                </select>
+              </div>
+              <div>
+                <label>등급</label>
+                <select id="grade">
+                  <option>A</option>
+                  <option>B</option>
+                  <option>C</option>
+                </select>
+              </div>
+              <div>
+                <label>참고사항</label>
+                <input type="text" id="note" placeholder="예: 활어, 선도 우수" />
+              </div>
+            </div>
+            <div class="form-row" style="margin-top: 14px; align-items: center;">
+              <label style="display:inline-flex;align-items:center;gap:6px;margin:0;">
+                <input type="checkbox" style="width:auto;" /> 사진 첨부 (상태 증빙)
+              </label>
+            </div>
+            <div class="form-actions">
+              <button class="btn-secondary" onclick="resetForm()">초기화</button>
+              <button class="btn-primary" onclick="addItem()">+ 품목 추가</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h2>입고 리스트 (동해호)</h2>
+            <button class="btn-primary" onclick="submitAll()">전체 입고 확정</button>
+          </div>
+          <div class="panel-body dense">
+            <table class="data-table" id="intake-table">
+              <thead>
+                <tr>
+                  <th>탱크</th>
+                  <th>어종</th>
+                  <th class="num">중량(kg)</th>
+                  <th>단위</th>
+                  <th>등급</th>
+                  <th>참고</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="intake-tbody">
+                <tr>
+                  <td>T-01</td>
+                  <td>고등어</td>
+                  <td class="num">320</td>
+                  <td><span class="badge badge-info">kg</span></td>
+                  <td>A</td>
+                  <td>활어</td>
+                  <td><button class="btn-ghost">삭제</button></td>
+                </tr>
+                <tr>
+                  <td>T-02</td>
+                  <td>갈치</td>
+                  <td class="num">220</td>
+                  <td><span class="badge badge-info">박스</span></td>
+                  <td>A</td>
+                  <td>20kg 박스 × 11</td>
+                  <td><button class="btn-ghost">삭제</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    function toast(msg) {
+      var t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(function () { t.classList.remove('show'); }, 1800);
+    }
+    function addItem() {
+      var tank = document.getElementById('tank').value.trim() || ('T-0' + (document.querySelectorAll('#intake-tbody tr').length + 1));
+      var fish = document.getElementById('fish').value;
+      var weight = document.getElementById('weight').value || '0';
+      var unit = document.getElementById('unit').value;
+      var unitLabel = { kg: 'kg', box: '박스', ea: '마리' }[unit];
+      var grade = document.getElementById('grade').value;
+      var note = document.getElementById('note').value || '-';
+
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td>' + tank + '</td>' +
+        '<td>' + fish + '</td>' +
+        '<td class="num">' + Number(weight).toLocaleString() + '</td>' +
+        '<td><span class="badge badge-info">' + unitLabel + '</span></td>' +
+        '<td>' + grade + '</td>' +
+        '<td>' + note + '</td>' +
+        '<td><button class="btn-ghost" onclick="this.closest(\'tr\').remove()">삭제</button></td>';
+      document.getElementById('intake-tbody').appendChild(tr);
+      resetForm();
+      toast('품목이 추가되었습니다');
+    }
+    function resetForm() {
+      document.getElementById('tank').value = '';
+      document.getElementById('weight').value = '';
+      document.getElementById('note').value = '';
+    }
+    function submitAll() {
+      toast('입고가 확정되었습니다 · 공지 발송으로 이동하세요');
+    }
+  </script>
+</body>
+</html>

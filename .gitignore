@@ -1,0 +1,11 @@
+# Spec documents (kept local only)
+수산물_경매_시스템_기획서.docx
+수산물_경매_시스템_요구사항.md
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
+*.swp

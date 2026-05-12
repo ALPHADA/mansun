@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>내 입찰 결과 · 중매인</title>
+  <link rel="stylesheet" href="../assets/common.css" />
+  <link rel="stylesheet" href="../assets/broker.css" />
+</head>
+<body class="broker">
+  <div class="mobile-frame">
+    <header class="mobile-header">
+      <div>
+        <h1>내 입찰 결과</h1>
+        <div style="font-size:11px;color:var(--color-text-muted);margin-top:2px;">김중매 · M-201</div>
+      </div>
+      <span class="header-icon">🔔</span>
+    </header>
+
+    <div class="mobile-content">
+      <div style="background:linear-gradient(135deg,#0ea5e9,#0e7490);color:#fff;border-radius:12px;padding:16px;margin-bottom:14px;">
+        <div style="font-size:12px;opacity:0.8;">오늘의 낙찰</div>
+        <div style="font-size:24px;font-weight:700;margin-top:4px;">3 건</div>
+        <div style="font-size:13px;opacity:0.9;margin-top:2px;">총 14,920,000원 (수수료 별도)</div>
+      </div>
+
+      <div style="display:flex;gap:6px;margin-bottom:12px;">
+        <button class="btn-primary" style="flex:1;background:#0ea5e9;font-size:12px;">전체 6</button>
+        <button class="btn-secondary" style="flex:1;font-size:12px;">낙찰 3</button>
+        <button class="btn-secondary" style="flex:1;font-size:12px;">패찰 3</button>
+      </div>
+
+      <div class="result-card won">
+        <div class="top-row">
+          <div class="fish-name">갈치 · 11박스</div>
+          <span class="badge badge-success">✅ 낙찰</span>
+        </div>
+        <div class="ship-line">제3만선호 · 박성진 · A02</div>
+        <div class="price-line">
+          <span style="color:var(--color-text-muted);">내 입찰가</span>
+          <span><strong>48,000</strong> 원/박스</span>
+        </div>
+        <div class="price-line">
+          <span style="color:var(--color-text-muted);">낙찰가 (최종)</span>
+          <span style="color:var(--color-success);"><strong>48,000</strong> 원/박스</span>
+        </div>
+        <div class="price-line">
+          <span style="color:var(--color-text-muted);">총액</span>
+          <span><strong>528,000</strong> 원</span>
+        </div>
+        <div style="margin-top:8px;padding:8px;background:#ecfdf5;border-radius:6px;font-size:11px;color:#065f46;">
+          📦 인수 안내: 07:30까지 위판장 1구역에서 인수해주세요.
+        </div>
+      </div>
+
+      <div class="result-card won">
+        <div class="top-row">
+          <div class="fish-name">방어 · 95kg</div>
+          <span class="badge badge-success">✅ 낙찰</span>
+        </div>
+        <div class="ship-line">백호1호 · 최영수 · A06</div>
+        <div class="price-line">
+          <span style="color:var(--color-text-muted);">내 입찰가</span>
+          <span><strong>14,800</strong> 원/kg</span>
+        </div>
+        <div class="price-line">
+          <span style="color:var(--color-text-muted);">낙찰가 (최종)</span>
+          <span style="color:var(--color-success);"><strong>14,800</strong> 원/kg</span>
+        </div>
+        <div class="price-line">
+          <span style="color:var(--color-text-muted);">총액</span>
+          <span><strong>1,406,000</strong> 원</span>
+        </div>
+      </div>
+
+      <div class="result-card won">
+        <div class="top-row">
+          <div class="fish-name">고등어 · 320kg</div>
+          <span class="badge badge-success">✅ 낙찰</span>
+        </div>
+        <div class="ship-line">제3만선호 · 박성진 · A01</div>
+        <div class="price-line">
+          <span style="color:var(--color-text-muted);">내 입찰가 (방금)</span>
+          <span><strong>9,000</strong> 원/kg</span>
+        </div>
+        <div class="price-line">
+          <span style="color:var(--color-text-muted);">낙찰가 (최종)</span>
+          <span style="color:var(--color-success);"><strong>9,000</strong> 원/kg</span>
+        </div>
+        <div class="price-line">
+          <span style="color:var(--color-text-muted);">총액</span>
+          <span><strong>2,880,000</strong> 원</span>
+        </div>
+      </div>
+
+      <div class="result-card lost">
+        <div class="top-row">
+          <div class="fish-name">광어 · 230kg</div>
+          <span class="badge badge-muted">패찰</span>
+        </div>
+        <div class="ship-line">백호1호 · 최영수 · A04</div>
+        <div class="price-line">
+          <span style="color:var(--color-text-muted);">내 입찰가</span>
+          <span>21,000 원/kg</span>
+        </div>
+        <div class="price-line">
+          <span style="color:var(--color-text-muted);">낙찰가</span>
+          <span>22,500 원/kg (이상철)</span>
+        </div>
+      </div>
+
+      <div class="result-card lost">
+        <div class="top-row">
+          <div class="fish-name">참돔 · 180kg</div>
+          <span class="badge badge-muted">패찰</span>
+        </div>
+        <div class="ship-line">백호1호 · 최영수 · A05</div>
+        <div class="price-line">
+          <span style="color:var(--color-text-muted);">내 입찰가</span>
+          <span>30,000 원/kg</span>
+        </div>
+        <div class="price-line">
+          <span style="color:var(--color-text-muted);">낙찰가</span>
+          <span>32,500 원/kg (현장)</span>
+        </div>
+      </div>
+
+      <div class="result-card lost">
+        <div class="top-row">
+          <div class="fish-name">오징어 · 540마리</div>
+          <span class="badge badge-muted">패찰</span>
+        </div>
+        <div class="ship-line">동해호 · 이상철 · A03</div>
+        <div class="price-line">
+          <span style="color:var(--color-text-muted);">내 입찰가</span>
+          <span>1,700 원/마리</span>
+        </div>
+        <div class="price-line">
+          <span style="color:var(--color-text-muted);">낙찰가</span>
+          <span>1,850 원/마리 (현장)</span>
+        </div>
+      </div>
+    </div>
+
+    <nav class="bottom-tabs">
+      <a href="auctions.html">
+        <span class="tab-icon">🐟</span><span>경매</span>
+      </a>
+      <a href="results.html" class="active">
+        <span class="tab-icon">📋</span><span>내 입찰</span>
+      </a>
+      <a href="#" onclick="alert('마이페이지 (목업 미구현)');return false;">
+        <span class="tab-icon">👤</span><span>마이</span>
+      </a>
+    </nav>
+  </div>
+</body>
+</html>

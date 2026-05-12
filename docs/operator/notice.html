@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>경매 공지 · 운영자</title>
+  <link rel="stylesheet" href="../assets/common.css" />
+  <link rel="stylesheet" href="../assets/operator.css" />
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="sidebar-brand">🐟 MANSUN <span class="brand-tag">OPS</span></div>
+      <ul class="sidebar-nav">
+        <li><a href="dashboard.html"><span class="nav-icon">📊</span> 대시보드</a></li>
+        <li><a href="intake.html"><span class="nav-icon">📥</span> 입고 등록</a></li>
+        <li><a href="notice.html" class="active"><span class="nav-icon">📢</span> 경매 공지</a></li>
+        <li><a href="results.html"><span class="nav-icon">🔨</span> 개찰 · 결과</a></li>
+        <li><a href="settlement.html"><span class="nav-icon">💰</span> 정산</a></li>
+      </ul>
+      <div class="sidebar-user">김운영 / 운영자<br /><a href="../index.html">로그아웃</a></div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <h1>경매 공지 <span style="color:#9ca3af;font-weight:400;font-size:14px;">UC-02</span></h1>
+        <div class="meta">발송 채널: 인앱 푸시 + 알림톡 (이중화)</div>
+      </div>
+      <div class="content">
+        <div class="panel">
+          <div class="panel-header">
+            <h2>공지 작성</h2>
+            <div class="toggle-row" id="modeToggle">
+              <button class="active" data-mode="manual">수동</button>
+              <button data-mode="auto">자동 스케줄</button>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="form-row">
+              <div style="flex:1;">
+                <label>공지 제목</label>
+                <input type="text" value="2026-05-12 오전 1회차 경매 안내" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div style="flex:1;">
+                <label>입찰 시작</label>
+                <input type="datetime-local" value="2026-05-12T06:30" />
+              </div>
+              <div style="flex:1;">
+                <label>입찰 마감</label>
+                <input type="datetime-local" value="2026-05-12T07:00" />
+              </div>
+              <div style="flex:1;">
+                <label>현장 경매 시작 (Phase 2)</label>
+                <input type="datetime-local" value="2026-05-12T07:05" />
+              </div>
+            </div>
+
+            <div>
+              <label>발송 대상</label>
+              <div class="checkbox-row">
+                <label><input type="checkbox" checked /> 중매인 (142명)</label>
+                <label><input type="checkbox" checked /> 노조 (12명)</label>
+                <label><input type="checkbox" checked /> 수협 직원 (8명)</label>
+                <label><input type="checkbox" /> 선주 (참고용, 24명)</label>
+              </div>
+            </div>
+
+            <div style="margin-top:14px;">
+              <label>발송 채널</label>
+              <div class="checkbox-row">
+                <label><input type="checkbox" checked /> 인앱 푸시</label>
+                <label><input type="checkbox" checked /> 카카오 알림톡</label>
+                <label><input type="checkbox" /> SMS (백업)</label>
+              </div>
+            </div>
+
+            <div style="margin-top:14px;">
+              <label>안내 메시지</label>
+              <textarea rows="3" style="resize:vertical;">5월 12일 오전 1회차 경매가 06:30부터 07:00까지 진행됩니다. 입고 품목 총 14건 (고등어, 갈치, 광어, 오징어 등). 디지털 입찰은 7시 정각에 마감되며 이후 현장 호가식 경매가 이어집니다.</textarea>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn-secondary" onclick="toast('미리보기 (목업)')">미리보기</button>
+              <button class="btn-primary" onclick="sendNotice()">📤 공지 발송</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header"><h2>오늘 포함될 품목 (14건)</h2></div>
+          <div class="panel-body dense">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>경매번호</th><th>선박</th><th>어종</th><th class="num">중량</th><th>단위</th><th>등급</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>5/12-A01</td><td>제3만선호</td><td>고등어</td><td class="num">320 kg</td><td>kg</td><td>A</td></tr>
+                <tr><td>5/12-A02</td><td>제3만선호</td><td>갈치</td><td class="num">11 박스</td><td>박스</td><td>A</td></tr>
+                <tr><td>5/12-A03</td><td>동해호</td><td>오징어</td><td class="num">540 마리</td><td>마리</td><td>B</td></tr>
+                <tr><td>5/12-A04</td><td>백호1호</td><td>광어</td><td class="num">230 kg</td><td>kg</td><td>A</td></tr>
+                <tr><td>5/12-A05</td><td>백호1호</td><td>참돔</td><td class="num">180 kg</td><td>kg</td><td>A</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header"><h2>최근 공지 이력</h2></div>
+          <div class="panel-body dense">
+            <table class="data-table">
+              <thead>
+                <tr><th>발송시각</th><th>제목</th><th>유형</th><th class="num">수신자</th><th>채널</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>05-12 05:30</td><td>5/12 오전 1회차 사전 안내</td><td><span class="badge badge-muted">자동</span></td><td class="num">162</td><td>푸시, 알림톡</td></tr>
+                <tr><td>05-11 18:00</td><td>5/11 야간 입고 종료</td><td><span class="badge badge-info">수동</span></td><td class="num">142</td><td>푸시</td></tr>
+                <tr><td>05-11 05:30</td><td>5/11 오전 1회차 안내</td><td><span class="badge badge-muted">자동</span></td><td class="num">158</td><td>푸시, 알림톡</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    function toast(msg) {
+      var t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2000);
+    }
+    function sendNotice() {
+      if (confirm('162명에게 공지를 발송하시겠습니까?')) {
+        toast('✅ 공지 발송 완료 · 162명에게 전송됨');
+      }
+    }
+    document.querySelectorAll('#modeToggle button').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('#modeToggle button').forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

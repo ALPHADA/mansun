@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>진행중 경매 · 중매인</title>
+  <link rel="stylesheet" href="../assets/common.css" />
+  <link rel="stylesheet" href="../assets/broker.css" />
+</head>
+<body class="broker">
+  <div class="mobile-frame">
+    <header class="mobile-header">
+      <div>
+        <h1>진행중 경매</h1>
+        <div style="font-size:11px;color:var(--color-text-muted);margin-top:2px;">김중매 · M-201</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span class="header-icon" title="알림">🔔</span>
+        <a href="../index.html" class="header-icon" title="로그아웃">↩</a>
+      </div>
+    </header>
+
+    <div class="mobile-content">
+      <div style="background:#0f172a;color:#fff;border-radius:10px;padding:14px;margin-bottom:14px;">
+        <div style="font-size:12px;opacity:0.7;">🟢 LIVE · 5/12 오전 1회차</div>
+        <div style="font-size:18px;font-weight:600;margin-top:4px;">디지털 마감까지 <span id="globalTimer" style="color:#fde047;">--:--</span></div>
+        <div style="font-size:11px;opacity:0.7;margin-top:4px;">서버시각 기준 · 마감 후 입찰 불가</div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <button class="btn-primary" style="flex:1;background:#0ea5e9;">전체 14</button>
+        <button class="btn-secondary" style="flex:1;">고등어</button>
+        <button class="btn-secondary" style="flex:1;">갈치</button>
+        <button class="btn-secondary" style="flex:1;">기타</button>
+      </div>
+
+      <a href="bid.html?id=A01" class="auction-card">
+        <div class="card-top">
+          <div>
+            <div class="fish-name">고등어 · A등급</div>
+            <div class="ship-name">제3만선호 · 박성진</div>
+          </div>
+          <span class="unit-tag">단위: kg</span>
+        </div>
+        <div class="meta-row">
+          <span><strong>320</strong> kg</span>
+          <span>활어 · 선도 우수</span>
+        </div>
+        <div class="countdown-row">
+          <span style="font-size:12px;color:var(--color-text-muted);">경매 A01</span>
+          <span class="countdown" data-end-offset="180">⏱ 03:00</span>
+        </div>
+      </a>
+
+      <a href="bid.html?id=A02" class="auction-card">
+        <div class="card-top">
+          <div>
+            <div class="fish-name">갈치 · A등급</div>
+            <div class="ship-name">제3만선호 · 박성진</div>
+          </div>
+          <span class="unit-tag">단위: 박스</span>
+        </div>
+        <div class="meta-row">
+          <span><strong>11</strong> 박스 (20kg/박스)</span>
+          <span>은빛 양호</span>
+        </div>
+        <div class="countdown-row">
+          <span style="font-size:12px;color:var(--color-text-muted);">경매 A02</span>
+          <span class="countdown" data-end-offset="240">⏱ 04:00</span>
+        </div>
+      </a>
+
+      <a href="bid.html?id=A03" class="auction-card">
+        <div class="card-top">
+          <div>
+            <div class="fish-name">오징어 · B등급</div>
+            <div class="ship-name">동해호 · 이상철</div>
+          </div>
+          <span class="unit-tag">단위: 마리</span>
+        </div>
+        <div class="meta-row">
+          <span><strong>540</strong> 마리</span>
+          <span>중간 사이즈</span>
+        </div>
+        <div class="countdown-row">
+          <span style="font-size:12px;color:var(--color-text-muted);">경매 A03</span>
+          <span class="countdown" data-end-offset="420">⏱ 07:00</span>
+        </div>
+      </a>
+
+      <a href="bid.html?id=A04" class="auction-card">
+        <div class="card-top">
+          <div>
+            <div class="fish-name">광어 · A등급</div>
+            <div class="ship-name">백호1호 · 최영수</div>
+          </div>
+          <span class="unit-tag">단위: kg</span>
+        </div>
+        <div class="meta-row">
+          <span><strong>230</strong> kg</span>
+          <span>활어</span>
+        </div>
+        <div class="countdown-row">
+          <span style="font-size:12px;color:var(--color-text-muted);">경매 A04</span>
+          <span class="countdown cool" data-end-offset="900">⏱ 15:00</span>
+        </div>
+      </a>
+
+      <a href="bid.html?id=A05" class="auction-card">
+        <div class="card-top">
+          <div>
+            <div class="fish-name">참돔 · A등급</div>
+            <div class="ship-name">백호1호 · 최영수</div>
+          </div>
+          <span class="unit-tag">단위: kg</span>
+        </div>
+        <div class="meta-row">
+          <span><strong>180</strong> kg</span>
+          <span>활어 · 대형</span>
+        </div>
+        <div class="countdown-row">
+          <span style="font-size:12px;color:var(--color-text-muted);">경매 A05</span>
+          <span class="countdown cool" data-end-offset="1200">⏱ 20:00</span>
+        </div>
+      </a>
+    </div>
+
+    <nav class="bottom-tabs">
+      <a href="auctions.html" class="active">
+        <span class="tab-icon">🐟</span><span>경매</span>
+      </a>
+      <a href="results.html">
+        <span class="tab-icon">📋</span><span>내 입찰</span>
+      </a>
+      <a href="#" onclick="alert('마이페이지 (목업 미구현)');return false;">
+        <span class="tab-icon">👤</span><span>마이</span>
+      </a>
+    </nav>
+  </div>
+
+  <script>
+    function pad(n) { return String(n).padStart(2, '0'); }
+
+    function formatRemaining(sec) {
+      if (sec <= 0) return '마감';
+      var m = Math.floor(sec / 60);
+      var s = sec % 60;
+      return '⏱ ' + pad(m) + ':' + pad(s);
+    }
+
+    var cards = document.querySelectorAll('.countdown');
+    var remaining = [];
+    cards.forEach(function (el) { remaining.push(parseInt(el.dataset.endOffset, 10)); });
+
+    function tick() {
+      var earliest = Infinity;
+      cards.forEach(function (el, idx) {
+        remaining[idx] = Math.max(0, remaining[idx] - 1);
+        el.textContent = formatRemaining(remaining[idx]);
+        if (remaining[idx] <= 60 && remaining[idx] > 0) {
+          el.classList.remove('cool');
+        }
+        if (remaining[idx] === 0) {
+          el.style.color = '#94a3b8';
+        }
+        earliest = Math.min(earliest, remaining[idx]);
+      });
+      var g = document.getElementById('globalTimer');
+      g.textContent = earliest === Infinity ? '--:--' : pad(Math.floor(earliest / 60)) + ':' + pad(earliest % 60);
+    }
+    tick();
+    setInterval(tick, 1000);
+  </script>
+</body>
+</html>

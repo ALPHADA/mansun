@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>개찰 · 결과 · 운영자</title>
+  <link rel="stylesheet" href="../assets/common.css" />
+  <link rel="stylesheet" href="../assets/operator.css" />
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="sidebar-brand">🐟 MANSUN <span class="brand-tag">OPS</span></div>
+      <ul class="sidebar-nav">
+        <li><a href="dashboard.html"><span class="nav-icon">📊</span> 대시보드</a></li>
+        <li><a href="intake.html"><span class="nav-icon">📥</span> 입고 등록</a></li>
+        <li><a href="notice.html"><span class="nav-icon">📢</span> 경매 공지</a></li>
+        <li><a href="results.html" class="active"><span class="nav-icon">🔨</span> 개찰 · 결과</a></li>
+        <li><a href="settlement.html"><span class="nav-icon">💰</span> 정산</a></li>
+      </ul>
+      <div class="sidebar-user">김운영 / 운영자<br /><a href="../index.html">로그아웃</a></div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <h1>개찰 · 결과 <span style="color:#9ca3af;font-weight:400;font-size:14px;">UC-04 · UC-05</span></h1>
+        <div class="meta">디지털 마감 07:00 → 현장 경매 07:05 (Phase 2 병행)</div>
+      </div>
+      <div class="content">
+
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-label">개찰 대상</div>
+            <div class="kpi-value">14</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">개찰 완료</div>
+            <div class="kpi-value">3</div>
+            <div class="kpi-delta" id="doneDelta">11 대기</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">총 낙찰 금액</div>
+            <div class="kpi-value" id="totalAmount">8.4M</div>
+            <div class="kpi-delta">원</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">유찰</div>
+            <div class="kpi-value">0</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h2>5/12 오전 1회차 — 경매 진행 현황</h2>
+            <button class="btn-primary" onclick="openAll()">전체 일괄 개찰</button>
+          </div>
+          <div class="panel-body dense">
+            <table class="data-table" id="auctionTable">
+              <thead>
+                <tr>
+                  <th>경매번호</th>
+                  <th>어종</th>
+                  <th>단위</th>
+                  <th class="num">입찰자 수</th>
+                  <th class="num">디지털 최고가</th>
+                  <th class="num">현장 최고가</th>
+                  <th class="num">최종 낙찰가</th>
+                  <th>낙찰자</th>
+                  <th>출처</th>
+                  <th>상태</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr data-id="A01" data-digital="8200" data-field="8500" data-buyer="이상철(M-205)" data-source="현장">
+                  <td>A01</td>
+                  <td>고등어 320kg</td>
+                  <td>kg</td>
+                  <td class="num">7</td>
+                  <td class="num">8,200</td>
+                  <td class="num result-field-cell">—</td>
+                  <td class="num result-final-cell">—</td>
+                  <td class="result-buyer-cell">—</td>
+                  <td class="result-source-cell">—</td>
+                  <td class="result-status-cell"><span class="badge badge-warning">개찰 대기</span></td>
+                  <td><button class="btn-primary open-btn">개찰</button></td>
+                </tr>
+                <tr data-id="A02" data-digital="48000" data-field="46000" data-buyer="김중매(M-201)" data-source="디지털">
+                  <td>A02</td>
+                  <td>갈치 11박스</td>
+                  <td>박스</td>
+                  <td class="num">9</td>
+                  <td class="num">48,000</td>
+                  <td class="num result-field-cell">—</td>
+                  <td class="num result-final-cell">—</td>
+                  <td class="result-buyer-cell">—</td>
+                  <td class="result-source-cell">—</td>
+                  <td class="result-status-cell"><span class="badge badge-warning">개찰 대기</span></td>
+                  <td><button class="btn-primary open-btn">개찰</button></td>
+                </tr>
+                <tr data-id="A03" data-digital="1800" data-field="1850" data-buyer="박철수(M-218)" data-source="현장">
+                  <td>A03</td>
+                  <td>오징어 540마리</td>
+                  <td>마리</td>
+                  <td class="num">5</td>
+                  <td class="num">1,800</td>
+                  <td class="num result-field-cell">—</td>
+                  <td class="num result-final-cell">—</td>
+                  <td class="result-buyer-cell">—</td>
+                  <td class="result-source-cell">—</td>
+                  <td class="result-status-cell"><span class="badge badge-warning">개찰 대기</span></td>
+                  <td><button class="btn-primary open-btn">개찰</button></td>
+                </tr>
+                <tr>
+                  <td>A04</td><td>광어 230kg</td><td>kg</td><td class="num">8</td>
+                  <td class="num">22,500</td><td class="num">22,000</td>
+                  <td class="num">22,500</td>
+                  <td>이상철(M-205)</td>
+                  <td><span class="badge badge-info">디지털</span></td>
+                  <td><span class="badge badge-success">낙찰</span></td>
+                  <td>—</td>
+                </tr>
+                <tr>
+                  <td>A05</td><td>참돔 180kg</td><td>kg</td><td class="num">6</td>
+                  <td class="num">31,000</td><td class="num">32,500</td>
+                  <td class="num">32,500</td>
+                  <td>최영수(M-302)</td>
+                  <td><span class="badge badge-warning">현장</span></td>
+                  <td><span class="badge badge-success">낙찰</span></td>
+                  <td>—</td>
+                </tr>
+                <tr>
+                  <td>A06</td><td>방어 95kg</td><td>kg</td><td class="num">3</td>
+                  <td class="num">14,800</td><td class="num">14,500</td>
+                  <td class="num">14,800</td>
+                  <td>김중매(M-201)</td>
+                  <td><span class="badge badge-info">디지털</span></td>
+                  <td><span class="badge badge-success">낙찰</span></td>
+                  <td>—</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header"><h2>동일가 / 분쟁 검토</h2></div>
+          <div class="panel-body">
+            <p style="color: var(--color-text-muted); margin: 0;">현재 동일가 케이스 없음. (정책: <strong>옵션 A — 디지털가 비공개</strong>, 동일가 시 선착순 낙찰)</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    function toast(msg) {
+      var t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(function () { t.classList.remove('show'); }, 1800);
+    }
+    function fmt(n) { return Number(n).toLocaleString(); }
+
+    function openRow(tr) {
+      var digital = Number(tr.dataset.digital);
+      var field = Number(tr.dataset.field);
+      var buyer = tr.dataset.buyer;
+      var source = tr.dataset.source;
+      var final = Math.max(digital, field);
+      tr.querySelector('.result-field-cell').textContent = fmt(field);
+      tr.querySelector('.result-final-cell').innerHTML = '<strong>' + fmt(final) + '</strong>';
+      tr.querySelector('.result-buyer-cell').textContent = buyer;
+      tr.querySelector('.result-source-cell').innerHTML = '<span class="badge ' +
+        (source === '디지털' ? 'badge-info' : 'badge-warning') + '">' + source + '</span>';
+      tr.querySelector('.result-status-cell').innerHTML = '<span class="badge badge-success">낙찰</span>';
+      var btnCell = tr.querySelector('button.open-btn');
+      if (btnCell) btnCell.parentElement.textContent = '—';
+      tr.removeAttribute('data-id');
+    }
+
+    document.querySelectorAll('.open-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        openRow(btn.closest('tr'));
+        toast('개찰 완료 · 결과 통보 전송됨');
+      });
+    });
+
+    function openAll() {
+      if (!confirm('대기중인 모든 경매를 일괄 개찰하시겠습니까?')) return;
+      document.querySelectorAll('tr[data-id]').forEach(function (tr) { openRow(tr); });
+      toast('✅ 전체 개찰 완료 · 결과 통보 발송');
+    }
+  </script>
+</body>
+</html>
