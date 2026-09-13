@@ -20,9 +20,10 @@ export async function generateMetadata({ params }: { params: Promise<{ code: str
 const ROLES: Role[] = ["admin", "operator", "receiver", "broker", "shipper", "union"];
 const WINNER_LABEL = { license_no: "면허번호 공개", anonymous: "비공개(익명)" } as const;
 
-export default async function TenantDetailPage({ params }: { params: Promise<{ code: string }> }) {
+export default async function TenantDetailPage({ params, searchParams }: { params: Promise<{ code: string }>; searchParams: Promise<{ readmode?: string; next?: string }> }) {
   await requirePlatformAdmin();
   const { code } = await params;
+  const sp = await searchParams;
   const d = await getTenantDetail(code);
   if (!d) notFound();
   const { tenant: t, memberCounts, admins, pendingInvites, activity, recentAudit } = d;
@@ -35,12 +36,13 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ c
 
   return (
     <>
+      {sp.readmode === "required" && <div className="status-banner info mb-16" style={{ borderRadius: 10 }}>🔍 Platform Admin 은 수협 운영 데이터를 <b>분쟁 조회 모드</b>(사유 기록, 4시간 유효)로만 볼 수 있습니다. 아래에서 사유를 입력해 진입하세요.</div>}
       <div className="pf-head">
         <div>
           <h2>{t.name} <code style={{ fontSize: 13, fontWeight: 400 }}>{t.code}</code> <StatusBadge map={TENANT_STATUS} value={t.status} /></h2>
           <div className="sub"><Link href="/platform/tenants">← 수협 목록</Link> · {t.region ?? "-"} · 생성 {fmtDate(t.createdAt)}{t.activatedAt && <> · 활성화 {fmtDate(t.activatedAt)}</>}</div>
         </div>
-        <TenantActions code={t.code} name={t.name} status={t.status} adminActiveCount={adminActive} defaultAdmin={defaultAdmin} />
+        <TenantActions code={t.code} name={t.name} status={t.status} adminActiveCount={adminActive} defaultAdmin={defaultAdmin} readNext={sp.next} autoOpenRead={sp.readmode === "required"} />
       </div>
 
       {t.status === "suspended" && <div className="alert-card"><div><div className="title">⚠ 정지 상태</div><div className="reason">{t.suspendReason ?? "사유 미기재"}{t.suspendedAt && ` · 정지일 ${fmtDateTime(t.suspendedAt)}`}</div></div></div>}

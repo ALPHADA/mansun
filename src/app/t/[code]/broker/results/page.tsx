@@ -23,7 +23,7 @@ export default async function BrokerResultsPage({ params, searchParams }: { para
 
   const today = localDateStr();
   const todayWon = rows.filter((r) => r.bid.status === "awarded" && r.auction.awardedAt && localDateStr(r.auction.awardedAt) === today);
-  const todayTotal = todayWon.reduce((s, r) => s + Math.round((r.auction.finalPrice ?? r.bid.price) * r.auction.quantity), 0);
+  const todayTotal = todayWon.reduce((s, r) => s + Math.round((r.auction.finalPrice ?? r.bid.price) * r.auction.quantity * (r.myShare ?? 1)), 0);
 
   const list = (f === "all" ? rows : rows.filter((r) => kind(r) === f))
     .sort((a, b) => Math.max(b.auction.awardedAt?.getTime() ?? 0, b.bid.submittedAt.getTime()) - Math.max(a.auction.awardedAt?.getTime() ?? 0, a.bid.submittedAt.getTime()));
@@ -59,16 +59,17 @@ export default async function BrokerResultsPage({ params, searchParams }: { para
         const isDisputed = a.status === "disputed";
 
         if (k === "won") {
-          const total = Math.round((a.finalPrice ?? b.price) * a.quantity);
+          const share = r.myShare ?? 1;
+          const total = Math.round((a.finalPrice ?? b.price) * a.quantity * share);
           return (
             <div key={b.id} className="result-card won">
-              <div className="top-row"><div className="fish-name">{title}</div><Badge tone="success">✅ 낙찰{a.status === "settled" ? " · 정산완료" : ""}</Badge></div>
+              <div className="top-row"><div className="fish-name">{title}</div><Badge tone="success">✅ 낙찰{share < 1 ? ` · 분할 ${Math.round(share * 100)}%` : ""}{a.status === "settled" ? " · 정산완료" : ""}</Badge></div>
               <div className="ship-line">{shipLine}</div>
               <div className="price-line"><span className="muted-label">내 입찰가{b.revision > 1 ? ` (${b.revision}차)` : ""}</span><span><strong>{num(b.price)}</strong> 원/{unit}</span></div>
               <div className="price-line"><span className="muted-label">낙찰가 (최종)</span><span style={{ color: "var(--color-success)" }}><strong>{num(a.finalPrice ?? b.price)}</strong> 원/{unit}</span></div>
               <div className="price-line"><span className="muted-label">총액</span><span><strong>{num(total)}</strong> 원</span></div>
               <div className="price-line"><span className="muted-label">출처 · 시각</span><span className="small">{source} · {fmtDateTime(a.awardedAt)}</span></div>
-              <div className="pickup">📦 인수 안내: 개찰 후 위판장 1구역에서 인수해주세요. (인수 시각·장소는 수협 안내 기준)</div>
+              <div className="pickup">📦 인수 안내: {t.pickupInstructions ?? "인수 시각·장소는 수협 운영자 안내를 따르세요"}</div>
             </div>
           );
         }

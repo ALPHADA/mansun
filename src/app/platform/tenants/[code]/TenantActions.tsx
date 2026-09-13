@@ -10,8 +10,8 @@ import { enterReadModeAction, reinviteAdminAction, tenantStatusAction } from "./
 type Kind = "activate" | "suspend" | "unsuspend" | "archive" | "reinvite" | "read";
 interface Props { code: string; name: string; status: TenantStatus; adminActiveCount: number; defaultAdmin?: { name: string; email: string; phone?: string | null; title?: string | null } | null }
 
-export function TenantActions({ code, name, status, adminActiveCount, defaultAdmin }: Props) {
-  const [open, setOpen] = useState<Kind | null>(null);
+export function TenantActions({ code, name, status, adminActiveCount, defaultAdmin, readNext, autoOpenRead }: Props & { readNext?: string; autoOpenRead?: boolean }) {
+  const [open, setOpen] = useState<Kind | null>(autoOpenRead ? "read" : null);
   const [pending, start] = useTransition();
   const toast = useToast();
   const router = useRouter();
@@ -50,7 +50,7 @@ export function TenantActions({ code, name, status, adminActiveCount, defaultAdm
       {open === "unsuspend" && <UnsuspendModal name={name} busy={pending} onClose={close} onSubmit={(o, onErr) => runStatus("unsuspend", o, onErr)} />}
       {open === "archive" && <ArchiveModal name={name} busy={pending} onClose={close} onSubmit={(o, onErr) => runStatus("archive", o, onErr)} />}
       {open === "reinvite" && <ReinviteModal code={code} name={name} initial={defaultAdmin ?? null} onClose={close} />}
-      {open === "read" && <ReadModeModal code={code} name={name} onClose={close} />}
+      {open === "read" && <ReadModeModal code={code} name={name} onClose={close} next={readNext} />}
     </>
   );
 }
@@ -187,7 +187,7 @@ function ReinviteModal({ code, name, initial, onClose }: { code: string; name: s
   );
 }
 
-function ReadModeModal({ code, name, onClose }: { code: string; name: string; onClose: () => void }) {
+function ReadModeModal({ code, name, onClose, next }: { code: string; name: string; onClose: () => void; next?: string }) {
   const [reason, setReason] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
@@ -198,7 +198,7 @@ function ReadModeModal({ code, name, onClose }: { code: string; name: string; on
     const r = await enterReadModeAction(code, reason);
     if (!r.ok) { setError(r.error); return; }
     toast(r.message ?? "진입");
-    if (r.data) router.push(r.data.next);
+    if (r.data) router.push(next && next.startsWith(`/t/${code}`) ? next : r.data.next);
   });
   return (
     <Modal title="🔍 분쟁 조회 모드 진입" onClose={onClose} footer={<>

@@ -1,9 +1,10 @@
 import "server-only";
-import { and, eq } from "drizzle-orm";
+import { and, eq, gt } from "drizzle-orm";
+import { headers } from "next/headers";
 import { cache } from "react";
 import { notFound as nextNotFound, redirect } from "next/navigation";
 import { db } from "@/db/client";
-import { tenants, memberships, type Role, type Tenant } from "@/db/schema";
+import { tenants, memberships, platformReadSessions, type Role, type Tenant } from "@/db/schema";
 import { getSession, type SessionPayload } from "./session";
 import { roleHas, type Permission } from "@/lib/authz/matrix";
 import { forbidden, AppError } from "@/lib/errors";
@@ -24,26 +25,40 @@ export const getTenantByCode = cache(async (code: string) => {
 });
 
 /** 페이지/레이아웃용: 세션 없으면 로그인으로, 소속 없으면 404 */
+async function currentPath(fallback: string) {
+  try { return (await headers()).get("x-pathname") || fallback; } catch { return fallback; }
+}
+
 export const requireTenantContext = cache(async (code: string): Promise<TenantContext> => {
   const session = await getSession();
-  if (!session) redirect(`/login?next=/t/${code}`);
+  const here = await currentPath(`/t/${code}`);
+  if (!session) redirect(`/login?next=${encodeURIComponent(here)}`);
   const tenant = await getTenantByCode(code);
   if (!tenant) nextNotFound();
 
   if (session.activeTenantId !== tenant.id) {
-    // URL code 와 토큰 불일치 → 소속이면 전환 유도, 아니면 404
+    // URL code 와 토큰 불일치 → 소속이면 전환 유도, 아니면 404. Platform Admin 은 분쟁 조회 모드(사유 입력)로 진입
     const ms = await db.select({ id: memberships.id }).from(memberships)
       .where(and(eq(memberships.userId, session.userId), eq(memberships.tenantId, tenant.id), eq(memberships.status, "active"))).limit(1);
-    if (ms.length || session.isPlatformAdmin) redirect(`/api/auth/switch?code=${tenant.code}&next=${encodeURIComponent(`/t/${code}`)}`);
+    if (ms.length) redirect(`/api/auth/switch?code=${tenant.code}&next=${encodeURIComponent(here)}`);
+    if (session.isPlatformAdmin) redirect(`/platform/tenants/${tenant.code}?readmode=required&next=${encodeURIComponent(here)}`);
     nextNotFound();
   }
 
   const isPA = session.isPlatformAdmin && !session.activeRole;
+  if (isPA) {
+    // 도메인 데이터 조회는 유효한 분쟁 조회 세션(사유 기록)이 있어야 한다 (design/06 E2)
+    const rs = session.readSessionId
+      ? await db.select({ id: platformReadSessions.id }).from(platformReadSessions)
+          .where(and(eq(platformReadSessions.id, session.readSessionId), eq(platformReadSessions.tenantId, tenant.id), eq(platformReadSessions.adminUserId, session.userId), gt(platformReadSessions.expiresAt, new Date()))).limit(1)
+      : [];
+    if (!rs.length) redirect(`/platform/tenants/${tenant.code}?readmode=required&next=${encodeURIComponent(here)}`);
+  }
   let membershipId: string | null = null;
   if (session.activeRole) {
     const [m] = await db.select({ id: memberships.id }).from(memberships)
       .where(and(eq(memberships.userId, session.userId), eq(memberships.tenantId, tenant.id), eq(memberships.role, session.activeRole), eq(memberships.status, "active"))).limit(1);
-    if (!m) redirect(`/api/auth/switch?code=${tenant.code}&next=${encodeURIComponent(`/t/${code}`)}`);
+    if (!m) redirect(`/api/auth/switch?code=${tenant.code}&next=${encodeURIComponent(here)}`);
     membershipId = m.id;
   }
   const readOnly = isPA || tenant.status !== "active";

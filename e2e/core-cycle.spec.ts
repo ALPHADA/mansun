@@ -160,10 +160,15 @@ test("⑤ 노조는 가격 비노출, Platform Admin 읽기 전용", async ({ br
 
   const pctx = await browser.newContext();
   const pp = await login(pctx, "platform@mansun.kr");
+  // 비소속 Platform Admin 은 분쟁 조회 모드(사유 ≥20자)로만 진입 가능
   await pp.goto("/t/gangu/operator/results");
-  await pp.waitForURL(/\/t\/gangu\//);
-  await pp.goto("/t/gangu/operator/results");
+  await pp.waitForURL(/\/platform\/tenants\/gangu\?readmode=required/);
+  await pp.getByPlaceholder(/민원/).fill("e2e 검증 — 9/13 1회차 개찰 결과 및 입찰 이력 확인");
+  await pp.getByRole("button", { name: "사유 기록 후 진입" }).click();
+  await pp.waitForURL(/\/t\/gangu\/operator\/results/);
   await expect(pp.getByText("읽기 전용 (Platform Admin)")).toBeVisible();
+  const [rs] = await sql`select count(*)::int as n from platform_read_sessions where expires_at > now()`;
+  expect(rs.n).toBeGreaterThan(0);
   expect(await pp.getByRole("button", { name: /일괄 개찰/ }).count()).toBe(0);
   await pctx.close();
 });

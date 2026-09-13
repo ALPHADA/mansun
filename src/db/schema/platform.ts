@@ -71,6 +71,8 @@ export const tenants = pgTable("tenants", {
   winnerDisclosure: text("winner_disclosure").$type<WinnerDisclosure>().notNull().default("license_no"),
   accountingAdapter: text("accounting_adapter").notNull().default("mock"),
   notificationConfig: jsonb("notification_config").$type<NotificationConfig>().notNull().default({ channels: ["inapp", "kakao"] }),
+  /** 낙찰 후 인수 안내 문구 (중매인 결과 화면·낙찰 알림에 노출) */
+  pickupInstructions: text("pickup_instructions"),
   suspendReason: text("suspend_reason"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   activatedAt: timestamp("activated_at", { withTimezone: true }),

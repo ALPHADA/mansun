@@ -36,6 +36,7 @@ export const generalSchema = z.object({
   address: optStr(120),
   contactEmail: z.union([z.literal(""), z.email("이메일 형식이 올바르지 않습니다")]).optional().nullable().transform((v) => (v ? v : null)),
   contactPhone: optStr(20).refine((v) => !v || /^[0-9-]{8,15}$/.test(v), "전화번호 형식이 올바르지 않습니다"),
+  pickupInstructions: optStr(200),
 });
 
 export const scheduleSlotSchema = z.object({
@@ -95,7 +96,7 @@ export async function hasActiveAuctions(tenantId: string) {
   return n > 0;
 }
 
-type TenantPatch = Partial<Pick<Tenant, "name" | "region" | "address" | "contactEmail" | "contactPhone" | "digitalCloseBufferMin" | "tieBreakPolicy"
+type TenantPatch = Partial<Pick<Tenant, "name" | "region" | "address" | "contactEmail" | "contactPhone" | "pickupInstructions" | "digitalCloseBufferMin" | "tieBreakPolicy"
   | "digitalPriceVisibility" | "bidModificationAllowed" | "fieldAuctionEnabled" | "bidMfaRequired" | "winnerDisclosure" | "reservePrices" | "schedule"
   | "boxWeightTable" | "feePolicy" | "notificationConfig" | "accountingAdapter">>;
 
@@ -108,7 +109,7 @@ export async function updateTenantSettings(ctx: TenantContext, section: Settings
   switch (section) {
     case "general": {
       const v = generalSchema.parse(patch);
-      set = v; before = { name: t.name, region: t.region, address: t.address, contactEmail: t.contactEmail, contactPhone: t.contactPhone }; after = v;
+      set = v; before = { name: t.name, region: t.region, address: t.address, contactEmail: t.contactEmail, contactPhone: t.contactPhone, pickupInstructions: t.pickupInstructions }; after = v;
       break;
     }
     case "auction": {

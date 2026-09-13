@@ -46,6 +46,9 @@ export async function doThing(code: string, input: X): Promise<ActionResult<Y>> 
 - 라우트 파라미터/`searchParams`는 Promise — `await` 필수 (Next 16).
 - 쿠키 변경(세션 전환)은 Route Handler/서버 액션에서만 가능 → 페이지 렌더 중에는 `/api/auth/switch?code=&next=`로 redirect.
 - 개발 로그인: `/api/dev/login?email=&tenant=&next=` (프로덕션 비활성).
+- `src/proxy.ts` 가 `/t/*`, `/platform/*` 요청에 `x-pathname` 헤더를 주입 → `requireTenantContext` 가 전환/로그인 후 원래 경로로 복귀시킴.
+- Platform Admin 의 Tenant 도메인 조회는 **분쟁 조회 세션**(`platform_read_sessions`, 사유 ≥20자, 4시간)이 있어야 하며 `requireTenantContext` 가 강제한다. 없으면 `/platform/tenants/{code}?readmode=required` 로 redirect.
+- 테스트: `tests/*.test.ts` 순수 로직, `tests/integration/*.test.ts` 서비스 통합(`tests/helpers/fixture.ts` 의 `TenantFixture` 로 일회성 Tenant 생성·삭제, `server-only`/`next/*` 는 `tests/mocks/` 로 alias), `e2e/*.spec.ts` Playwright(dev 서버 3100 필요, `pnpm e2e` 는 DB 리셋 포함).
 - 스타일: `.panel/.panel-header/.panel-body(.dense)`, `.data-table`, `.kpi-grid/.kpi-card`, `.form-grid`, `.badge-*`, `.auction-card`, `.result-card`, `.detail-section/.detail-row`, `.bid-input-wrap`, `.notice-box`, `.chips/.chip`, `.tabs`, `.live-banner`, `.hero-card`, `.empty-state`, `.list-item`, `.kv` 등 — `globals.css` 참조. 새 클래스는 최소화하고 필요 시 `globals.css` 끝에 추가.
 - 금액은 `won()`, 숫자는 `num()`; 상태 배지는 `<StatusBadge map={AUCTION_STATUS} value={a.status} />`.
 - 문서 SSoT: `design/roles/*.md`(화면·필드·검증), `design/02-iam.md`(권한), `design/03-tenant-lifecycle.md`(설정 항목).

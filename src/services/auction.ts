@@ -125,7 +125,7 @@ export async function notifyAwardResult(tenant: Tenant, auctionId: string) {
     const fieldWinnerUser = a.awardSource === "field" && a.winnerMembershipId
       ? (await withTenant(tenant.id, (tx) => tx.select({ userId: memberships.userId }).from(memberships).where(eq(memberships.id, a.winnerMembershipId!))))[0]?.userId : null;
     const winUsers = fieldWinnerUser ? [fieldWinnerUser] : winners;
-    await notify({ tenantId: tenant.id, userIds: winUsers, type: "awarded", title: `🎉 낙찰 · ${label}`, body: `${won(a.finalPrice)}/${unitLabel(a.unit)} (${a.awardSource === "field" ? "현장" : "디지털"})`, link, channels: ["kakao"], mandatory: true });
+    await notify({ tenantId: tenant.id, userIds: winUsers, type: "awarded", title: `🎉 낙찰 · ${label}`, body: `${won(a.finalPrice)}/${unitLabel(a.unit)} (${a.awardSource === "field" ? "현장" : "디지털"})${tenant.pickupInstructions ? `\n📦 ${tenant.pickupInstructions}` : ""}`, link, channels: ["kakao"], mandatory: true });
     await notify({ tenantId: tenant.id, userIds: losers.filter((u) => !winUsers.includes(u)), type: "lost", title: `패찰 · ${label}`, body: `낙찰가 ${won(a.finalPrice)}/${unitLabel(a.unit)}`, link });
     if (detail.shipperUserId) await notify({ tenantId: tenant.id, userIds: [detail.shipperUserId], type: "awarded", title: `낙찰 · ${detail.vesselName} ${label}`, body: `${won(a.finalPrice)}/${unitLabel(a.unit)} × ${a.quantity}${unitLabel(a.unit)}`, link: `/t/${tenant.code}/shipper/intake/${a.intakeId}`, channels: ["kakao"], mandatory: true });
   } else if (a.status === "passed") {

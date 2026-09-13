@@ -46,6 +46,7 @@ async function main() {
     status: "active", contactEmail: "ops@gangu.suhyup.kr", contactPhone: "0547330001",
     feePolicy, boxWeightTable: boxTable, schedule, reservePrices: { flatfish: 15000 },
     tieBreakPolicy: "first_come", digitalPriceVisibility: "hidden", bidModificationAllowed: true, fieldAuctionEnabled: true,
+    pickupInstructions: "개찰 후 07:30까지 위판장 1구역에서 인수 · 문의 054-733-0001",
     activatedAt: new Date(),
   }).returning();
   const [pohang] = await db.insert(tenants).values({

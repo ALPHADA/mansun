@@ -1,7 +1,7 @@
 import "server-only";
 import { outer } from "@/db/sql";
 import { and, asc, desc, eq, gte, inArray, lte, sql } from "drizzle-orm";
-import { auctions, bids, bidRevisions, rounds, memberships, users, intakes, vessels, fishSpecies, type BidStatus } from "@/db/schema";
+import { auctions, bids, bidRevisions, rounds, memberships, users, intakes, vessels, fishSpecies, auctionResults, type BidStatus } from "@/db/schema";
 import { withTenant } from "@/db/context";
 import { audit } from "./audit";
 import { notify } from "./notification";
@@ -73,7 +73,9 @@ export async function myBids(ctx: TenantContext, opts: { status?: BidStatus[]; f
     if (opts.to) conds.push(lte(bids.submittedAt, opts.to));
     const winnerLicense = sql<string | null>`(select m.license_no from ${memberships} m where m.id = ${outer(auctions, auctions.winnerMembershipId)})`;
     const winnerName = sql<string | null>`(select u.name from ${memberships} m join ${users} u on u.id = m.user_id where m.id = ${outer(auctions, auctions.winnerMembershipId)})`;
-    return tx.select({ bid: bids, auction: auctions, speciesName: fishSpecies.name, vesselName: vessels.name, shipperName: users.name, round: rounds, winnerLicense, winnerName })
+    /** 분할 낙찰 시 본인 지분 (auction_results.winners), 아니면 null */
+    const myShare = sql<number | null>`(select (w->>'share')::float from ${auctionResults} r, jsonb_array_elements(r.winners) w where r.auction_id = ${outer(auctions, auctions.id)} and r.is_current and w->>'membershipId' = ${ctx.membershipId} limit 1)`;
+    return tx.select({ bid: bids, auction: auctions, speciesName: fishSpecies.name, vesselName: vessels.name, shipperName: users.name, round: rounds, winnerLicense, winnerName, myShare })
       .from(bids).innerJoin(auctions, eq(auctions.id, bids.auctionId)).innerJoin(intakes, eq(intakes.id, auctions.intakeId)).innerJoin(vessels, eq(vessels.id, intakes.vesselId))
       .leftJoin(users, eq(users.id, vessels.shipperUserId)).leftJoin(rounds, eq(rounds.id, auctions.roundId)).leftJoin(fishSpecies, eq(fishSpecies.code, auctions.speciesCode))
       .where(and(...conds)).orderBy(desc(bids.submittedAt));

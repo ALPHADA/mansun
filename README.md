@@ -18,18 +18,8 @@ pnpm dev                                # http://localhost:3000
 ```
 `pnpm db:reset` 은 스키마를 드롭하고 마이그레이션·시드를 다시 수행한다.
 
-### 시드 계정 (비밀번호 공통 `mansun1234`)
-| 계정 | 역할 | 비고 |
-|---|---|---|
-| platform@mansun.kr | Platform Admin | `/platform` 콘솔 |
-| admin@gangu.kr | 강구항 수협 Admin | 설정·멤버·면허 |
-| operator@gangu.kr | 운영자 + 입고담당 | 입고·공지·개찰·정산 |
-| receiver@gangu.kr | 입고담당 | 모바일 현장 입고 |
-| broker@gangu.kr | 중매인 (강구 M-201 · 포항 B-340) | 다중 소속 → 수협 선택 화면 |
-| lee@gangu.kr / park@gangu.kr / choi@gangu.kr | 중매인 | lee 면허 5일 후 만료 |
-| shipper1~4@gangu.kr | 선주 | shipper1 박성진 = 제3만선호 |
-| union@gangu.kr | 노조 | 작업조 1반 |
-| admin@pohang.kr / operator@pohang.kr | 포항 수협 | 동일가 추첨 정책, 현장 경매 미사용 |
+### 시드 계정
+비밀번호 공통 `mansun1234`. 전체 계정·전화번호·DB 롤·비밀 키는 [`SEED_ACCOUNTS.md`](SEED_ACCOUNTS.md) 참조 (운영 전 변경 필수).
 
 개발 편의: `GET /api/dev/login?email=…&tenant=…` 로 비밀번호 없이 세션 발급(프로덕션 비활성), `POST /api/internal/tick` 으로 스케줄러 즉시 실행.
 
@@ -61,6 +51,6 @@ src/adapters           SMS/알림톡/이메일/회계 ERP Mock(발송 로그 테
 
 ## 테스트
 ```bash
-pnpm typecheck && pnpm lint && pnpm test   # vitest: 개찰 엔진·정산 계산·권한 매트릭스·RLS 격리(DB 필요)
-pnpm e2e                                    # Playwright 스모크 (dev 서버 필요)
+pnpm typecheck && pnpm lint && pnpm test   # vitest: 순수 로직 + 서비스 통합 테스트(로컬 DB 필요, 일회성 Tenant 생성 후 정리)
+pnpm e2e                                    # DB 리셋 후 Playwright E2E (dev 서버 3100 필요)
 ```

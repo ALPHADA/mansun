@@ -21,7 +21,7 @@ export default async function SettingsPage({ params, searchParams }: { params: P
   const [species, locked] = await Promise.all([listSpecies(), hasActiveAuctions(ctx.tenant.id)]);
   const t = ctx.tenant;
   const settings: TenantSettings = {
-    name: t.name, region: t.region, address: t.address, contactEmail: t.contactEmail, contactPhone: t.contactPhone, businessNo: t.businessNo, code: t.code,
+    name: t.name, region: t.region, address: t.address, contactEmail: t.contactEmail, contactPhone: t.contactPhone, pickupInstructions: t.pickupInstructions, businessNo: t.businessNo, code: t.code,
     digitalCloseBufferMin: t.digitalCloseBufferMin, tieBreakPolicy: t.tieBreakPolicy, digitalPriceVisibility: t.digitalPriceVisibility, bidModificationAllowed: t.bidModificationAllowed,
     fieldAuctionEnabled: t.fieldAuctionEnabled, bidMfaRequired: t.bidMfaRequired, winnerDisclosure: t.winnerDisclosure, reservePrices: t.reservePrices, schedule: t.schedule,
     boxWeightTable: t.boxWeightTable, feePolicy: t.feePolicy, notificationConfig: t.notificationConfig, accountingAdapter: t.accountingAdapter,

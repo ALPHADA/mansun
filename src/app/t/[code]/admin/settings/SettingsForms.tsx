@@ -9,7 +9,7 @@ import type { SettingsSection } from "@/services/tenant-admin";
 import { saveSettingsAction } from "./actions";
 
 export interface TenantSettings {
-  code: string; name: string; region: string | null; address: string | null; contactEmail: string | null; contactPhone: string | null; businessNo: string | null;
+  code: string; name: string; region: string | null; address: string | null; contactEmail: string | null; contactPhone: string | null; pickupInstructions: string | null; businessNo: string | null;
   digitalCloseBufferMin: number; tieBreakPolicy: TieBreakPolicy; digitalPriceVisibility: DigitalPriceVisibility; bidModificationAllowed: boolean;
   fieldAuctionEnabled: boolean; bidMfaRequired: boolean; winnerDisclosure: WinnerDisclosure; reservePrices: ReservePrices; schedule: ScheduleSlot[];
   boxWeightTable: BoxWeightTable; feePolicy: FeePolicy; notificationConfig: NotificationConfig; accountingAdapter: string;
@@ -52,7 +52,7 @@ export function SettingsTab(props: Common & { tab: SettingsSection; species: Spe
 // ───────── 일반 ─────────
 function GeneralForm({ code, settings: s, canWrite }: Common) {
   const { save, pending, errors } = useSave(code, "general");
-  const [f, setF] = useState({ name: s.name, region: s.region ?? "", address: s.address ?? "", contactEmail: s.contactEmail ?? "", contactPhone: s.contactPhone ?? "" });
+  const [f, setF] = useState({ name: s.name, region: s.region ?? "", address: s.address ?? "", contactEmail: s.contactEmail ?? "", contactPhone: s.contactPhone ?? "", pickupInstructions: s.pickupInstructions ?? "" });
   const ro = !canWrite;
   return (
     <form className="panel settings-form" onSubmit={(e) => { e.preventDefault(); save(f); }}>
@@ -64,6 +64,7 @@ function GeneralForm({ code, settings: s, canWrite }: Common) {
           <div className="field" style={{ gridColumn: "1 / -1" }}><label>주소</label><input value={f.address} onChange={(e) => setF({ ...f, address: e.target.value })} disabled={ro} /><Err m={errors.address} /></div>
           <div className="field"><label>대표 이메일</label><input type="email" value={f.contactEmail} onChange={(e) => setF({ ...f, contactEmail: e.target.value })} disabled={ro} /><Err m={errors.contactEmail} /></div>
           <div className="field"><label>대표 전화</label><input value={f.contactPhone} onChange={(e) => setF({ ...f, contactPhone: e.target.value })} placeholder="054-733-0001" disabled={ro} /><Err m={errors.contactPhone} /></div>
+          <div className="field" style={{ gridColumn: "1 / -1" }}><label>낙찰 후 인수 안내 (중매인 결과 화면·낙찰 알림에 표시)</label><input value={f.pickupInstructions} onChange={(e) => setF({ ...f, pickupInstructions: e.target.value })} maxLength={200} placeholder="예: 개찰 후 07:30까지 위판장 1구역에서 인수. 문의 054-733-0001" disabled={ro} /><Err m={errors.pickupInstructions} /></div>
         </div>
         <p className="hint">수협 코드·사업자등록번호·운영 상태는 Platform Admin만 변경할 수 있습니다.</p>
         <Actions pending={pending} canWrite={canWrite} />

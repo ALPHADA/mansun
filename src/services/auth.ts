@@ -77,9 +77,9 @@ export async function selectTenant(session: SessionPayload, tenantCode: string |
   if (session.isPlatformAdmin) {
     const [t] = await db.select().from(tenants).where(eq(tenants.code, tenantCode)).limit(1);
     if (!t) throw new AppError("not_found", "수협을 찾을 수 없습니다");
-    await setSessionCookie({ ...session, activeTenantId: t.id, activeTenantCode: t.code, activeRole: null, tenantRoles: [] });
+    // 비소속 Platform Admin 의 Tenant 진입은 분쟁 조회 모드(사유 입력)를 통해서만 — 상세 페이지로 안내
     await audit({ action: "platform.enter_tenant", actorUserId: session.userId, tenantId: t.id });
-    return { next: `/t/${t.code}` };
+    return { next: `/platform/tenants/${t.code}?readmode=required` };
   }
   throw new AppError("forbidden", "소속되지 않은 수협입니다");
 }
