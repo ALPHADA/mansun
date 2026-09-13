@@ -10,8 +10,10 @@ export const metadata = { title: "진행중 경매" };
 
 function quantityLabel(a: AuctionRow["auction"]) {
   if (a.unit === "kg") return <span><strong>{num(a.weightKg)}</strong> kg</span>;
-  const per = a.quantity > 0 ? Math.round(a.weightKg / a.quantity) : null;
-  return <span><strong>{num(a.quantity)}</strong> {unitLabel(a.unit)}{per ? ` (${per}kg/${unitLabel(a.unit)})` : ""} · {num(a.weightKg)}kg</span>;
+  const perKg = a.quantity > 0 ? a.weightKg / a.quantity : null;
+  // 마리 단위는 g, 박스는 kg 로 표기 (0.4kg/마리 → 400g/마리)
+  const per = perKg == null ? "" : perKg < 1 ? ` (${Math.round(perKg * 1000)}g/${unitLabel(a.unit)})` : ` (${num(perKg, 1)}kg/${unitLabel(a.unit)})`;
+  return <span><strong>{num(a.quantity)}</strong> {unitLabel(a.unit)}{per} · {num(a.weightKg)}kg</span>;
 }
 
 export default async function BrokerAuctionsPage({ params, searchParams }: { params: Promise<{ code: string }>; searchParams: Promise<Record<string, string | undefined>> }) {
