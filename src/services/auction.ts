@@ -1,4 +1,5 @@
 import "server-only";
+import { outer } from "@/db/sql";
 import { and, asc, desc, eq, inArray, notInArray, sql, ne } from "drizzle-orm";
 import { auctions, bids, auctionResults, rounds, intakes, vessels, users, memberships, disputes, fishSpecies, type Tenant, type Auction, type AuctionStatus } from "@/db/schema";
 import type { Tx } from "@/db/client";
@@ -22,8 +23,8 @@ export async function listAuctions(tenantId: string, opts: { roundId?: string; s
     if (opts.shipperUserId) conds.push(eq(vessels.shipperUserId, opts.shipperUserId));
     if (opts.speciesCode) conds.push(eq(auctions.speciesCode, opts.speciesCode));
     if (opts.from) conds.push(sql`${auctions.createdAt} >= ${opts.from}`);
-    const winnerUser = sql<string | null>`(select u.name from ${memberships} m join ${users} u on u.id = m.user_id where m.id = ${auctions.winnerMembershipId})`;
-    const winnerLicense = sql<string | null>`(select m.license_no from ${memberships} m where m.id = ${auctions.winnerMembershipId})`;
+    const winnerUser = sql<string | null>`(select u.name from ${memberships} m join ${users} u on u.id = m.user_id where m.id = ${outer(auctions, auctions.winnerMembershipId)})`;
+    const winnerLicense = sql<string | null>`(select m.license_no from ${memberships} m where m.id = ${outer(auctions, auctions.winnerMembershipId)})`;
     return tx.select({
       auction: auctions, speciesName: fishSpecies.name, vesselName: vessels.name, shipperName: users.name, shipperUserId: vessels.shipperUserId,
       round: rounds, intakeStatus: intakes.status, winnerName: winnerUser, winnerLicense,

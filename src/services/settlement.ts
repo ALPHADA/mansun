@@ -1,4 +1,5 @@
 import "server-only";
+import { outer } from "@/db/sql";
 import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
 import { auctions, auctionResults, intakes, vessels, memberships, users, rounds, settlements, settlementLines, fishSpecies, type Tenant, type SettlementStatus } from "@/db/schema";
 import { withTenant } from "@/db/context";
@@ -73,7 +74,7 @@ export async function listSettlements(tenantId: string, opts: { roundId?: string
     if (opts.partyType) conds.push(eq(settlements.partyType, opts.partyType));
     if (opts.partyUserId) conds.push(eq(settlements.partyUserId, opts.partyUserId));
     if (opts.status) conds.push(inArray(settlements.status, opts.status));
-    const vesselNames = sql<string | null>`(select string_agg(distinct v.name, ', ') from ${settlementLines} sl join ${auctions} a on a.id = sl.auction_id join ${intakes} i on i.id = a.intake_id join ${vessels} v on v.id = i.vessel_id where sl.settlement_id = ${settlements.id})`;
+    const vesselNames = sql<string | null>`(select string_agg(distinct v.name, ', ') from ${settlementLines} sl join ${auctions} a on a.id = sl.auction_id join ${intakes} i on i.id = a.intake_id join ${vessels} v on v.id = i.vessel_id where sl.settlement_id = ${outer(settlements, settlements.id)})`;
     return tx.select({ s: settlements, partyName: users.name, licenseNo: memberships.licenseNo, roundLabel: rounds.label, roundDate: rounds.date, vesselNames, bankAccount: users.bankAccount })
       .from(settlements).innerJoin(users, eq(users.id, settlements.partyUserId)).leftJoin(memberships, eq(memberships.id, settlements.partyMembershipId)).innerJoin(rounds, eq(rounds.id, settlements.roundId))
       .where(and(...conds)).orderBy(desc(rounds.date), asc(settlements.partyType), asc(users.name)).limit(opts.limit ?? 500);
@@ -82,7 +83,7 @@ export async function listSettlements(tenantId: string, opts: { roundId?: string
 
 export async function getSettlement(tenantId: string, id: string) {
   return withTenant(tenantId, async (tx) => {
-    const [row] = await tx.select({ s: settlements, partyName: users.name, partyPhone: users.phone, bankAccount: users.bankAccount, licenseNo: memberships.licenseNo, round: rounds, confirmedByName: sql<string | null>`(select name from ${users} u where u.id = ${settlements.confirmedBy})` })
+    const [row] = await tx.select({ s: settlements, partyName: users.name, partyPhone: users.phone, bankAccount: users.bankAccount, licenseNo: memberships.licenseNo, round: rounds, confirmedByName: sql<string | null>`(select name from ${users} u where u.id = ${outer(settlements, settlements.confirmedBy)})` })
       .from(settlements).innerJoin(users, eq(users.id, settlements.partyUserId)).leftJoin(memberships, eq(memberships.id, settlements.partyMembershipId)).innerJoin(rounds, eq(rounds.id, settlements.roundId))
       .where(and(eq(settlements.tenantId, tenantId), eq(settlements.id, id)));
     if (!row) return null;

@@ -1,4 +1,5 @@
 import "server-only";
+import { outer } from "@/db/sql";
 import { and, asc, desc, eq, gte, inArray, lt, sql } from "drizzle-orm";
 import { auctions, intakes, vessels, users, rounds, type BidUnit, type Grade, type Tenant, type IntakeStatus } from "@/db/schema";
 import { withTenant } from "@/db/context";
@@ -47,8 +48,8 @@ export async function listIntakes(tenantId: string, opts: { date?: string; round
     return tx.select({
       id: intakes.id, arrivedAt: intakes.arrivedAt, status: intakes.status, roundId: intakes.roundId, note: intakes.note, createdBy: intakes.createdBy, confirmedAt: intakes.confirmedAt,
       vesselId: vessels.id, vesselName: vessels.name, shipperUserId: vessels.shipperUserId, shipperName: users.name, roundLabel: rounds.label,
-      lotCount: sql<number>`(select count(*)::int from ${auctions} a where a.intake_id = ${intakes.id} and a.status <> 'withdrawn')`,
-      totalWeight: sql<number>`(select coalesce(sum(a.weight_kg),0)::float from ${auctions} a where a.intake_id = ${intakes.id} and a.status <> 'withdrawn')`,
+      lotCount: sql<number>`(select count(*)::int from ${auctions} a where a.intake_id = ${outer(intakes, intakes.id)} and a.status <> 'withdrawn')`,
+      totalWeight: sql<number>`(select coalesce(sum(a.weight_kg),0)::float from ${auctions} a where a.intake_id = ${outer(intakes, intakes.id)} and a.status <> 'withdrawn')`,
     }).from(intakes)
       .innerJoin(vessels, eq(vessels.id, intakes.vesselId))
       .leftJoin(users, eq(users.id, vessels.shipperUserId))

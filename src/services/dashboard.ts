@@ -1,4 +1,5 @@
 import "server-only";
+import { outer } from "@/db/sql";
 import { and, desc, eq, gte, inArray, lt, ne, sql } from "drizzle-orm";
 import { db } from "@/db/client";
 import { auctions, auditLogs, intakes, rounds, settlements, users } from "@/db/schema";
@@ -98,10 +99,10 @@ export async function listRoundsWithCounts(tenantId: string, opts: { from?: stri
     if (opts.from) conds.push(gte(rounds.date, opts.from));
     return tx.select({
       round: rounds,
-      lotCount: sql<number>`(select count(*)::int from ${auctions} a where a.round_id = ${rounds.id} and a.status <> 'withdrawn')`,
-      awardedCount: sql<number>`(select count(*)::int from ${auctions} a where a.round_id = ${rounds.id} and a.status in ('awarded','settled'))`,
-      pendingOpenCount: sql<number>`(select count(*)::int from ${auctions} a where a.round_id = ${rounds.id} and a.status in ('closed_digital','field_open','rebid'))`,
-      settlementCount: sql<number>`(select count(*)::int from ${settlements} s where s.round_id = ${rounds.id})`,
+      lotCount: sql<number>`(select count(*)::int from ${auctions} a where a.round_id = ${outer(rounds, rounds.id)} and a.status <> 'withdrawn')`,
+      awardedCount: sql<number>`(select count(*)::int from ${auctions} a where a.round_id = ${outer(rounds, rounds.id)} and a.status in ('awarded','settled'))`,
+      pendingOpenCount: sql<number>`(select count(*)::int from ${auctions} a where a.round_id = ${outer(rounds, rounds.id)} and a.status in ('closed_digital','field_open','rebid'))`,
+      settlementCount: sql<number>`(select count(*)::int from ${settlements} s where s.round_id = ${outer(rounds, rounds.id)})`,
     }).from(rounds).where(and(...conds)).orderBy(desc(rounds.date), desc(rounds.seq)).limit(opts.limit ?? 40);
   });
 }

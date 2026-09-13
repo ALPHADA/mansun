@@ -1,4 +1,5 @@
 import "server-only";
+import { outer } from "@/db/sql";
 import { randomUUID } from "crypto";
 import { and, asc, desc, eq, gte, ilike, inArray, lte, ne, or, sql } from "drizzle-orm";
 import { z } from "zod";
@@ -68,7 +69,7 @@ export async function listTenants(opts: { status?: TenantStatus; q?: string } = 
     const q = `%${opts.q.trim()}%`;
     conds.push(or(ilike(tenants.code, q), ilike(tenants.name, q), ilike(tenants.region, q)));
   }
-  const memberCount = sql<number>`(select count(*)::int from ${memberships} m where m.tenant_id = ${tenants.id} and m.status = 'active')`;
+  const memberCount = sql<number>`(select count(*)::int from ${memberships} m where m.tenant_id = ${outer(tenants, tenants.id)} and m.status = 'active')`;
   const rows = await db.select({ tenant: tenants, memberCount }).from(tenants).where(conds.length ? and(...conds) : undefined)
     .orderBy(sql`case ${tenants.status} when 'active' then 0 when 'pending' then 1 when 'suspended' then 2 else 3 end`, asc(tenants.name));
   const today = localDateStr();

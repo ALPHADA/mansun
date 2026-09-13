@@ -34,7 +34,7 @@ export const requireTenantContext = cache(async (code: string): Promise<TenantCo
     // URL code 와 토큰 불일치 → 소속이면 전환 유도, 아니면 404
     const ms = await db.select({ id: memberships.id }).from(memberships)
       .where(and(eq(memberships.userId, session.userId), eq(memberships.tenantId, tenant.id), eq(memberships.status, "active"))).limit(1);
-    if (ms.length || session.isPlatformAdmin) redirect(`/select-tenant?switch=${tenant.code}&next=/t/${code}`);
+    if (ms.length || session.isPlatformAdmin) redirect(`/api/auth/switch?code=${tenant.code}&next=${encodeURIComponent(`/t/${code}`)}`);
     nextNotFound();
   }
 
@@ -43,7 +43,7 @@ export const requireTenantContext = cache(async (code: string): Promise<TenantCo
   if (session.activeRole) {
     const [m] = await db.select({ id: memberships.id }).from(memberships)
       .where(and(eq(memberships.userId, session.userId), eq(memberships.tenantId, tenant.id), eq(memberships.role, session.activeRole), eq(memberships.status, "active"))).limit(1);
-    if (!m) redirect(`/select-tenant?next=/t/${code}`);
+    if (!m) redirect(`/api/auth/switch?code=${tenant.code}&next=${encodeURIComponent(`/t/${code}`)}`);
     membershipId = m.id;
   }
   const readOnly = isPA || tenant.status !== "active";

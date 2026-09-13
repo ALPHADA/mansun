@@ -14,15 +14,9 @@ export default async function SelectTenantPage({ searchParams }: { searchParams:
   if (!session) redirect("/login");
   const ms = await listMemberships(session.userId);
 
-  // 자동 전환 요청 (URL code 불일치 시)
-  if (sp.switch && (ms.some((m) => m.tenantCode === sp.switch) || session.isPlatformAdmin)) {
-    const fd = new FormData(); fd.set("code", sp.switch); fd.set("next", sp.next ?? "");
-    await selectTenantFormAction(fd);
-  }
-  if (!session.isPlatformAdmin && ms.length === 1) {
-    const fd = new FormData(); fd.set("code", ms[0].tenantCode);
-    await selectTenantFormAction(fd);
-  }
+  // 자동 전환 (쿠키 변경은 Route Handler에서)
+  if (sp.switch && (ms.some((m) => m.tenantCode === sp.switch) || session.isPlatformAdmin)) redirect(`/api/auth/switch?code=${sp.switch}&next=${encodeURIComponent(sp.next ?? "")}`);
+  if (!session.isPlatformAdmin && ms.length === 1) redirect(`/api/auth/switch?code=${ms[0].tenantCode}`);
 
   return (
     <div className="auth-body">

@@ -1,4 +1,5 @@
 import "server-only";
+import { outer } from "@/db/sql";
 import { and, asc, desc, eq, gte, inArray, lte, sql } from "drizzle-orm";
 import { auctions, bids, bidRevisions, rounds, memberships, users, intakes, vessels, fishSpecies, type BidStatus } from "@/db/schema";
 import { withTenant } from "@/db/context";
@@ -70,8 +71,8 @@ export async function myBids(ctx: TenantContext, opts: { status?: BidStatus[]; f
     if (opts.status) conds.push(inArray(bids.status, opts.status));
     if (opts.from) conds.push(gte(bids.submittedAt, opts.from));
     if (opts.to) conds.push(lte(bids.submittedAt, opts.to));
-    const winnerLicense = sql<string | null>`(select m.license_no from ${memberships} m where m.id = ${auctions.winnerMembershipId})`;
-    const winnerName = sql<string | null>`(select u.name from ${memberships} m join ${users} u on u.id = m.user_id where m.id = ${auctions.winnerMembershipId})`;
+    const winnerLicense = sql<string | null>`(select m.license_no from ${memberships} m where m.id = ${outer(auctions, auctions.winnerMembershipId)})`;
+    const winnerName = sql<string | null>`(select u.name from ${memberships} m join ${users} u on u.id = m.user_id where m.id = ${outer(auctions, auctions.winnerMembershipId)})`;
     return tx.select({ bid: bids, auction: auctions, speciesName: fishSpecies.name, vesselName: vessels.name, shipperName: users.name, round: rounds, winnerLicense, winnerName })
       .from(bids).innerJoin(auctions, eq(auctions.id, bids.auctionId)).innerJoin(intakes, eq(intakes.id, auctions.intakeId)).innerJoin(vessels, eq(vessels.id, intakes.vesselId))
       .leftJoin(users, eq(users.id, vessels.shipperUserId)).leftJoin(rounds, eq(rounds.id, auctions.roundId)).leftJoin(fishSpecies, eq(fishSpecies.code, auctions.speciesCode))
