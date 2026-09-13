@@ -16,7 +16,13 @@ export interface BrokerItem {
 }
 
 const fmtPhone = (p: string | null) => (p && /^\d{10,11}$/.test(p) ? p.replace(/^(\d{2,3})(\d{3,4})(\d{4})$/, "$1-$2-$3") : p ?? "-");
-const addYears = (d: string | null, n: number) => { const base = d && d >= new Date().toISOString().slice(0, 10) ? new Date(`${d}T00:00:00+09:00`) : new Date(); base.setFullYear(base.getFullYear() + n); return base.toISOString().slice(0, 10); };
+const kstDate = (d: Date) => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
+/** 만료일(또는 오늘) + n년, KST 기준 YYYY-MM-DD (UTC 변환 오프바이원 방지) */
+const addYears = (d: string | null, n: number) => {
+  const today = kstDate(new Date());
+  const [y, m, day] = (d && d >= today ? d : today).split("-").map(Number);
+  return `${y + n}-${String(m).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+};
 
 export function BrokerTable({ code, rows, canWrite }: { code: string; rows: BrokerItem[]; canWrite: boolean }) {
   const [edit, setEdit] = useState<{ row: BrokerItem; mode: "renew" | "suspend" | "revoke" | "edit" } | null>(null);

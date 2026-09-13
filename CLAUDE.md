@@ -8,7 +8,7 @@
 Next.js 16 (App Router, `src/`), React 19, TypeScript strict, Drizzle ORM + postgres.js, PostgreSQL 14 (RLS), jose(JWT 쿠키), zod, vitest. Tailwind 없음 — `src/styles/globals.css`의 mockup 디자인 시스템 클래스 사용.
 
 ## 명령
-`pnpm dev` (기본 3000; 개발 세션에서는 `-p 3100`) · `pnpm typecheck` · `pnpm lint` · `pnpm test`(vitest 42) · `pnpm e2e`(DB 리셋 후 Playwright 핵심 사이클 5단계, dev 서버 3100 필요) · `pnpm db:setup` · `pnpm db:generate` · `pnpm db:migrate` · `pnpm db:seed` · `pnpm db:reset`(스키마 드롭+마이그레이션+시드)
+`pnpm dev` (기본 3000; 개발 세션에서는 `-p 3100`) · `pnpm typecheck` · `pnpm lint` · `pnpm test`(vitest 155: 순수 로직 + 서비스 통합) · `pnpm e2e`(DB 리셋 후 Playwright 8 스펙 37 테스트, 단일 워커 직렬, dev 서버 3100 필요) · `pnpm db:setup` · `pnpm db:generate` · `pnpm db:migrate` · `pnpm db:seed` · `pnpm db:reset`(스키마 드롭+마이그레이션+시드)
 시드 계정 비밀번호 `mansun1234`: platform@mansun.kr(P.Admin) · admin@gangu.kr · operator@gangu.kr(operator+receiver) · receiver@gangu.kr · broker@gangu.kr(강구 M-201 + 포항 B-340) · lee@gangu.kr/park@gangu.kr/choi@gangu.kr(broker) · shipper1~4@gangu.kr · union@gangu.kr · admin@pohang.kr · operator@pohang.kr
 
 ## 디렉터리

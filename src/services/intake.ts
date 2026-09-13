@@ -113,7 +113,11 @@ export async function addLot(ctx: TenantContext, intakeId: string, lot: LotInput
     if (!isDraft) {
       // 확정 후 추가 → 즉시 번호 부여
       const no = await nextAuctionNo(tx, ctx.tenant, it.roundId!);
-      Object.assign(values, { auctionNo: no.no, status: it.status === "announced" ? "announced" : "registered" });
+      // 상태는 회차 기준 (confirmIntake 와 동일 규칙): 진행중 회차면 즉시 입찰 가능
+      const rs = no.round.status;
+      if (rs === "done" || rs === "cancelled" || rs === "auctioning" || no.round.bidCloseAt.getTime() <= Date.now()) throw stateError("입찰이 마감된 회차에는 물품을 추가할 수 없습니다");
+      const status = rs === "scheduled" ? "registered" : rs === "announced" ? "announced" : "open";
+      Object.assign(values, { auctionNo: no.no, status });
     }
     const [a] = await tx.insert(auctions).values(values).returning();
     if (!isDraft) await tx.update(intakes).set({ status: "corrected" }).where(eq(intakes.id, it.id));

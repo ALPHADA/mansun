@@ -13,28 +13,53 @@ import type { Tenant, Role, BidUnit, Grade } from "@/db/schema";
 export const owner = postgres(process.env.DATABASE_OWNER_URL!, { max: 1, onnotice: () => {} });
 
 export interface FixtureUser { userId: string; membershipId: string; email: string; role: Role; name: string }
+/** Membership 없는 사용자 (Platform Admin, 미소속 사용자 등) */
+export interface BareUser { userId: string; email: string; phone: string; name: string }
+
+/** 테넌트 소속 도메인/플랫폼 행 삭제 (tenant_id 기준) — tenants 행은 남긴다 */
+export async function deleteTenantRows(tid: string) {
+  for (const t of ["settlement_lines", "settlements", "auction_results", "bid_revisions", "bids", "disputes", "round_subscriptions", "notices", "auctions", "intakes", "vessels", "rounds", "invitations", "memberships", "notification_logs", "audit_logs", "platform_read_sessions", "notifications"]) {
+    await owner.unsafe(`delete from ${t} where tenant_id = $1`, [tid]);
+  }
+}
+/** 서비스(createTenant 등)로 만들어진 테넌트를 code 로 완전 삭제 */
+export async function destroyTenantByCode(code: string) {
+  await owner`select set_config('app.bypass_rls','on',false)`;
+  const [t] = await owner`select id from tenants where code = ${code}`;
+  if (!t) return;
+  await deleteTenantRows(t.id as string);
+  await owner`delete from tenants where id = ${t.id}`;
+}
 
 export class TenantFixture {
   tenant!: Tenant;
   users: Record<string, FixtureUser> = {};
+  bare: Record<string, BareUser> = {};
+  /** 서비스가 생성한 사용자 등 destroy 시 함께 지울 user id */
+  private extraUserIds: string[] = [];
   code = `t${randomUUID().replace(/-/g, "").slice(0, 8)}`;
+
+  /** 서비스가 만든 사용자를 정리 대상에 등록 */
+  trackUser(userId: string) { this.extraUserIds.push(userId); }
 
   async create(overrides: Record<string, unknown> = {}) {
     await owner`select set_config('app.bypass_rls','on',false)`;
+    // 주의: jsonb 파라미터에는 객체를 그대로 넘긴다. JSON.stringify 한 문자열을 넘기면 postgres.js 가 한 번 더 인코딩해 문자열 스칼라로 저장된다.
+    const feePolicy = { marketFeeRate: 0.04, brokerFeeRate: 0.015, vatIncluded: true, vatRate: 0.1 };
+    const boxWeightTable = { hairtail: { box: 20 } };
+    const reservePrices = { flatfish: 15000 };
     await owner`insert into tenants (code, name, region, status, fee_policy, box_weight_table, reserve_prices, tie_break_policy, field_auction_enabled, bid_modification_allowed, activated_at)
       values (${this.code}, ${"테스트 수협 " + this.code}, '테스트', 'active',
-        ${JSON.stringify({ marketFeeRate: 0.04, brokerFeeRate: 0.015, vatIncluded: true, vatRate: 0.1 })}::jsonb,
-        ${JSON.stringify({ hairtail: { box: 20 } })}::jsonb, ${JSON.stringify({ flatfish: 15000 })}::jsonb, 'first_come', false, true, now())`;
+        ${owner.json(feePolicy)}, ${owner.json(boxWeightTable)}, ${owner.json(reservePrices)}, 'first_come', false, true, now())`;
     if (Object.keys(overrides).length) await this.update(overrides);
     await this.reload();
     return this;
   }
 
-  /** tenants 컬럼 갱신 (snake_case 키) */
+  /** tenants 컬럼 갱신 (snake_case 키). 객체/배열 값은 jsonb 컬럼으로 그대로 전달 */
   async update(patch: Record<string, unknown>) {
     for (const [k, v] of Object.entries(patch)) {
-      const val = typeof v === "object" && v !== null ? JSON.stringify(v) : v;
-      await owner.unsafe(`update tenants set "${k}" = $1 where code = $2`, [val as never, this.code]);
+      await owner.unsafe(`update tenants set "${k}" = $1 where code = $2`, [v as never, this.code]);
     }
     await this.reload();
   }
@@ -52,6 +77,29 @@ export class TenantFixture {
     const fu = { userId: u.id, membershipId: m.id, email, role, name: extra.name ?? key };
     this.users[key] = fu;
     return fu;
+  }
+
+  /** Membership 없는 사용자 생성 (비밀번호 test1234) */
+  async addBareUser(key: string, extra: { name?: string; globalSuspended?: boolean } = {}): Promise<BareUser> {
+    const email = `${key}@${this.code}.test`;
+    const phone = "018" + Math.floor(Math.random() * 1e8).toString().padStart(8, "0");
+    const hash = await bcrypt.hash("test1234", 4);
+    const [u] = await owner`insert into users (email, phone, name, password_hash, identity_verified, global_suspended) values (${email}, ${phone}, ${extra.name ?? key}, ${hash}, true, ${extra.globalSuspended ?? false}) returning id`;
+    const bu = { userId: u.id as string, email, phone, name: extra.name ?? key };
+    this.bare[key] = bu;
+    return bu;
+  }
+  /** Platform Admin 사용자 (platform_admins 행 포함, Membership 없음) */
+  async addPlatformAdmin(key: string): Promise<BareUser> {
+    const bu = await this.addBareUser(key);
+    await owner`insert into platform_admins (user_id) values (${bu.userId})`;
+    return bu;
+  }
+  /** 기존 사용자에게 이 테넌트의 Membership 추가 (다중 역할/다중 테넌트 시나리오) */
+  async addMembership(userId: string, role: Role, extra: { licenseNo?: string; status?: string } = {}) {
+    const [m] = await owner`insert into memberships (user_id, tenant_id, role, status, license_no, license_status, joined_at)
+      values (${userId}, ${this.tenant.id}, ${role}, ${extra.status ?? "active"}, ${extra.licenseNo ?? null}, ${role === "broker" ? "active" : null}, now()) returning id`;
+    return m.id as string;
   }
 
   ctx(key: string, extraRoles: Role[] = []): TenantContext {
@@ -103,11 +151,23 @@ export class TenantFixture {
 
   async destroy() {
     const tid = this.tenant?.id; if (!tid) return;
-    const userIds = Object.values(this.users).map((u) => u.userId);
-    for (const t of ["settlement_lines", "settlements", "auction_results", "bid_revisions", "bids", "disputes", "round_subscriptions", "notices", "auctions", "intakes", "vessels", "rounds", "invitations", "memberships", "notification_logs", "audit_logs", "platform_read_sessions"]) {
-      await owner.unsafe(`delete from ${t} where tenant_id = $1`, [tid]);
+    const userIds = [...new Set([...Object.values(this.users).map((u) => u.userId), ...Object.values(this.bare).map((u) => u.userId), ...this.extraUserIds])];
+    await deleteTenantRows(tid);
+    if (userIds.length) {
+      const emails = (await owner`select email from users where id in ${owner(userIds)} and email is not null`).map((r) => r.email as string);
+      await owner`delete from notifications where user_id in ${owner(userIds)}`;
+      await owner`delete from notification_logs where user_id in ${owner(userIds)}`;   // tenant_id null(글로벌) 로그 포함
+      await owner`delete from otp_codes where user_id in ${owner(userIds)}`;
+      if (emails.length) await owner`delete from otp_codes where target in ${owner(emails)}`;
+      // 로그인 실패 감사(actor/tenant 없음)는 identifier 로 정리 — 픽스처 도메인 전체
+      await owner`delete from audit_logs where action = 'auth.login_failed' and after->>'identifier' like ${"%@" + this.code + ".test"}`;
+      await owner`delete from platform_admins where user_id in ${owner(userIds)}`;
+      await owner`delete from platform_read_sessions where admin_user_id in ${owner(userIds)}`;
+      await owner`delete from invitations where invited_by in ${owner(userIds)}`;
+      await owner`delete from memberships where user_id in ${owner(userIds)}`;      // 다른 테넌트 Membership 포함
+      await owner`delete from audit_logs where actor_user_id in ${owner(userIds)} or target_id in ${owner(userIds)}`;
+      await owner`delete from users where id in ${owner(userIds)}`;
     }
-    if (userIds.length) { await owner`delete from notifications where user_id in ${owner(userIds)}`; await owner`delete from otp_codes where user_id in ${owner(userIds)}`; await owner`delete from users where id in ${owner(userIds)}`; }
     await owner`delete from tenants where id = ${tid}`;
   }
 }
