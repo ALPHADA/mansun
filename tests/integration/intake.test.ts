@@ -32,8 +32,8 @@ describe("createIntake", () => {
     expect((await intake(r.id)).status).toBe("draft");
     const rows = await lots(r.id);
     expect(rows).toHaveLength(2);
-    expect(rows[0]).toMatchObject({ quantity: 11, weightKg: 220, status: "registered", auctionNo: null, roundId: schedRound, reservePrice: null });
-    expect(rows[1]).toMatchObject({ quantity: 50, reservePrice: 15000 });
+    expect(rows.find((row) => row.weightKg === 220)).toMatchObject({ quantity: 11, weightKg: 220, status: "registered", auctionNo: null, roundId: schedRound, reservePrice: null });
+    expect(rows.find((row) => row.weightKg === 50)).toMatchObject({ quantity: 50, reservePrice: 15000 });
     expect(await fx.q`select * from audit_logs where action = 'intake.create' and target_id = ${r.id}`).toHaveLength(1);
   });
   it("명시 수량이 있으면 환산 대신 사용, 환산표 없는 어종 box → 중량 그대로", async () => {
@@ -167,7 +167,8 @@ describe("확정 후 정정", () => {
   it("확정 후 removeLot → 사유 필수, withdrawn 처리 (행 유지), 목록 lotCount 에서 제외", async () => {
     const r = await draft([kg(100), kg(50)]);
     await confirmIntake(fx.ctx("rcv"), r.id);
-    const [a] = await lots(r.id);
+    // Both lots can share created_at; SQL does not guarantee their relative order.
+    const a = (await lots(r.id)).find((row) => row.weightKg === 100)!;
     await expect(removeLot(fx.ctx("op"), a.id)).rejects.toThrow(/취소 사유/);
     await removeLot(fx.ctx("op"), a.id, "이중 등록");
     const after = await lots(r.id);
