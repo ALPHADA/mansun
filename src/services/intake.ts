@@ -189,7 +189,7 @@ export async function confirmIntake(ctx: TenantContext, intakeId: string, roundI
     for (const a of items) {
       const next = await nextAuctionNo(tx, tenant, rid);
       round = next.round;
-      if (round.status === "done" || round.status === "cancelled") throw stateError("종료된 회차에는 입고할 수 없습니다");
+      if (round.status === "done" || round.status === "cancelled" || round.status === "auctioning" || round.bidCloseAt.getTime() <= Date.now()) throw stateError("입찰이 마감된 회차에는 입고할 수 없습니다. 다음 회차를 선택하세요");
       const status = round.status === "scheduled" ? "registered" : round.status === "announced" ? "announced" : "open";
       await tx.update(auctions).set({ auctionNo: next.no, roundId: rid, status }).where(eq(auctions.id, a.id));
     }

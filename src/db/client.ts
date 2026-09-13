@@ -4,7 +4,6 @@ import postgres from "postgres";
 import * as schema from "./schema";
 
 declare global {
-  // eslint-disable-next-line no-var
   var __mansunPg: ReturnType<typeof postgres> | undefined;
 }
 

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { SidebarShell, type NavItem } from "@/components/SidebarShell";
 import { tenantChrome } from "@/components/TenantChrome";
 import { fmtDateTime } from "@/lib/format";
+import "@/styles/admin-pages.css";
 
 export default async function AdminLayout({ params, children }: { params: Promise<{ code: string }>; children: React.ReactNode }) {
   const { code } = await params;

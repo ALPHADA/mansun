@@ -13,7 +13,8 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx src/db/migrate.ts",
     "db:seed": "tsx src/db/seed.ts",
-    "db:reset": "tsx src/db/reset.ts && pnpm db:migrate && pnpm db:seed"
+    "db:reset": "tsx src/db/reset.ts && pnpm db:migrate && pnpm db:seed",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
@@ -27,6 +28,7 @@
     "zod": "^4.6.4"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@types/bcryptjs": "^3.0.0",
     "@types/node": "^26.5.1",
     "@types/react": "^19.3.0",
@@ -36,7 +38,7 @@
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.3.5",
     "tsx": "^4.23.13",
-    "typescript": "^7.0.2",
+    "typescript": "^5.9.3",
     "vitest": "^5.0.0"
   }
 }

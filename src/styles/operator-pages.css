@@ -1,0 +1,72 @@
+/* ───────── 운영자 화면 전용 스타일 ───────── */
+.page-title { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+.page-title h2 { font-size: 18px; }
+.page-title h2 .uc { color: #9ca3af; font-weight: 400; font-size: 13px; margin-left: 6px; }
+.page-title .actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+.kpi-link { display: block; color: inherit; }
+.kpi-link:hover { text-decoration: none; border-color: var(--color-primary); }
+
+.select-inline { width: auto; min-width: 220px; max-width: 100%; }
+.btn-sm { padding: 4px 10px; font-size: 12px; }
+table.data-table td.actions { white-space: nowrap; }
+table.data-table td.actions > * + * { margin-left: 6px; }
+table.data-table tr.row-active td { background: #eff6ff; }
+
+/* 입고 등록: 좌측 목록 + 우측 작업 영역 */
+.intake-layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 20px; align-items: start; }
+.intake-list a { display: block; padding: 10px 14px; border-bottom: 1px solid var(--color-border); color: var(--color-text); border-left: 3px solid transparent; }
+.intake-list a:hover { background: var(--color-bg); text-decoration: none; }
+.intake-list a.active { background: #eff6ff; border-left-color: var(--color-primary); }
+.intake-list a:last-child { border-bottom: none; }
+.intake-list .title { font-weight: 600; font-size: 13px; display: flex; justify-content: space-between; gap: 6px; align-items: center; }
+.intake-list .sub { font-size: 12px; color: var(--color-text-muted); margin-top: 2px; }
+.photo-grid .photo-thumb img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid var(--color-border); }
+.inline-new { background: #f8fafc; border: 1px dashed var(--color-border); border-radius: var(--radius-sm); padding: 12px; margin-top: 12px; }
+
+/* 공지 */
+.notice-preview { white-space: pre-line; background: #f8fafc; border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 12px; font-size: 13px; }
+.info-box { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e3a8a; border-radius: var(--radius-sm); padding: 12px 14px; font-size: 13px; }
+.info-box p { margin: 0 0 6px; } .info-box p:last-child { margin-bottom: 0; }
+
+/* 개찰 정책 */
+.policy-list { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.9; }
+
+/* 현장 결과 입력 (태블릿) */
+.field-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+.field-card { background: #fff; border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 16px; box-shadow: var(--shadow-sm); }
+.field-card.focus { border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(30, 111, 235, 0.15); }
+.field-card .head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
+.field-card .no { font-size: 12px; color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
+.field-card .fish { font-size: 17px; font-weight: 700; }
+.field-card .meta { display: flex; gap: 12px; flex-wrap: wrap; font-size: 13px; color: var(--color-text-muted); margin-bottom: 12px; }
+.field-card input, .field-card select { font-size: 16px; padding: 12px; }
+.field-card .btn-primary { width: 100%; padding: 12px; font-size: 15px; }
+.compare-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin-top: 12px; }
+.compare-cell { background: #f8fafc; border-radius: var(--radius-sm); padding: 10px; text-align: center; }
+.compare-cell .lbl { font-size: 11px; color: var(--color-text-muted); }
+.compare-cell .val { font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.compare-cell.win { background: #d1fae5; color: #065f46; }
+
+/* 입찰 내역 필터 */
+.filter-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; align-items: end; }
+.filter-bar .span-2 { grid-column: span 2; }
+.filter-bar .buttons { display: flex; gap: 8px; }
+
+/* 정산서 인쇄 */
+.print-actions { display: flex; gap: 8px; justify-content: flex-end; max-width: 800px; margin: 16px auto 0; padding: 0 16px; }
+.print-sheet .sheet-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+.print-sheet .sheet-head .org { font-size: 13px; color: var(--color-text-muted); }
+.print-sheet .totals td { font-weight: 600; background: #f9fafb; }
+.print-sheet td.num, .print-sheet th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.print-sheet .kv { margin-bottom: 16px; }
+.print-sheet .foot { margin-top: 24px; font-size: 12px; color: var(--color-text-muted); }
+
+@media (max-width: 900px) {
+  .intake-layout { grid-template-columns: 1fr; }
+}
+@media (max-width: 768px) {
+  .page-title .actions { width: 100%; }
+  .page-title .actions > * { flex: 1; }
+  .filter-bar .span-2 { grid-column: span 1; }
+}

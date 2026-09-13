@@ -1,0 +1,135 @@
+/* ───────── 선주·노조 모바일 페이지 전용 (mobile-pages.css 의 period-form / pref-row / switch / section-title 과 함께 사용) ───────── */
+
+/* 출하 카드 */
+.ship-item { display: block; background: #fff; border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 12px 14px; margin-bottom: 10px; color: var(--color-text); box-shadow: var(--shadow-sm); }
+.ship-item:hover { text-decoration: none; border-color: var(--color-accent); }
+.ship-item .row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.ship-item .vessel { font-size: 15px; font-weight: 600; }
+.ship-item .sub { font-size: 12px; color: var(--color-text-muted); margin-top: 4px; display: flex; gap: 8px; flex-wrap: wrap; }
+.ship-item .pay { font-size: 14px; font-weight: 700; color: #047857; white-space: nowrap; }
+.ship-item .species { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
+.ship-item .species span { background: #ecfeff; color: #0e7490; font-size: 11px; padding: 2px 8px; border-radius: 999px; }
+.status-dots { display: flex; gap: 3px; }
+.status-dots i { width: 8px; height: 8px; border-radius: 50%; background: #cbd5e1; display: inline-block; }
+.status-dots i.success { background: var(--color-success); } .status-dots i.info { background: var(--color-accent); } .status-dots i.danger { background: var(--color-danger); } .status-dots i.warning { background: var(--color-warning); }
+
+/* 로트 카드 (출하 상세) */
+.lot-row { background: #fff; border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 12px 14px; margin-bottom: 10px; }
+.lot-row .head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.lot-row .title { font-size: 15px; font-weight: 600; }
+.lot-row .no { font-size: 11px; color: var(--color-text-muted); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.lot-row .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px; margin-top: 8px; font-size: 13px; }
+.lot-row .grid .k { color: var(--color-text-muted); font-size: 11px; }
+.lot-row .grid .v { font-weight: 500; }
+.lot-row .payout { margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--color-border); display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+.lot-row .payout strong { color: #047857; font-size: 15px; }
+.lot-row .actions { margin-top: 10px; display: flex; gap: 6px; justify-content: flex-end; align-items: center; flex-wrap: wrap; }
+.lot-row .actions .deadline { font-size: 11px; color: var(--color-text-muted); margin-right: auto; }
+.lot-row .actions button { padding: 6px 12px; font-size: 12px; }
+.dispute-note { background: #fff7ed; border: 1px solid #fed7aa; color: #9a3412; border-radius: var(--radius-sm); padding: 8px 10px; font-size: 12px; margin-top: 8px; white-space: pre-line; }
+.dispute-note .badge { margin-left: 6px; }
+
+/* 선박 카드 */
+.vessel-card { background: #fff; border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 14px; margin-bottom: 10px; }
+.vessel-card .head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.vessel-card .name { font-size: 16px; font-weight: 600; }
+.vessel-card .reg { font-size: 12px; color: var(--color-text-muted); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.vessel-card .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+.vessel-card .stats div { background: #f8fafc; border-radius: var(--radius-sm); padding: 8px; text-align: center; }
+.vessel-card .stats .k { font-size: 11px; color: var(--color-text-muted); }
+.vessel-card .stats .v { font-size: 15px; font-weight: 700; margin-top: 2px; }
+.vessel-card .recent { margin-top: 10px; border-top: 1px dashed var(--color-border); padding-top: 6px; }
+.vessel-card .recent a { display: flex; justify-content: space-between; gap: 8px; padding: 6px 0; font-size: 12px; color: var(--color-text); border-bottom: 1px solid var(--color-bg); }
+.vessel-card .recent a:last-child { border-bottom: none; }
+.vessel-card .recent a:hover { text-decoration: none; color: var(--color-primary); }
+
+/* 정산 요약 */
+.sum-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 8px 0 14px; }
+.sum-grid .cell { background: #fff; border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 10px; text-align: center; }
+.sum-grid .cell .k { font-size: 11px; color: var(--color-text-muted); }
+.sum-grid .cell .v { font-size: 14px; font-weight: 700; margin-top: 2px; font-variant-numeric: tabular-nums; }
+.sum-grid .cell.net .v { color: #047857; }
+.link-row { display: flex; gap: 8px; justify-content: flex-end; margin-bottom: 10px; }
+.link-row a { font-size: 12px; padding: 6px 12px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: #fff; color: var(--color-text); }
+.link-row a:hover { text-decoration: none; background: var(--color-bg); }
+
+/* 마이페이지 */
+.inline-edit { display: flex; gap: 6px; align-items: center; }
+.inline-edit input { flex: 1; }
+.inline-edit button { white-space: nowrap; padding: 8px 12px; font-size: 13px; }
+.mandatory-note { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e3a8a; border-radius: var(--radius-sm); padding: 8px 10px; font-size: 12px; margin-top: 10px; }
+
+/* 노조 회차 카드 */
+.round-card { background: #fff; border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 14px; margin-bottom: 12px; box-shadow: var(--shadow-sm); }
+.round-card.live { border-color: var(--color-accent); box-shadow: 0 0 0 3px rgba(14,165,233,0.12); }
+.round-card.done { opacity: 0.8; }
+.round-card .head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.round-card .label { font-size: 16px; font-weight: 600; }
+.round-card .times { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 10px; }
+.round-card .times div { background: #f8fafc; border-radius: var(--radius-sm); padding: 8px; text-align: center; }
+.round-card .times .k { font-size: 10px; color: var(--color-text-muted); }
+.round-card .times .v { font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; margin-top: 2px; }
+.round-card .counts { display: flex; gap: 12px; font-size: 13px; margin-top: 10px; flex-wrap: wrap; }
+.round-card .counts strong { font-weight: 700; }
+.round-card .species-chips { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 8px; }
+.round-card .species-chips span { background: #ecfeff; color: #0e7490; font-size: 11px; padding: 2px 8px; border-radius: 999px; }
+.round-card .foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--color-border); }
+.round-card .foot a { font-size: 13px; font-weight: 500; }
+.btn-sub { background: #fff; border: 1px solid var(--color-border); color: var(--color-text); padding: 6px 12px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px; }
+.btn-sub.on { background: #ecfeff; border-color: var(--color-accent); color: #0e7490; font-weight: 600; }
+
+/* 주간 캘린더 (모바일: 세로 스택) */
+.week-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px; }
+.week-nav a { font-size: 13px; padding: 6px 10px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: #fff; color: var(--color-text); white-space: nowrap; }
+.week-nav a:hover { text-decoration: none; background: var(--color-bg); }
+.week-nav .title { font-weight: 600; font-size: 14px; text-align: center; }
+.cal-grid.week { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.cal-day .dow { font-size: 10px; color: var(--color-text-muted); }
+.cal-day.today .day-num { color: var(--color-primary); }
+.cal-day.weekend .day-num { color: var(--color-danger); }
+.cal-day .cal-item { display: block; color: #1e3a8a; }
+.cal-day .cal-item:hover { text-decoration: none; background: #dbeafe; }
+.cal-day .cal-item.done { background: #f3f4f6; color: #6b7280; }
+.cal-day .cal-item.cancelled { background: #fee2e2; color: #991b1b; text-decoration: line-through; }
+.cal-day .cal-item small { display: block; font-size: 10px; opacity: 0.8; }
+.cal-day .none { font-size: 10px; color: #cbd5e1; }
+@media (max-width: 440px) {
+  .cal-grid.week { grid-template-columns: 1fr; gap: 8px; }
+  .cal-day { min-height: 0; display: flex; gap: 10px; align-items: flex-start; }
+  .cal-day .day-head { min-width: 56px; }
+  .cal-day .day-items { flex: 1; }
+  .cal-day .cal-item { font-size: 12px; padding: 4px 8px; }
+}
+
+/* 회차 상세 표 (노조) */
+.mini-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.mini-table th, .mini-table td { padding: 8px 6px; border-bottom: 1px solid var(--color-border); text-align: left; }
+.mini-table th { font-size: 11px; color: var(--color-text-muted); font-weight: 500; background: #f9fafb; }
+.mini-table td.num, .mini-table th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.mini-table tfoot td { font-weight: 700; border-bottom: none; }
+.arrive-list .item { display: flex; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--color-bg); font-size: 13px; }
+.arrive-list .item:last-child { border-bottom: none; }
+.arrive-list .seq { width: 22px; height: 22px; border-radius: 50%; background: #eff6ff; color: #1e3a8a; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.arrive-list .name { font-weight: 600; flex: 1; }
+.arrive-list .meta { font-size: 11px; color: var(--color-text-muted); text-align: right; }
+
+/* 작업량 통계 */
+.squad-badge { display: inline-flex; align-items: center; gap: 4px; background: #0f172a; color: #e2e8f0; padding: 4px 10px; border-radius: 999px; font-size: 12px; }
+.vbar-chart { display: flex; align-items: flex-end; gap: 4px; height: 120px; padding: 6px 2px 0; border-bottom: 1px solid var(--color-border); }
+.vbar-chart .col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; min-width: 0; }
+.vbar-chart .bar { width: 100%; max-width: 28px; background: linear-gradient(180deg, #38bdf8, #1e6feb); border-radius: 3px 3px 0 0; min-height: 2px; }
+.vbar-labels { display: flex; gap: 4px; padding-top: 4px; font-size: 10px; color: var(--color-text-muted); }
+.vbar-labels span { flex: 1; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.share-row { display: grid; grid-template-columns: 70px 1fr 64px; gap: 8px; align-items: center; font-size: 12px; padding: 4px 0; }
+.share-row .track { height: 10px; background: #f3f4f6; border-radius: 999px; overflow: hidden; }
+.share-row .fill { height: 100%; background: linear-gradient(90deg, #6ee7b7, #10b981); border-radius: 999px; }
+.share-row .pct { text-align: right; font-variant-numeric: tabular-nums; color: var(--color-text-muted); }
+.hour-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px; }
+.hour-grid div { aspect-ratio: 1; border-radius: 3px; background: #f3f4f6; font-size: 9px; display: flex; align-items: center; justify-content: center; color: var(--color-text-muted); }
+.hour-grid div.l1 { background: #dbeafe; } .hour-grid div.l2 { background: #93c5fd; color: #1e3a8a; } .hour-grid div.l3 { background: #2563eb; color: #fff; }
+.page-back { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; color: var(--color-text-muted); margin-bottom: 10px; }
+.page-back:hover { text-decoration: none; color: var(--color-text); }
+.quick-range { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.quick-range a { font-size: 12px; padding: 4px 10px; border: 1px solid var(--color-border); border-radius: 999px; color: var(--color-text-muted); background: #fff; }
+.quick-range a:hover { text-decoration: none; background: var(--color-bg); }
+.quick-range a.active { background: var(--color-accent); color: #fff; border-color: var(--color-accent); }

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { MobileShell } from "@/components/MobileShell";
 import { tenantChrome } from "@/components/TenantChrome";
+import "@/styles/mobile-pages.css";
 
 export default async function BrokerLayout({ params, children }: { params: Promise<{ code: string }>; children: React.ReactNode }) {
   const { code } = await params;

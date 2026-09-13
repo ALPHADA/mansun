@@ -17,5 +17,5 @@ export function Countdown({ until, className = "countdown", coolAfterMs = 60_000
     return () => clearInterval(id);
   }, [target, now, onExpire]);
   const cool = ms > coolAfterMs;
-  return <span className={`${className}${cool ? " cool" : ""}`}>{prefix}{remainingLabel(ms)}</span>;
+  return <span suppressHydrationWarning className={`${className}${cool ? " cool" : ""}`}>{prefix}{remainingLabel(ms)}</span>;
 }

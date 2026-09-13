@@ -1,6 +1,6 @@
 import "server-only";
 import { and, asc, desc, eq, gte, lte, sql } from "drizzle-orm";
-import { db, type DbOrTx } from "@/db/client";
+import type { DbOrTx } from "@/db/client";
 import { rounds, auctions, type Round, type Tenant } from "@/db/schema";
 import { kstDateTime, localDateStr, fmtShortDate } from "@/lib/format";
 import { withTenant } from "@/db/context";

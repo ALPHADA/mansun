@@ -1,0 +1,103 @@
+/* ───────── 중매인·입고담당 모바일 페이지 전용 ───────── */
+
+/* 라이브 배너 확장 */
+.live-banner.stack { flex-direction: column; align-items: flex-start; gap: 2px; }
+.live-banner .sub { font-size: 11px; color: #94a3b8; }
+.live-banner .timer-line { font-size: 16px; font-weight: 600; display: flex; align-items: baseline; gap: 6px; }
+
+/* 경매 카드 배지 */
+.auction-card.muted { opacity: 0.75; }
+.auction-card .tag-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; justify-content: flex-end; }
+.auction-card .my-bid { font-size: 12px; color: #0e7490; font-weight: 600; }
+.auction-card .countdown-row .lot-no { font-size: 12px; color: var(--color-text-muted); }
+
+/* 세그먼트 필터 (전체/낙찰/패찰) */
+.seg-tabs { display: flex; gap: 6px; margin-bottom: 12px; }
+.seg-tabs a { flex: 1; text-align: center; padding: 8px 4px; font-size: 12px; border-radius: var(--radius-sm); border: 1px solid var(--color-border); background: #fff; color: var(--color-text); }
+.seg-tabs a:hover { text-decoration: none; background: var(--color-bg); }
+.seg-tabs a.active { background: var(--color-accent); border-color: var(--color-accent); color: #fff; font-weight: 600; }
+
+/* 결과 카드 부가 */
+.result-card .pickup { margin-top: 8px; padding: 8px; background: #ecfdf5; border-radius: 6px; font-size: 11px; color: #065f46; }
+.result-card .pending-note { margin-top: 8px; padding: 8px; background: #fef3c7; border-radius: 6px; font-size: 11px; color: #92400e; }
+.result-card .price-line .muted-label { color: var(--color-text-muted); }
+.result-card a.card-link { color: inherit; display: block; }
+.result-card a.card-link:hover { text-decoration: none; }
+
+/* 입찰 화면 */
+.policy-box { margin-top: 20px; padding: 12px; background: #f1f5f9; border-radius: 8px; font-size: 12px; color: var(--color-text-muted); line-height: 1.7; }
+.policy-box strong { color: var(--color-text); }
+.bid-input-wrap .total-preview { margin-top: 8px; font-size: 12px; color: var(--color-text-muted); }
+.bid-input-wrap .total-preview strong { color: var(--color-text); font-size: 14px; }
+.bid-input-wrap .memo { margin-top: 10px; }
+.bid-input-wrap .memo input { font-size: 13px; font-weight: 400; text-align: left; border: 1px solid var(--color-border); background: #fff; padding: 8px 10px; }
+.bid-input-wrap .hint { font-size: 11px; color: #0e7490; margin-top: 6px; }
+.current-bid { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e3a8a; border-radius: var(--radius-sm); padding: 10px 12px; font-size: 13px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
+.current-bid strong { font-size: 15px; }
+.photo-grid.detail { margin-top: 10px; }
+.otp-box { margin-top: 12px; }
+.otp-box input { font-size: 20px; letter-spacing: 6px; text-align: center; }
+.dev-code { font-size: 12px; color: #92400e; background: #fef3c7; border-radius: 6px; padding: 6px 10px; margin-top: 8px; }
+
+/* 정산 */
+.period-form { display: grid; grid-template-columns: 1fr 1fr auto; gap: 6px; align-items: end; margin-bottom: 14px; }
+.period-form label { margin-bottom: 2px; }
+.settle-item { display: block; background: #fff; border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 12px 14px; margin-bottom: 10px; color: var(--color-text); }
+.settle-item .row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.settle-item .no { font-size: 12px; color: var(--color-text-muted); }
+.settle-item .amount { font-size: 16px; font-weight: 700; }
+.settle-item .sub { font-size: 12px; color: var(--color-text-muted); margin-top: 4px; }
+.hero-card .hero-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
+.hero-card .hero-grid .k { font-size: 11px; opacity: 0.85; }
+.hero-card .hero-grid .v { font-size: 15px; font-weight: 700; }
+
+/* 마이페이지 */
+.section-title { font-size: 13px; font-weight: 600; color: var(--color-text-muted); margin: 18px 0 8px; }
+.pref-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--color-bg); font-size: 14px; }
+.pref-row:last-child { border-bottom: none; }
+.pref-row .desc { font-size: 11px; color: var(--color-text-muted); }
+.switch { position: relative; width: 44px; height: 26px; border-radius: 999px; background: #cbd5e1; padding: 0; flex-shrink: 0; }
+.switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: left 0.15s ease; box-shadow: var(--shadow-sm); }
+.switch.on { background: var(--color-accent); }
+.switch.on::after { left: 21px; }
+.switch:disabled { opacity: 0.6; cursor: not-allowed; }
+.license-card { border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 12px 14px; margin-bottom: 8px; background: #fff; }
+.license-card.current { border-color: var(--color-accent); background: #f0f9ff; }
+.license-card .row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.license-card .name { font-weight: 600; }
+.license-card .sub { font-size: 12px; color: var(--color-text-muted); margin-top: 2px; }
+.stack-form { display: grid; gap: 10px; }
+
+/* 입고담당 */
+.kpi-mini { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
+.kpi-mini .cell { background: #fff; border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 10px; text-align: center; }
+.kpi-mini .cell .k { font-size: 11px; color: var(--color-text-muted); }
+.kpi-mini .cell .v { font-size: 18px; font-weight: 700; margin-top: 2px; }
+.intake-item { display: block; background: #fff; border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 12px 14px; margin-bottom: 10px; color: var(--color-text); box-shadow: var(--shadow-sm); }
+.intake-item:hover { text-decoration: none; border-color: var(--color-accent); }
+.intake-item .row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.intake-item .vessel { font-size: 15px; font-weight: 600; }
+.intake-item .sub { font-size: 12px; color: var(--color-text-muted); margin-top: 4px; display: flex; gap: 10px; flex-wrap: wrap; }
+.lot-card { background: #fff; border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 12px 14px; margin-bottom: 10px; }
+.lot-card .row { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.lot-card .title { font-size: 15px; font-weight: 600; }
+.lot-card .sub { font-size: 12px; color: var(--color-text-muted); margin-top: 2px; }
+.lot-card .actions { display: flex; gap: 6px; }
+.lot-card .actions button { padding: 4px 10px; font-size: 12px; }
+.lot-card .photo-grid { margin-top: 8px; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); }
+.lot-editor { display: grid; gap: 10px; }
+.lot-editor .two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.lot-editor .three { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.photo-add { display: flex; align-items: center; justify-content: center; aspect-ratio: 1; border: 1px dashed var(--color-border); border-radius: var(--radius-sm); color: var(--color-text-muted); font-size: 22px; cursor: pointer; background: #fafafa; }
+.photo-add input { display: none; }
+.sticky-actions { position: sticky; bottom: 68px; background: rgba(255,255,255,0.96); padding: 10px 0 4px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; z-index: 5; }
+.sticky-actions button { padding: 12px; font-size: 14px; }
+.inline-new { background: #f8fafc; border: 1px dashed var(--color-border); border-radius: var(--radius-md); padding: 12px; display: grid; gap: 8px; margin-top: 8px; }
+.queue-item { background: #fff; border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 12px 14px; margin-bottom: 10px; }
+.queue-item.error { border-color: #fca5a5; background: #fff7f7; }
+.queue-item .err { font-size: 12px; color: #991b1b; margin-top: 6px; background: #fee2e2; padding: 6px 8px; border-radius: 6px; }
+.offline-pill { display: inline-flex; align-items: center; gap: 4px; background: #fef3c7; color: #92400e; padding: 4px 10px; border-radius: 999px; font-size: 12px; }
+.offline-pill:hover { text-decoration: none; background: #fde68a; }
+.readonly-note { background: #f1f5f9; color: var(--color-text-muted); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 12px; margin-bottom: 14px; }
+.fab:hover { text-decoration: none; background: var(--color-primary-hover); }
+@media (max-width: 420px) { .fab { right: 16px; } }

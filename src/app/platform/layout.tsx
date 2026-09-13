@@ -3,6 +3,8 @@ import { listMemberships } from "@/services/auth";
 import { SidebarShell } from "@/components/SidebarShell";
 import { TenantSwitcher } from "@/components/TenantSwitcher";
 import { fmtDateTime } from "@/lib/format";
+import "@/styles/admin-pages.css";
+import "@/styles/platform-pages.css";
 
 export default async function PlatformLayout({ children }: { children: React.ReactNode }) {
   const session = await requirePlatformAdmin();
