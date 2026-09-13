@@ -1,6 +1,7 @@
 # Spec documents (kept local only)
 수산물_경매_시스템_기획서.docx
 수산물_경매_시스템_요구사항.md
+기획서_2606.pdf
 
 # macOS
 .DS_Store
@@ -9,3 +10,17 @@
 .vscode/
 .idea/
 *.swp
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+
+# Env & local data
+.env
+.env.local
+uploads/
+test-results/
+playwright-report/
