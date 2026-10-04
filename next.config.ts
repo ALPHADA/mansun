@@ -3,6 +3,16 @@ const config: NextConfig = {
   reactStrictMode: true,
   distDir: process.env.NEXT_DIST_DIR || ".next",
   serverExternalPackages: ["postgres", "sharp"],
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "www.pungeo.com" }],
+        destination: "https://pungeo.com/:path*",
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {

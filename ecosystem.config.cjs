@@ -21,14 +21,6 @@ module.exports = {
       time: true,
     },
     {
-      name: "mansun-market-tunnel",
-      cwd,
-      script: "scripts/tunnel.mjs",
-      env: { NODE_ENV: "production" },
-      restart_delay: 10000,
-      time: true,
-    },
-    {
       name: "mansun-market-backup",
       cwd,
       script: "node_modules/tsx/dist/cli.mjs",
