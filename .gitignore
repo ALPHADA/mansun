@@ -24,3 +24,8 @@ next-env.d.ts
 uploads/
 test-results/
 playwright-report/
+
+# Independent marketplace data and checks
+data/
+.next-e2e/
+artifacts/

@@ -1,44 +1,43 @@
 {
   "name": "mansun",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --hostname 127.0.0.1 --port 3005",
     "build": "next build",
-    "start": "next start",
+    "start": "next start --hostname 127.0.0.1 --port 3005",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "db:setup": "bash scripts/db-setup.sh",
-    "db:generate": "drizzle-kit generate",
-    "db:migrate": "tsx src/db/migrate.ts",
-    "db:seed": "tsx src/db/seed.ts",
-    "db:reset": "tsx src/db/reset.ts && pnpm db:migrate && pnpm db:seed",
-    "e2e": "pnpm db:reset && playwright test"
+    "e2e": "playwright test",
+    "db:migrate": "tsx scripts/migrate.ts",
+    "db:demo": "tsx scripts/seed.ts",
+    "jobs": "tsx scripts/jobs.ts",
+    "admin:grant": "tsx scripts/admin.ts"
   },
   "dependencies": {
-    "bcryptjs": "^3.0.3",
-    "drizzle-orm": "^0.45.2",
-    "idb-keyval": "^6.3.0",
-    "jose": "^6.2.12",
+    "@phosphor-icons/react": "^2.1.10",
     "next": "^16.3.5",
     "postgres": "^3.4.9",
     "react": "19",
     "react-dom": "19",
+    "server-only": "^0.0.1",
+    "sharp": "^0.35.5",
     "zod": "^4.6.4"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
-    "@types/bcryptjs": "^3.0.0",
     "@types/node": "^26.5.1",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "dotenv": "^17.4.2",
-    "drizzle-kit": "^0.31.10",
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.3.5",
+    "prettier": "^3.9.9",
     "tsx": "^4.23.13",
     "typescript": "^5.9.3",
     "vitest": "^5.0.0"
-  }
+  },
+  "packageManager": "pnpm@9.15.0+sha512.76e2379760a4328ec4415815bcd6628dee727af3779aaa4c914e3944156c4299921a89f976381ee107d41f12cfa4b66681ca9c718f0668fa0831ed4c6d8ba56c",
+  "type": "module"
 }

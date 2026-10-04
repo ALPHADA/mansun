@@ -1,11 +1,11 @@
-import Link from "next/link";
+import { Empty } from "@/components/ui";
 export default function NotFound() {
   return (
-    <div className="auth-body">
-      <div className="login-card" style={{ textAlign: "center" }}>
-        <div className="brand"><div className="logo">🐟</div><h1>페이지를 찾을 수 없습니다</h1><p>주소가 잘못되었거나 접근 권한이 없는 수협입니다.</p></div>
-        <Link href="/" className="btn-primary btn-block" style={{ display: "block" }}>홈으로</Link>
-      </div>
-    </div>
+    <Empty
+      title="찾으시는 페이지가 없습니다"
+      description="주소가 변경되었거나 더 이상 공개되지 않는 정보입니다."
+      href="/"
+      label="오늘 물건으로 이동"
+    />
   );
 }

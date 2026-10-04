@@ -1,1 +1,0 @@
-ALTER TABLE "tenants" ADD COLUMN "pickup_instructions" text;

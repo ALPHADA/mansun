@@ -1,56 +1,80 @@
-# MANSUN — 수산물 위판 경매 디지털 플랫폼
+# 만선 — 수산물 매입·거래처 연결
 
-선박 입항 → 입고 → 공지 → 밀봉 입찰 → 개찰(디지털 + 현장 호가 결합) → 통보 → 정산 전 과정을 다루는 멀티테넌트(다중 수협) B2B 웹앱.
-설계 문서는 [`design/`](design/00-overview.md), 역할별 화면 명세는 [`design/roles/`](design/roles/README.md), 초기 HTML mockup은 [`docs/`](docs/index.html).
+전국 중매인의 오늘 물건과 제시 판매가를 확인하고 전화·문자로 거래처를 연결하는 반응형 웹입니다. 첫 현장 테스트는 신진도에서 진행하지만 모든 지역에서 동일하게 사용할 수 있습니다.
 
-## 스택
-Next.js 16 (App Router) · React 19 · TypeScript · Drizzle ORM · PostgreSQL 14 (Row Level Security) · jose JWT 세션 · zod · vitest · Playwright
+## 구현된 기능
 
-## 로컬 실행
-```bash
-brew services start postgresql@14      # 로컬 PG (또는 임의의 PG 14+)
+- 휴대폰 OTP 로그인·가입, 3개 주 역할(중매인·매입회원·보관업체), 운영자 중매인 승인
+- 사진 등록·압축·메타데이터 제거, 상품 생성·수정·복사·판매 완료·한국시간 당일 자동 마감
+- 지역·어종·상태·검색어 탐색, 관심 상품, 중매인 프로필·매입 대행 소개, 전화·문자 연결
+- 매입회원의 공개 매입 요청, 보관업체 소개와 연락
+- 상태·규격·단위·상자 중량별 일별 등록 가격 범위·물량·참여 중매인 집계
+- 공식 경락 참고 정보의 출처·기준일 검증 후 운영자 등록 (자동 수집 미연결)
+- 웹 내부 알림함, 관심 조건 하루 요약, 읽음 처리, 일별 집계 저장
+- 다중 운영자 회원·신고·게시물·지역·어종 관리, 운영 이력과 방문·연락 지표
+
+가격·연락처·상세 인수 위치는 비로그인 HTML, RSC와 API 응답에서 제외합니다. 회원 등록 가격은 공식 경락가와 합산하지 않습니다. 시연 자료는 명시적으로 표시하고 실제 시세·성과·요약 알림에서 분리합니다.
+
+## 기술과 실행
+
+Next.js 16.3 · React 19 · TypeScript · PostgreSQL · postgres.js · Zod · Sharp. 새로운 독립 서비스이며 과거 수협용 데이터베이스나 코드를 사용하지 않습니다.
+
+```sh
 pnpm install
-cp .env.example .env                    # 필요 시 DATABASE_URL 등 수정
-pnpm db:setup                           # DB + 롤(mansun_owner / mansun_app) 생성
-pnpm db:migrate                         # 마이그레이션 + RLS 정책 적용
-pnpm db:seed                            # 시연 데이터 (강구항·포항 수협, 오늘 회차, 입고 14건, 입찰)
-pnpm dev                                # http://localhost:3000
-```
-`pnpm db:reset` 은 스키마를 드롭하고 마이그레이션·시드를 다시 수행한다.
-
-### 시드 계정
-비밀번호 공통 `mansun1234`. 전체 계정·전화번호·DB 롤·비밀 키는 [`SEED_ACCOUNTS.md`](SEED_ACCOUNTS.md) 참조 (운영 전 변경 필수).
-
-개발 편의: `GET /api/dev/login?email=…&tenant=…` 로 비밀번호 없이 세션 발급(프로덕션 비활성), `POST /api/internal/tick` 으로 스케줄러 즉시 실행.
-
-## 구조
-```
-src/app/(auth)         로그인 · 수협 선택 · 초청 수락
-src/app/platform       Platform Console (Tenant 등록/정지/아카이브, 글로벌 사용자, 통계, 감사)
-src/app/t/[code]/      Tenant 컨텍스트 (URL code ↔ 세션 검증)
-  operator/            대시보드 · 입고 · 공지 · 개찰/결과 · 현장 결과 입력 · 입찰 내역 · 정산
-  receiver/            모바일 현장 입고 (오프라인 큐)
-  broker/              진행중 경매 · 입찰 · 내 결과 · 정산 · 마이
-  shipper/             출하 · 선박 · 출하 상세(이의 제기) · 정산 · 마이
-  union/               오늘 · 7일 일정 · 회차 상세 · 작업량
-  admin/               수협 설정(6탭) · 멤버 · 면허 · 선주 · 감사 로그 · 통계
-  notifications/       알림함 (다중 수협 통합)
-src/services           유스케이스 (모든 쓰기는 감사 로그)
-src/domain             순수 로직: 개찰 엔진, 정산 계산, 상태 라벨
-src/db                 Drizzle 스키마 · RLS · 시드 · withTenant/withPlatform
-src/scheduler          10초 tick: 자동 공지, 상태 전이, 마감·자동 개찰, 재입찰 종료, 면허 만료 알림
-src/adapters           SMS/알림톡/이메일/회계 ERP Mock(발송 로그 테이블), 로컬 파일 저장
+cp .env.example .env
+# .env의 AUTH_SECRET를 충분히 긴 무작위 값으로 설정
+createdb mansun_market
+pnpm db:migrate
+pnpm dev
 ```
 
-### 핵심 규칙
-- **테넌트 격리 2중화**: 모든 도메인 쿼리는 `withTenant(tenantId)` 트랜잭션 안에서 실행되고, PostgreSQL RLS(`src/db/rls.sql`)가 `app.current_tenant_id` 와 일치하지 않는 행을 차단한다. 앱은 비-superuser 롤로 접속한다.
-- **권한 매트릭스** 단일 출처 `src/lib/authz/matrix.ts` (`design/02-iam.md`). 서버 액션은 `requirePermission()` 을 반드시 거친다. Platform Admin은 Tenant 도메인 데이터 읽기 전용.
-- **시간**: 마감·입찰 시각은 서버 시각만 신뢰. 클라이언트 카운트다운은 `/api/time` 으로 보정.
-- **개찰**: `final = max(디지털 최고가, 현장 최고가)`, 예가 미달 시 유찰, 동일가는 수협 정책(선착순/추첨/분할/재입찰). 결과는 append-only(`auction_results`)로 보존, 재개찰은 Admin 승인 후 1회.
-- **정산**: 수수료율·VAT·박스 환산은 수협 설정(`tenants.fee_policy` 등)에서 동적으로 적용. 확정 시 회계 어댑터 호출 후 불변.
+접속: `http://localhost:3005`. 데이터베이스 이름은 안전한 분리를 위해 `mansun_market` 접두사를 요구합니다. 기존 `mansun` DB를 지정하면 실행하지 않습니다.
 
-## 테스트
-```bash
-pnpm typecheck && pnpm lint && pnpm test   # vitest: 순수 로직 + 서비스 통합 테스트(로컬 DB 필요, 일회성 Tenant 생성 후 정리)
-pnpm e2e                                    # DB 리셋 후 Playwright E2E (dev 서버 3100 필요)
+실제 문자 인증에는 `SOLAPI_API_KEY`, `SOLAPI_API_SECRET`, `SOLAPI_FROM`, `SERVICE_OPERATOR_NAME`, `SERVICE_OPERATOR_CONTACT` 설정이 필요합니다. 카카오 로그인에는 `KAKAO_REST_API_KEY`, `KAKAO_CLIENT_SECRET`과 카카오 개발자 콘솔의 Redirect URI 등록이 필요합니다. 문자 설정 없이 카카오로 가입·로그인할 수 있습니다. 유료 서비스 가입이나 문자는 이 구현 과정에서 실행하지 않았습니다.
+
+로컬만 인증 화면을 확인하려면 `.env`에 `DEV_SMS_PREVIEW=true`를 설정하세요. **개발 모드의 localhost 요청만** 인증번호를 표시합니다. 운영 환경에서는 이 값을 켜도 인증 우회가 작동하지 않습니다. 문자 OTP는 번호 소유 확인이며 별도의 실명 본인확인이 아닙니다.
+
+## 개발용 시연 자료
+
+```sh
+ALLOW_DEMO_SEED=true pnpm db:demo
 ```
+
+실제 회원이 없는 개발용 DB에만 사용할 수 있습니다. 시연 중매인 번호 `01000000000`은 로컬 OTP 미리보기로 로그인할 수 있는 개발용 데이터이며 첫 계정에 운영자 권한이 있습니다. 실제 회원이 있거나 `NODE_ENV=production`이면 시연 자료를 넣지 않습니다. 시연 상품의 전화·문자 연결은 비활성화됩니다.
+
+## 운영자와 정기 작업
+
+```sh
+# 실제 회원이 가입한 후 서버에서 지정
+pnpm admin:grant 01012345678
+pnpm jobs
+pnpm exec tsx scripts/backup.ts
+```
+
+실제 번호를 명령 인자로 입력할 때 셸 기록에 남을 수 있습니다. 운영자 부여는 서버 접근 권한으로만 가능하며 웹 가입에서 관리자 권한을 선택할 수 없습니다.
+
+배포 환경은 PM2가 웹, 1분 간격 요약·집계 작업, HTTPS 터널, 일일 백업을 각각 관리합니다. [운영·복원 안내](docs/OPERATIONS.md), [API](docs/API.md), [기획 결정](docs/PRODUCT.md)을 참고하세요.
+
+## 검증
+
+```sh
+createdb mansun_market_test
+createdb mansun_market_e2e_test
+pnpm typecheck
+pnpm lint
+pnpm test
+pnpm e2e
+pnpm build
+```
+
+- 단위·통합 테스트는 전용 `_test` DB만 사용하며 해당 DB의 테스트 데이터를 초기화합니다.
+- E2E는 별도 3006 포트·`.next-e2e` 빌드 경로·전용 데이터베이스·업로드 경로를 사용합니다.
+- 실제 DB를 초기화하는 `db:reset` 명령은 제공하지 않습니다.
+
+## 아직 외부 준비가 필요한 항목
+
+- 실제 운영자 문의 연락처, 카카오 앱 설정 (문자 로그인을 추가할 경우 문자 발신 계정·발신번호)
+- 공식 시세의 최신 데이터 제공 범위·재사용 조건 검증과 이후 자동 연동
+- 정식 도메인 (현재는 임시 HTTPS 주소)
+
+카카오 연결·웹 결제·정산·배송 중개·네이티브 앱·선주 및 수협 직원 전용 기능은 첫 버전 범위에 포함하지 않습니다.
