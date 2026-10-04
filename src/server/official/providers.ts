@@ -90,21 +90,21 @@ export function regionFromAddress(address: string): string {
 }
 export function parseMofPage(payload: unknown): { rows: Row[]; total: number } {
   const root = object(payload),
-    response = object(root.response ?? root);
+    response = object(root.responseJson ?? root.response ?? root);
   const header = object(response.header);
   if (str(header.resultCode) !== "00")
     throw new Error(
       "해양수산부 응답 오류 · 인증 또는 제공 상태를 확인해주세요",
     );
   const body = object(response.body),
-    total = Number(body.totalCount);
+    total = Number(header.totalCount ?? body.totalCount);
   if (!Number.isSafeInteger(total) || total < 0)
     throw new Error("해양수산부 전체 건수가 올바르지 않습니다");
   const items = body.items;
   const rows = list(
     items && typeof items === "object" && !Array.isArray(items)
       ? object(items).item
-      : items,
+      : (items ?? body.item),
   );
   if (total > 0 && !rows.length)
     throw new Error("해양수산부 응답이 일부 누락되었습니다");
@@ -115,9 +115,17 @@ export function normalizeMof(
   day: string,
   locations: Map<string, string>,
 ): Observation[] {
-  return rows.map((r) => {
+  return rows.flatMap((r): Observation[] => {
     const rawDay = str(r.csmtDe),
       basis = rawDay.replace(/^(\d{4})(\d{2})(\d{2})$/, "$1-$2-$3");
+    if (basis !== day) throw new Error("위판 자료의 날짜가 올바르지 않습니다");
+    // Live MOF feeds include zero endpoints for unavailable prices.
+    // Only exclude explicit zeros paired with another valid price or zero.
+    if (
+      (str(r.lprc) === "0" && (str(r.hghpc) === "0" || amount(r.hghpc))) ||
+      (str(r.hghpc) === "0" && amount(r.lprc))
+    )
+      return [];
     const low = amount(r.lprc),
       high = amount(r.hghpc);
     if (
@@ -131,28 +139,30 @@ export function normalizeMof(
       !str(r.goodsUnitNm)
     )
       throw new Error("위판 자료의 날짜·가격·단위가 올바르지 않습니다");
-    return {
-      key: identity([
-        r.mxtrCode,
-        r.csmtmktCode,
-        r.mprcStdCode,
-        r.goodsStndrdCode,
-        r.goodsUnitCode,
-        r.kdfshSttusCode,
-      ]),
-      day,
-      region: locations.get(str(r.csmtmktCode)) || "지역 미확인",
-      market: [str(r.mxtrNm), str(r.csmtmktNm)].filter(Boolean).join(" · "),
-      species: str(r.mprcStdCodeNm),
-      state: str(r.kdfshSttusNm) || "상태 미제공",
-      grade: str(r.goodsStndrdNm) || "규격 미제공",
-      unit: str(r.goodsUnitNm),
-      kind: "auction",
-      low,
-      high,
-      previous: null,
-      week: null,
-    };
+    return [
+      {
+        key: identity([
+          r.mxtrCode,
+          r.csmtmktCode,
+          r.mprcStdCode,
+          r.goodsStndrdCode,
+          r.goodsUnitCode,
+          r.kdfshSttusCode,
+        ]),
+        day,
+        region: locations.get(str(r.csmtmktCode)) || "지역 미확인",
+        market: [str(r.mxtrNm), str(r.csmtmktNm)].filter(Boolean).join(" · "),
+        species: str(r.mprcStdCodeNm),
+        state: str(r.kdfshSttusNm) || "상태 미제공",
+        grade: str(r.goodsStndrdNm) || "규격 미제공",
+        unit: str(r.goodsUnitNm),
+        kind: "auction",
+        low,
+        high,
+        previous: null,
+        week: null,
+      },
+    ];
   });
 }
 export function normalizeKamis(
@@ -254,7 +264,7 @@ export async function mofRows(
     }
     const params: Record<string, string> = {
       serviceKey: decoded,
-      numOfRows: "999",
+      numOfRows: "100",
       pageNo: String(page),
       type: "json",
     };

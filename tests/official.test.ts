@@ -121,6 +121,7 @@ it("collects all pages and refuses changing totals", async () => {
   expect(await mofRows("0050", day, "a%2Bb", fetcher)).toHaveLength(2);
   const url = fetcher.mock.calls[0][0] as URL;
   expect(url.searchParams.get("serviceKey")).toBe("a+b");
+  expect(url.searchParams.get("numOfRows")).toBe("100");
   expect(url.searchParams.get("baseDt")).toBe("20260102");
   const changing = vi
     .fn()
@@ -213,4 +214,57 @@ it("retains both KAMIS stages when a later response omits one", async () => {
   const report = await officialReport("kamis", day);
   expect(report.total).toBe(2);
   expect(report.rows.map((row) => row.data.low).sort()).toEqual([5500, 6500]);
+});
+
+it("parses the live MOF responseJson envelope and header pagination", () => {
+  const responseJson = {
+    header: { resultCode: "00", totalCount: 1, pageNo: 1, numOfRows: 100 },
+    body: { item: [raw] },
+  };
+  expect(parseMofPage({ responseJson })).toEqual({ rows: [raw], total: 1 });
+  expect(
+    parseMofPage({ responseJson: { ...responseJson, body: { item: raw } } }),
+  ).toEqual({ rows: [raw], total: 1 });
+  expect(
+    parseMofPage({
+      responseJson: {
+        header: { resultCode: "00", totalCount: 0 },
+        body: { item: [] },
+      },
+    }),
+  ).toEqual({ rows: [], total: 0 });
+  expect(() =>
+    parseMofPage({
+      responseJson: { header: { resultCode: "30" }, body: { item: [] } },
+    }),
+  ).toThrow();
+});
+
+it("excludes explicit zero-price MOF records without hiding malformed ranges", () => {
+  const zero = { ...raw, lprc: "0", hghpc: "0" };
+  expect(normalizeMof([raw, zero], day, new Map())).toHaveLength(1);
+  expect(() =>
+    normalizeMof([{ ...zero, csmtDe: "20260101" }], day, new Map()),
+  ).toThrow();
+  expect(normalizeMof([{ ...raw, lprc: "0" }], day, new Map())).toEqual([]);
+  expect(normalizeMof([{ ...raw, hghpc: "0" }], day, new Map())).toEqual([]);
+  expect(() =>
+    normalizeMof([{ ...zero, hghpc: "-1" }], day, new Map()),
+  ).toThrow();
+  expect(() => normalizeMof([{ ...raw, lprc: "" }], day, new Map())).toThrow();
+});
+
+it("paginates live responseJson pages using header totals", async () => {
+  const fetcher = vi.fn().mockImplementation(async (url: URL) => {
+    const pageNo = Number(url.searchParams.get("pageNo"));
+    return Response.json({
+      responseJson: {
+        header: { resultCode: "00", totalCount: 2, pageNo, numOfRows: 100 },
+        body: { item: [{ ...raw, csmtmktCode: String(pageNo) }] },
+      },
+    });
+  });
+  const rows = await mofRows("0050", day, "test-key", fetcher);
+  expect(rows.map((row) => row.csmtmktCode)).toEqual(["1", "2"]);
+  expect(fetcher).toHaveBeenCalledTimes(2);
 });

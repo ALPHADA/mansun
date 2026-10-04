@@ -109,7 +109,7 @@ export default async function Market({
               <strong>{sources[tab].name}</strong>
               <p>
                 {tab === "mof"
-                  ? "수협 위판장 경매 가격 · 같은 상태·규격·단위끼리 비교하세요."
+                  ? "수협 위판장 경매 가격 · 같은 상태·규격·단위끼리 비교하세요. 가격이 0으로 제공된 항목은 제외합니다."
                   : "전국 조사 평균 · 경매 낙찰가와 다른 도매·소매 판매가격입니다."}
               </p>
             </div>
