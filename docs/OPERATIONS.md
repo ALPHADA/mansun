@@ -38,6 +38,37 @@ pm2 logs mansun-market-web --lines 40 --nostream
 pm2 logs mansun-market-jobs --lines 40 --nostream
 ```
 
+## 실제 가입 활성화
+
+서버 `.env`에 문자 발송 제공사의 `SOLAPI_API_KEY`, `SOLAPI_API_SECRET`, 확인된 발신번호 `SOLAPI_FROM`과 운영 주체 `SERVICE_OPERATOR_NAME`, 공개 문의 연락처 `SERVICE_OPERATOR_CONTACT`를 설정하고 웹을 재시작합니다. API 키는 채팅·저장소·로그에 남기지 않습니다. 실제 계정으로 소량 인증 발송을 검증한 뒤 현장 참여자를 초대합니다.
+
+최초 운영자는 가입 완료 후 `pnpm admin:grant 실제휴대폰번호`로 부여합니다. 그 뒤 웹 운영 관리에서 중매인을 승인합니다. 웹 가입으로 운영자 권한을 생성할 수 없습니다.
+
+## 정기 작업과 보관
+
+작업 프로세스가 1분마다 알림 요약과 과거 일별 집계 누락분을 처리합니다. 알림은 회원·날짜 고유 키로 중복 생성되지 않습니다. 집계와 알림 생성은 PostgreSQL advisory lock으로 중복 실행을 직렬화합니다.
+
+백업 프로세스는 시작 시 한 번, 이후 서버 시각 오전 4시에 DB 덤프와 업로드 압축을 만듭니다. `/Users/dana/srv/backups/mansun-market`에 저장하며 자동 삭제는 하지 않습니다. 주기적으로 별도 장치에도 복사하고 용량을 점검하세요. 각 백업에 DB 아카이브 목록 검증과 복원 안내가 포함됩니다.
+
+## 기존 프로젝트 보존
+
+- 로컬 소스·환경·업로드·Git 보존: `/Users/dayoungchoi/Desktop/private/mansun-backups/20261004-131916/project.tar.gz`
+- 파일별 SHA-256: 같은 폴더 `manifest.json` (812개 파일을 아카이브와 대조)
+- 기존 로컬 DB: 같은 폴더 `database.dump` (독립 임시 DB에 복원 후 검증 완료)
+- 이전 작업 파일: 같은 폴더 `working-copy/`
+- 기존 서버 소스·DB: `/Users/dana/srv/backups/mansun-legacy-20261004-140232/`
+
+기존 DB로 복원하지 말고 별도 빈 디렉터리·DB에서 확인합니다. 소스에는 비밀 설정이 포함되므로 백업을 웹 공개 폴더나 Git에 넣지 않습니다.
+
+```sh
+# 예: 새 서비스 백업 검증. 실제 백업 경로를 지정하세요.
+createdb mansun_market_restore
+pg_restore --no-owner --no-acl -d mansun_market_restore /private/backup/database.dump
+# uploads.tar.gz는 복원 환경의 별도 UPLOAD_DIR에 풉니다.
+```
+
+## 장애 확인
+
 `/api/health`가 200이면 웹·DB 연결이 정상입니다. 로그인만 준비 중이면 카카오 키·운영자 환경 설정을 확인합니다. 이미지 오류는 UPLOAD_DIR 권한과 파일 보존 여부를, 알림 누락은 작업 프로세스 로그와 관심 조건·요약 시각을 확인합니다. 새 버전 롤백 시 코드와 DB 변경 내용을 함께 검토하고 기존 수협용 DB를 연결하지 않습니다.
 
 ## 카카오 로그인 설정
