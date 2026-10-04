@@ -10,7 +10,6 @@ import {
   Fish,
   ClipboardText,
   ChartLine,
-  Warehouse,
 } from "@/components/icons";
 import { Visit } from "@/components/actions";
 import "./globals.css";
@@ -41,12 +40,11 @@ export default async function Layout({
         </div>
         <header className="header">
           <div className="header-inner">
-            <Brand />
+            <Brand homeTitle />
             <nav className="desktop-nav" aria-label="주 메뉴">
               <Link href="/">오늘 물건</Link>
               <Link href="/requests">매입 요청</Link>
               <Link href="/market">지역 시세</Link>
-              <Link href="/storage">보관업체</Link>
             </nav>
             <div className="header-actions">
               <Link
@@ -61,17 +59,19 @@ export default async function Layout({
                 <UserCircle size={24} />
                 <span>{user ? user.profile.name : "로그인"}</span>
               </Link>
-              <Link
-                href={
-                  user?.role === "buyer" ? "/requests/new" : "/listings/new"
-                }
-                className="button small"
-              >
-                <Plus size={18} />
-                <span>
-                  {user?.role === "buyer" ? "매입 요청" : "물건 올리기"}
-                </span>
-              </Link>
+              {user?.role !== "storage" && (
+                <Link
+                  href={
+                    user?.role === "buyer" ? "/requests/new" : "/listings/new"
+                  }
+                  className="button small"
+                >
+                  <Plus size={18} />
+                  <span>
+                    {user?.role === "buyer" ? "매입 요청" : "물건 올리기"}
+                  </span>
+                </Link>
+              )}
             </div>
           </div>
         </header>
@@ -104,10 +104,6 @@ export default async function Layout({
           <Link href="/market">
             <ChartLine size={23} />
             지역 시세
-          </Link>
-          <Link href="/storage">
-            <Warehouse size={23} />
-            보관업체
           </Link>
           <Link href="/me">
             <UserCircle size={23} />내 정보

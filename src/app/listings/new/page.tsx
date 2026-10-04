@@ -18,7 +18,7 @@ export default async function NewListing({
       <>
         <Heading
           title="중매인 회원만 물건을 올릴 수 있어요"
-          description="매입회원·보관업체 회원은 물건을 등록할 수 없습니다. 역할 변경은 운영자에게 요청해주세요."
+          description="중매인 이외의 회원은 물건을 등록할 수 없습니다. 역할 변경은 운영자에게 요청해주세요."
         />
         <a className="button" href="/me">
           내 정보로 가기

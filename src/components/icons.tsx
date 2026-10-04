@@ -13,7 +13,6 @@ export {
   Heart,
   CheckCircle,
   Package,
-  Warehouse,
   ChartLine,
   ClipboardText,
   CaretRight,

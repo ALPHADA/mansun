@@ -1,10 +1,11 @@
 import { z } from "zod";
-export const roles = ["broker", "buyer", "storage"] as const;
-export type Role = (typeof roles)[number];
+export const roles = ["broker", "buyer"] as const;
+// Retain historical member roles without offering new storage registrations.
+export type Role = (typeof roles)[number] | "storage";
 export const roleNames: Record<Role, string> = {
   broker: "중매인",
   buyer: "매입회원",
-  storage: "보관업체",
+  storage: "기존 회원",
 };
 export const provinces = [
   "인천",
@@ -216,19 +217,6 @@ export const requestSchema = z.object({
   note: z.string().trim().max(1500).default(""),
 });
 export type RequestData = z.infer<typeof requestSchema>;
-export const storageSchema = z.object({
-  name: line(80),
-  region: line(60),
-  address: line(160),
-  kind: z.enum(["냉동", "냉장", "냉동·냉장"]),
-  species: z
-    .array(line(30))
-    .min(1, "취급 어종을 하나 이상 선택해주세요.")
-    .max(30),
-  conditions: z.string().trim().min(1).max(1500),
-  hours: line(80),
-});
-export type StorageData = z.infer<typeof storageSchema>;
 export interface User {
   id: string;
   phone: string | null;
@@ -267,14 +255,6 @@ export interface BuyRequest {
   closed_at: string | null;
   hidden: boolean;
   demo: boolean;
-  business?: string;
-  contact?: string;
-}
-export interface Warehouse {
-  id: string;
-  owner_id: string;
-  data: StorageData;
-  hidden: boolean;
   business?: string;
   contact?: string;
 }

@@ -134,7 +134,7 @@ export default async function Admin() {
                   <details>
                     <summary>역할 변경</summary>
                     {Object.entries(roleNames)
-                      .filter(([r]) => r !== m.role)
+                      .filter(([r]) => r !== m.role && r !== "storage")
                       .map(([r, label]) => (
                         <Action
                           key={r}

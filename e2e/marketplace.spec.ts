@@ -121,31 +121,34 @@ test("buyer sees price, saves a product and posts a buying request", async ({
   await page.goto("/me?tab=saved");
   await expect(page.locator(".product")).toHaveCount(1);
 });
-test("storage member registers a facility and mobile navigation works", async ({
+test("storage routes are removed and mobile navigation works", async ({
   page,
   context,
 }) => {
-  await login(context, "01099008803", "storage");
-  await page.goto("/storage/new");
-  await page.locator("input[name=address]").fill("테스트 전용 시설주소");
-  await page
-    .getByLabel("취급 어종: 목록에 없는 어종 직접 추가")
-    .fill("테스트냉동어");
-  await page.getByRole("button", { name: "추가", exact: true }).click();
+  await login(context, "01099008803", "buyer");
+  for (const path of ["/storage", "/storage/new", "/api/v1/storage"]) {
+    const response = await page.goto(path);
+    expect(response?.status()).toBe(404);
+  }
+  const response = await context.request.post("/api/v1/storage", {
+    headers: { origin: "http://localhost:3006" },
+    data: {},
+  });
+  expect(response.status()).toBe(404);
+  await page.goto("/");
   await expect(
-    page.locator('input[name=species][value="테스트냉동어"]'),
-  ).toBeChecked();
-  await page.locator('input[name=species][value="꽃게"]').check();
-  await page
-    .locator("textarea[name=conditions]")
-    .fill("검증용 보관 조건 · 실제 운영 시설 아님");
-  await page
-    .getByRole("button", { name: "업체 소개 저장", exact: true })
-    .click();
-  await page.waitForURL("**/storage");
-  await expect(page.locator(".warehouse-card")).toContainText(
-    "테스트 전용 시설주소",
+    page.getByRole("link", { name: "보관업체", exact: true }),
+  ).toHaveCount(0);
+  await expect(page).toHaveTitle("전국 수산물 경매 정보방");
+  await expect(page.locator("header .brand")).toContainText(
+    "전국 수산물 경매 정보방",
   );
+  await page.setViewportSize({ width: 320, height: 740 });
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth > innerWidth,
+    ),
+  ).toBe(false);
   await page
     .getByRole("navigation", { name: "모바일 메뉴" })
     .getByRole("link", { name: "지역 시세" })

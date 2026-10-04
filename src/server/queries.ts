@@ -6,7 +6,6 @@ import {
   type User,
   type Listing,
   type BuyRequest,
-  type Warehouse,
   type Notification,
   type MarketGroup,
 } from "../lib/model";
@@ -54,16 +53,6 @@ export async function requests(user: User | null, own = false) {
     BuyRequest[]
   >`SELECT r.*,m.profile->>'business' AS business,m.profile->>'contact' AS contact FROM buy_requests r JOIN members m ON m.id=r.owner_id WHERE NOT r.hidden AND NOT m.suspended AND m.role='buyer' AND (${own} OR (r.closed_at IS NULL AND r.data->>'deadline'>=${kstDay()})) AND (${!own} OR r.owner_id=${user?.id || null}) ORDER BY r.created_at DESC LIMIT 100`;
   return rows.map((r) => ({ ...r, contact: user ? r.contact : undefined }));
-}
-export async function warehouses(user: User | null) {
-  const rows = await db()<
-    Warehouse[]
-  >`SELECT w.*,m.profile->>'business' AS business,m.profile->>'contact' AS contact FROM warehouses w JOIN members m ON m.id=w.owner_id WHERE NOT w.hidden AND NOT m.suspended AND m.role='storage' ORDER BY w.created_at DESC LIMIT 100`;
-  return rows.map((w) => ({
-    ...w,
-    contact: user ? w.contact : undefined,
-    data: user ? w.data : { ...w.data, address: w.data.region },
-  }));
 }
 export async function broker(id: string, user: User | null) {
   if (!/^[0-9a-f-]{36}$/.test(id)) return null;
@@ -131,16 +120,15 @@ export async function adminData() {
     pendingContent,
     official,
     hiddenSpecies,
-  ] =
-    await Promise.all([
-      sql`SELECT id,phone,role,profile,suspended,admin FROM members ORDER BY created_at DESC LIMIT 150`,
-      sql`SELECT r.*,m.profile->>'business' AS reporter FROM reports r JOIN members m ON m.id=r.user_id ORDER BY created_at DESC LIMIT 100`,
-      sql`SELECT a.*,m.profile->>'name' AS actor FROM audit_log a LEFT JOIN members m ON m.id=a.actor_id ORDER BY a.created_at DESC LIMIT 80`,
-      sql`SELECT day::text AS day,count(DISTINCT user_id) FILTER(WHERE kind='visit')::int AS visitors,count(*) FILTER(WHERE kind='contact')::int AS contacts,(SELECT count(*) FROM listings l WHERE (l.created_at AT TIME ZONE 'Asia/Seoul')::date=a.day AND NOT l.demo)::int AS listings FROM activity a GROUP BY day ORDER BY day DESC LIMIT 14`,
-      sql`SELECT id,'listing' AS kind,data->>'species' AS title,hidden FROM listings UNION ALL SELECT id,'request',data->>'species',hidden FROM buy_requests UNION ALL SELECT id,'storage',data->>'name',hidden FROM warehouses LIMIT 200`,
-      sql`SELECT * FROM official_prices ORDER BY verified_at DESC LIMIT 50`,
-      sql`SELECT name FROM taxonomy WHERE kind='species' AND NOT active ORDER BY name`,
-    ]);
+  ] = await Promise.all([
+    sql`SELECT id,phone,role,profile,suspended,admin FROM members ORDER BY created_at DESC LIMIT 150`,
+    sql`SELECT r.*,m.profile->>'business' AS reporter FROM reports r JOIN members m ON m.id=r.user_id ORDER BY created_at DESC LIMIT 100`,
+    sql`SELECT a.*,m.profile->>'name' AS actor FROM audit_log a LEFT JOIN members m ON m.id=a.actor_id ORDER BY a.created_at DESC LIMIT 80`,
+    sql`SELECT day::text AS day,count(DISTINCT user_id) FILTER(WHERE kind='visit')::int AS visitors,count(*) FILTER(WHERE kind='contact')::int AS contacts,(SELECT count(*) FROM listings l WHERE (l.created_at AT TIME ZONE 'Asia/Seoul')::date=a.day AND NOT l.demo)::int AS listings FROM activity a GROUP BY day ORDER BY day DESC LIMIT 14`,
+    sql`SELECT id,'listing' AS kind,data->>'species' AS title,hidden FROM listings UNION ALL SELECT id,'request',data->>'species',hidden FROM buy_requests LIMIT 200`,
+    sql`SELECT * FROM official_prices ORDER BY verified_at DESC LIMIT 50`,
+    sql`SELECT name FROM taxonomy WHERE kind='species' AND NOT active ORDER BY name`,
+  ]);
   return {
     members,
     reports,

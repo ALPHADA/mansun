@@ -700,7 +700,7 @@ small {
 }
 .service-links {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 30px;
   margin-top: 33px;
 }
@@ -1370,33 +1370,6 @@ small {
   min-width: 0;
   padding: 10px 0;
 }
-.warehouse-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
-}
-.warehouse-card {
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 30px;
-  position: relative;
-}
-.warehouse-icon {
-  position: absolute;
-  right: 27px;
-  top: 26px;
-  color: #89aa98;
-}
-.warehouse-card h2 {
-  font-size: 25px;
-  margin: 12px 0 8px;
-}
-.warehouse-card > p {
-  font-size: 13px;
-}
-.warehouse-card .specs dt {
-  width: 90px;
-}
 .market-controls {
   display: flex;
   align-items: flex-end;
@@ -1960,9 +1933,6 @@ td strong {
   .market-summary .summary-note svg {
     width: 22px;
   }
-  .warehouse-grid {
-    grid-template-columns: 1fr;
-  }
   .official-list {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -2510,4 +2480,10 @@ td strong {
  .official-price-table td:nth-child(2) { grid-column:1; grid-row:2; font-size:12px; }
  .official-price-table td:nth-child(3) { grid-column:2; grid-row:1 / span 2; text-align:right; }
  .official-price-table td:nth-child(4) { grid-column:1 / -1; display:flex; gap:12px; }
+}
+
+/* The home name is longer than the short service name. */
+.brand-name-home { font-size: 18px; letter-spacing: -0.6px; line-height: 1.35; }
+@media (max-width: 700px) {
+  .brand-name-home { max-width: 140px; font-size: 16px; }
 }

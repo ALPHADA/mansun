@@ -11,7 +11,6 @@ import {
   speciesName,
   listingSchema,
   requestSchema,
-  storageSchema,
   profileSchema,
   endOfDay,
   kstDay,
@@ -114,15 +113,6 @@ export async function mutate(user: User, path: string, input: unknown) {
     if (!r) throw new AppError("내 요청만 마감할 수 있습니다.", 403);
     return { ok: true };
   }
-  if (path === "storage") {
-    if (user.role !== "storage")
-      throw new AppError("보관업체 회원만 등록할 수 있습니다.", 403);
-    const data = storageSchema.parse(body);
-    await assertSpecies(sql, data.species);
-    const [r] =
-      await sql`INSERT INTO warehouses(owner_id,data) VALUES(${user.id},${sql.json(data)}) ON CONFLICT(owner_id) DO UPDATE SET data=excluded.data RETURNING id`;
-    return { id: r.id };
-  }
   if (path === "taxonomy/species") {
     const name = speciesName.parse(body.name);
     return await sql.begin(async (tx) => {
@@ -164,7 +154,7 @@ export async function mutate(user: User, path: string, input: unknown) {
   if (path === "reports") {
     const data = z
       .object({
-        kind: z.enum(["listing", "request", "storage", "broker"]),
+        kind: z.enum(["listing", "request", "broker"]),
         id: uuid,
         reason: z
           .string()
@@ -201,7 +191,7 @@ export async function mutate(user: User, path: string, input: unknown) {
           .object({
             id: uuid,
             suspended: z.boolean().optional(),
-            role: z.enum(["broker", "buyer", "storage"]).optional(),
+            role: z.enum(["broker", "buyer"]).optional(),
           })
           .parse(body);
         const [old] = await tx<
@@ -227,14 +217,13 @@ export async function mutate(user: User, path: string, input: unknown) {
         const d = z
           .object({
             id: uuid,
-            kind: z.enum(["listing", "request", "storage"]),
+            kind: z.enum(["listing", "request"]),
             hidden: z.boolean(),
           })
           .parse(body);
         const table = {
           listing: "listings",
           request: "buy_requests",
-          storage: "warehouses",
         }[d.kind];
         const rows =
           await tx`UPDATE ${tx(table)} SET hidden=${d.hidden} WHERE id=${d.id} RETURNING id`;

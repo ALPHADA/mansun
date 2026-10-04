@@ -1,3 +1,4 @@
+import { BrandName } from "./brand-name";
 import Link from "next/link";
 import {
   Fish,
@@ -167,15 +168,19 @@ export function ProductCard({
     </article>
   );
 }
-export function Brand() {
+export function Brand({ homeTitle = false }: { homeTitle?: boolean }) {
   return (
-    <Link href="/" className="brand" aria-label="풍어 홈">
+    <Link href="/" className="brand" aria-label="홈">
       <span className="brand-symbol">
         <Fish size={29} weight="bold" />
       </span>
-      <span>
-        풍어<span className="brand-caption">바다의 오늘, 거래의 시작</span>
-      </span>
+      {homeTitle ? (
+        <BrandName />
+      ) : (
+        <span>
+          풍어<span className="brand-caption">바다의 오늘, 거래의 시작</span>
+        </span>
+      )}
     </Link>
   );
 }

@@ -71,7 +71,6 @@ export async function GET(
       return l ? json(l) : json({ error: "상품을 찾을 수 없습니다." }, 404);
     }
     if (path === "requests") return json(await q.requests(await requireUser()));
-    if (path === "storage") return json(await q.warehouses(u));
     if (path === "notifications")
       return json(await q.notifications(await requireUser()));
     return json({ error: "찾을 수 없습니다." }, 404);

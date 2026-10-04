@@ -17,6 +17,7 @@ import { requestOtp, verifyOtp, currentUser, devSms } from "../src/server/auth";
 import { runJobs } from "../src/server/jobs";
 import {
   profileSchema,
+  signupSchema,
   kstDay,
   type User,
   type ListingData,
@@ -126,7 +127,7 @@ it("accepts only listed species and lets members add missing ones", async () => 
   await expect(
     mutate(buyer, "taxonomy/species", { name: "문의 01099009901" }),
   ).rejects.toBeTruthy();
-  // 매입 요청과 보관업체도 목록의 어종만 받는다.
+  // 매입 요청도 목록의 어종만 받는다.
   const request = {
     species: "테스트없는어종",
     grade: "대",
@@ -141,19 +142,9 @@ it("accepts only listed species and lets members add missing ones", async () => 
     status: 400,
   });
   const keeper = { ...other, role: "storage" as const };
-  const facility = {
-    name: "테스트창고",
-    region: "충남",
-    address: "테스트 주소",
-    kind: "냉동",
-    conditions: "테스트",
-    hours: "09:00",
-  };
-  for (const species of [[], ["테스트없는어종"], "테스트꽃게"])
-    await expect(
-      mutate(keeper, "storage", { ...facility, species }),
-    ).rejects.toBeTruthy();
-  await mutate(keeper, "storage", { ...facility, species: ["테스트꽃게"] });
+  await expect(mutate(keeper, "storage", {})).rejects.toMatchObject({
+    status: 404,
+  });
   // 회원당 하루 20개까지만 새 어종을 추가할 수 있다.
   for (let i = 0; i < 19; i++)
     await mutate(buyer, "taxonomy/species", {
@@ -489,4 +480,38 @@ it("Kakao existing account logs in without duplicate signup and rejects suspensi
   mock.mockRestore();
   delete process.env.KAKAO_REST_API_KEY;
   delete process.env.KAKAO_CLIENT_SECRET;
+});
+
+it("does not allow registering or assigning the deferred storage role", async () => {
+  expect(
+    signupSchema.safeParse({
+      role: "storage",
+      consent: true,
+      profile: buyer.profile,
+    }).success,
+  ).toBe(false);
+  await expect(
+    mutate(admin, "admin/member", { id: buyer.id, role: "storage" }),
+  ).rejects.toBeTruthy();
+});
+
+it("rejects deferred storage report and admin content actions while allowing legacy role migration", async () => {
+  await expect(
+    mutate(buyer, "reports", {
+      kind: "storage",
+      id: buyer.id,
+      reason: "확인 요청 테스트",
+    }),
+  ).rejects.toBeTruthy();
+  await expect(
+    mutate(admin, "admin/content", {
+      kind: "storage",
+      id: buyer.id,
+      hidden: true,
+    }),
+  ).rejects.toBeTruthy();
+  await db()`UPDATE members SET role='storage' WHERE id=${buyer.id}`;
+  await mutate(admin, "admin/member", { id: buyer.id, role: "buyer" });
+  const [member] = await db()`SELECT role FROM members WHERE id=${buyer.id}`;
+  expect(member.role).toBe("buyer");
 });

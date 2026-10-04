@@ -70,7 +70,7 @@ export async function assertContactFree(
       409,
     );
 }
-// 상품·요청·프로필(가입 포함)·보관업체의 어종은 운영 중인 어종 목록에 있어야 관심 어종 알림·검색과 이어진다.
+// 상품·요청·프로필(가입 포함)의 어종은 운영 중인 어종 목록에 있어야 관심 어종 알림·검색과 이어진다.
 export async function assertSpecies(
   sql: postgres.Sql | postgres.TransactionSql,
   names: string[],

@@ -161,9 +161,6 @@ export function LoginForm({
             >
               <option value="buyer">매입회원 — 물건을 찾고 싶어요</option>
               <option value="broker">중매인 — 물건을 판매해요</option>
-              <option value="storage">
-                보관업체 — 냉동·냉장 보관을 제공해요
-              </option>
             </select>
           </label>
           <div className="field-pair">
@@ -185,7 +182,6 @@ export function LoginForm({
               <option>냉동유통</option>
               <option>가공</option>
               <option>중매인</option>
-              <option>냉동·냉장 보관</option>
             </select>
           </label>
           <label>

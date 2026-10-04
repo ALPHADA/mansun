@@ -13,6 +13,7 @@ import {
   Anchor,
 } from "@/components/icons";
 import { kstDay, dateLabel } from "@/lib/model";
+export const metadata = { title: { absolute: "전국 수산물 경매 정보방" } };
 export default async function Home({
   searchParams,
 }: {
@@ -236,14 +237,6 @@ export default async function Home({
         </Link>
       </section>
       <div className="service-links">
-        <Link href="/storage">
-          <div>
-            <span>냉동 · 냉장 보관</span>
-            <h3>물건 맡길 곳을 찾고 있나요?</h3>
-            <p>지역별 보관업체와 직접 연결하세요.</p>
-          </div>
-          <ArrowUpRight size={28} />
-        </Link>
         <Link href="/guide">
           <div>
             <span>중매인을 위한 풍어</span>

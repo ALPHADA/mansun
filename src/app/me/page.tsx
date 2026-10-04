@@ -168,10 +168,10 @@ export default async function Me({
         </>
       ) : (
         <Empty
-          title="보관업체 소개를 관리하세요"
-          description="시설 정보와 취급 조건을 등록하고 새로운 거래처와 연결하세요."
-          href="/storage/new"
-          label="내 업체 관리"
+          title="관심 있는 물건과 시세를 확인하세요"
+          description="판매·매입 역할 변경은 운영자에게 요청해주세요."
+          href="/market"
+          label="시세 보기"
         />
       )}
       <div className="logout">
