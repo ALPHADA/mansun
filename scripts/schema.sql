@@ -35,3 +35,26 @@ CREATE TABLE IF NOT EXISTS oauth_signups(token_hash text PRIMARY KEY,subject tex
 ALTER TABLE members ALTER COLUMN approval SET DEFAULT 'approved';
 UPDATE members SET suspended=true WHERE approval='rejected';
 UPDATE members SET approval='approved' WHERE approval<>'approved';
+
+-- Automated official feeds stay separate from operator-verified manual prices.
+CREATE TABLE IF NOT EXISTS official_observations (
+  provider text NOT NULL CHECK(provider IN ('mof','kamis')),
+  basis_day date NOT NULL,
+  item_key text NOT NULL,
+  region text NOT NULL,
+  species text NOT NULL,
+  market text NOT NULL,
+  data jsonb NOT NULL,
+  fetched_at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY(provider,basis_day,item_key)
+);
+CREATE INDEX IF NOT EXISTS official_observations_filter ON official_observations(provider,basis_day,region);
+CREATE TABLE IF NOT EXISTS official_sync_runs (
+  provider text NOT NULL CHECK(provider IN ('mof','kamis')),
+  basis_day date NOT NULL,
+  status text NOT NULL CHECK(status IN ('success','empty','error')),
+  item_count integer NOT NULL DEFAULT 0,
+  message text NOT NULL DEFAULT '',
+  attempted_at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY(provider,basis_day)
+);

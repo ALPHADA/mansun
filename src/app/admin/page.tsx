@@ -1,3 +1,4 @@
+import { officialSyncStatus } from "@/server/official/queries";
 import { notFound } from "next/navigation";
 import { currentUser } from "@/server/auth";
 import { adminData, taxonomy } from "@/server/queries";
@@ -8,6 +9,7 @@ export const metadata = { title: "운영 관리" };
 export default async function Admin() {
   const u = await currentUser();
   if (!u?.admin) notFound();
+  const feedStatus = await officialSyncStatus();
   const d = await adminData(),
     tax = await taxonomy();
   return (
@@ -21,6 +23,53 @@ export default async function Admin() {
         문의 버튼 사용은 거래 성사 수가 아닙니다. 시연 상품은 등록 성과 집계에서
         제외합니다.
       </div>
+      <section className="admin-section">
+        <h2>공식 시세 수집 상태</h2>
+        <p className="muted">
+          최근 3일 자료를 4시간 간격으로 재확인합니다. 수집 작업 실행이
+          필요합니다.
+        </p>
+        {feedStatus.sources.map((s) => (
+          <p key={s.provider}>
+            {s.name} · {s.configured ? "인증 설정됨" : "인증 설정 필요"}
+          </p>
+        ))}
+        <div className="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>제공처 / 기준일</th>
+                <th>결과</th>
+                <th>수집 건수</th>
+                <th>최근 확인</th>
+              </tr>
+            </thead>
+            <tbody>
+              {feedStatus.runs.map((r) => (
+                <tr key={r.provider + r.basis_day}>
+                  <td>
+                    {r.provider} · {r.basis_day}
+                  </td>
+                  <td>
+                    {
+                      { success: "정상", empty: "자료 없음", error: "오류" }[
+                        r.status as string
+                      ]
+                    }
+                    <small>{r.message}</small>
+                  </td>
+                  <td>{r.item_count}</td>
+                  <td>
+                    {new Date(r.attempted_at).toLocaleString("ko-KR", {
+                      timeZone: "Asia/Seoul",
+                    })}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
       <section className="admin-section">
         <h2>최근 이용 현황</h2>
         <div className="table-scroll">
@@ -188,8 +237,8 @@ export default async function Admin() {
           <summary>현재 목록</summary>
           <p>{tax.regions.join(" · ")}</p>
           <p className="muted">
-            어종은 회원도 직접 추가할 수 있습니다. 잘못된 항목은 숨기면 더
-            이상 고를 수 없습니다.
+            어종은 회원도 직접 추가할 수 있습니다. 잘못된 항목은 숨기면 더 이상
+            고를 수 없습니다.
           </p>
           <div className="row wrap">
             {tax.species.map((s) => (

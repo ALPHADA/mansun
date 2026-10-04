@@ -13,7 +13,8 @@
     "db:migrate": "tsx scripts/migrate.ts",
     "db:demo": "tsx scripts/seed.ts",
     "jobs": "tsx scripts/jobs.ts",
-    "admin:grant": "tsx scripts/admin.ts"
+    "admin:grant": "tsx scripts/admin.ts",
+    "prices:sync": "tsx scripts/sync-official.ts"
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",

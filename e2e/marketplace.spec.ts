@@ -38,7 +38,7 @@ test.describe.configure({ mode: "serial" });
 test.beforeAll(async () => {
   await sql.unsafe(await readFile("scripts/schema.sql", "utf8"));
   await sql.unsafe(
-    "TRUNCATE members,otp_challenges,daily_snapshots,official_prices RESTART IDENTITY CASCADE",
+    "TRUNCATE members,otp_challenges,daily_snapshots,official_prices,official_observations,official_sync_runs RESTART IDENTITY CASCADE",
   );
   await sql`DELETE FROM taxonomy WHERE name LIKE '테스트%'`;
   await sql`INSERT INTO taxonomy(kind,name) VALUES('region','충남'),('region','부산'),('species','꽃게') ON CONFLICT DO NOTHING`;
@@ -128,7 +128,9 @@ test("storage member registers a facility and mobile navigation works", async ({
   await login(context, "01099008803", "storage");
   await page.goto("/storage/new");
   await page.locator("input[name=address]").fill("테스트 전용 시설주소");
-  await page.getByLabel("취급 어종: 목록에 없는 어종 직접 추가").fill("테스트냉동어");
+  await page
+    .getByLabel("취급 어종: 목록에 없는 어종 직접 추가")
+    .fill("테스트냉동어");
   await page.getByRole("button", { name: "추가", exact: true }).click();
   await expect(
     page.locator('input[name=species][value="테스트냉동어"]'),
@@ -149,7 +151,63 @@ test("storage member registers a facility and mobile navigation works", async ({
     .getByRole("link", { name: "지역 시세" })
     .click();
   await expect(
-    page.getByRole("heading", { name: "지역의 오늘을 읽는 가격 정보" }),
+    page.getByRole("heading", { name: "전국 수산물 가격 정보" }),
   ).toBeVisible();
-  await expect(page.locator("table")).toContainText("31,001");
+  await page.getByRole("link", { name: "중매인 판매가", exact: true }).click();
+  await expect(page.locator("table").first()).toContainText("31,001");
+});
+
+test("official prices stay private and filters work on narrow screens", async ({
+  page,
+  context,
+}) => {
+  const data = {
+    key: "official-e2e",
+    day: "2026-01-02",
+    region: "부산",
+    market: "검증위판장",
+    species: "검증고등어",
+    state: "선어",
+    grade: "대",
+    unit: "상자",
+    kind: "auction",
+    low: 827341,
+    high: 827399,
+    previous: null,
+    week: null,
+  };
+  await sql`INSERT INTO official_observations(provider,basis_day,item_key,region,species,market,data) VALUES('mof','2026-01-02','official-e2e','부산','검증고등어','검증위판장',${sql.json(data)})`;
+  await page.goto("/market?day=2026-01-02&q=&q=꽃게");
+  await expect(
+    page.getByText("로그인하고 공식 시세와 가격 변화를 확인하세요"),
+  ).toBeVisible();
+  expect(await page.content()).not.toContain("827341");
+  expect(await page.content()).not.toContain("827,341");
+  expect(await page.content()).not.toContain("검증고등어");
+  await login(context, "01099008804");
+  await page.setViewportSize({ width: 320, height: 740 });
+  await page.goto("/market?day=2026-01-02&region=부산");
+  await expect(page.locator(".official-price-table")).toContainText("827,341");
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth > innerWidth,
+    ),
+  ).toBe(false);
+  await page.goto("/market?day=2026-01-03&region=부산");
+  await page
+    .getByRole("link", { name: "최근 자료 보기 · 2026-01-02 →" })
+    .click();
+  await expect(page.locator(".official-price-table")).toContainText(
+    "검증고등어",
+  );
+  await page.getByRole("link", { name: "도·소매 참고", exact: true }).click();
+  await expect(
+    page.getByText(
+      "전국 조사 평균 · 경매 낙찰가와 다른 도매·소매 판매가격입니다.",
+    ),
+  ).toBeVisible();
+  await page.getByRole("link", { name: "중매인 판매가", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "중매인 등록 판매가" }),
+  ).toBeVisible();
 });

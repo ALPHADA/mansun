@@ -1,212 +1,307 @@
+import { taxonomy } from "@/server/queries";
+import Link from "next/link";
 import { currentUser } from "@/server/auth";
-import { market, taxonomy } from "@/server/queries";
-import { Heading, Empty, LoginGate } from "@/components/ui";
-import { kstDay, money } from "@/lib/model";
-import { ChartLine, MapPin, ArrowUpRight } from "@/components/icons";
+import { Heading, LoginGate } from "@/components/ui";
+import BrokerMarket from "@/components/broker-market";
+import { officialReport } from "@/server/official/queries";
+import { sources, validDay } from "@/server/official/providers";
+import { kstDay, money, provinces } from "@/lib/model";
 export const metadata = { title: "지역 시세" };
+type Params = Record<string, string | string[] | undefined>;
 export default async function Market({
   searchParams,
 }: {
-  searchParams: Promise<{ day?: string; region?: string }>;
+  searchParams: Promise<Params>;
 }) {
-  const p = await searchParams,
-    u = await currentUser();
-  const day =
-    p.day &&
-    /^\d{4}-\d{2}-\d{2}$/.test(p.day) &&
-    !Number.isNaN(Date.parse(p.day)) &&
-    new Date(p.day).toISOString().slice(0, 10) === p.day
-      ? p.day
-      : kstDay();
-  const { groups, official } = await market(day, p.region || ""),
-    tax = await taxonomy();
-  const real = groups.filter((g) => !g.demo),
-    demo = groups.filter((g) => g.demo);
+  const raw = await searchParams;
+  const p = Object.fromEntries(
+    Object.entries(raw).map(([key, value]) => [
+      key,
+      Array.isArray(value) ? value[0] : value,
+    ]),
+  );
+  const user = await currentUser();
+  const tab = p.tab === "kamis" || p.tab === "broker" ? p.tab : "mof";
+  const day = p.day && validDay(p.day) && p.day <= kstDay() ? p.day : kstDay();
+  const regions = tab === "broker" ? (await taxonomy()).regions : provinces;
+  const region = regions.includes(p.region || "") ? p.region! : "";
+  const query = (p.q || "").trim().slice(0, 60);
+  const page = /^\d+$/.test(p.page || "")
+    ? Math.min(1000, Math.max(1, Number(p.page)))
+    : 1;
+  const href = (changes: Record<string, string>) =>
+    `/market?${new URLSearchParams({ tab, day, ...(region ? { region } : {}), ...(query ? { q: query } : {}), ...changes })}`;
+  // No official price data is queried or serialized for anonymous visitors.
+  const report =
+    user && tab !== "broker"
+      ? await officialReport(tab, day, region, query, page)
+      : null;
   return (
     <>
       <Heading
         eyebrow="MARKET REPORT"
-        title="지역의 오늘을 읽는 가격 정보"
-        description="어디에 어떤 물건이 올라왔는지, 같은 규격끼리 확인하세요."
+        title="전국 수산물 가격 정보"
+        description="위판 시세부터 도·소매 참고가격, 중매인 판매가까지 확인하세요."
       />
-      <form className="market-controls">
+      <nav className="price-tabs" aria-label="시세 구분">
+        {(
+          [
+            ["mof", "공식 위판"],
+            ["kamis", "도·소매 참고"],
+            ["broker", "중매인 판매가"],
+          ] as const
+        ).map(([value, label]) => (
+          <Link
+            key={value}
+            href={href({ tab: value })}
+            aria-current={tab === value ? "page" : undefined}
+          >
+            {label}
+          </Link>
+        ))}
+      </nav>
+      <form className="price-filters">
+        <input type="hidden" name="tab" value={tab} />
         <label>
           기준일
-          <input type="date" name="day" defaultValue={day} max={kstDay()} />
+          <input
+            type="date"
+            name="day"
+            defaultValue={day}
+            max={kstDay()}
+            required
+          />
         </label>
-        <label>
-          지역
-          <select name="region" defaultValue={p.region || ""}>
-            <option value="">전국</option>
-            {tax.regions.map((r) => (
-              <option key={r}>{r}</option>
-            ))}
-          </select>
-        </label>
+        {tab !== "kamis" && (
+          <label>
+            지역
+            <select name="region" defaultValue={region}>
+              <option value="">전국</option>
+              {regions.map((r) => (
+                <option key={r}>{r}</option>
+              ))}
+            </select>
+          </label>
+        )}
+        {tab !== "broker" && (
+          <label className="price-search">
+            {tab === "mof" ? "어종·위판장" : "품목"}
+            <input
+              type="search"
+              name="q"
+              defaultValue={query}
+              maxLength={60}
+              placeholder={tab === "mof" ? "예: 꽃게, 부산" : "예: 고등어"}
+            />
+          </label>
+        )}
         <button className="button">조회하기</button>
       </form>
-      <div className="market-summary">
-        <div>
-          <span>등록 상품</span>
-          <strong>
-            {real.reduce((s, g) => s + g.count, 0)}
-            <small>건</small>
-          </strong>
-        </div>
-        <div>
-          <span>등록 어종</span>
-          <strong>
-            {new Set(real.map((g) => g.species)).size}
-            <small>종</small>
-          </strong>
-        </div>
-        <div>
-          <span>등록 지역</span>
-          <strong>
-            {new Set(real.map((g) => g.region)).size}
-            <small>곳</small>
-          </strong>
-        </div>
-        <div className="summary-note">
-          <ChartLine size={27} />
-          <p>
-            풍어 등록 상품 기준
-            <br />
-            <strong>지역 전체 위판량과 다릅니다.</strong>
-          </p>
-        </div>
-      </div>
-      <div className="section-heading">
-        <h2>중매인 등록 판매가</h2>
-        <span className="muted">단위·상태·규격별 집계</span>
-      </div>
-      <div className="notice subtle">
-        수량은 중매인이 입력한 대략적인 등록 물량입니다. 판매 잔량이 아니며,
-        가격은 최종 거래가와 다를 수 있습니다.
-      </div>
-      {!u ? (
-        <LoginGate
-          next="/market"
-          message="로그인하고 지역별 가격대를 확인하세요"
+      {tab === "broker" ? (
+        <BrokerMarket
+          searchParams={Promise.resolve({ day, region })}
+          next={href({})}
         />
-      ) : real.length ? (
-        <MarketTable groups={real} />
       ) : (
-        <Empty
-          title="이 날짜의 등록 시세가 없습니다"
-          description="다른 날짜나 지역을 선택해주세요. 확인되지 않은 가격은 표시하지 않습니다."
-          href="/"
-          label="오늘 물건 보기"
-        />
-      )}
-      {u && demo.length > 0 && (
-        <details className="demo-section">
-          <summary>시연 데이터로 집계 화면 보기 · 실제 시세 아님</summary>
-          <MarketTable groups={demo} />
-        </details>
-      )}
-      <section className="official-section">
-        <div className="section-heading">
-          <div>
-            <span className="eyebrow">OFFICIAL REFERENCE</span>
-            <h2>공식 경락 참고 정보</h2>
-          </div>
-        </div>
-        <p className="muted">
-          중매인 판매가와 별도로 표시합니다. 출처·기준일·규격을 확인해주세요.
-        </p>
-        {!u ? (
-          <LoginGate next="/market" compact />
-        ) : official.length ? (
-          <div className="official-list">
-            {official.map((o) => (
-              <article key={String(o.id)}>
-                <h3>
-                  {String(o.species)} · {String(o.grade)}
-                </h3>
-                <p>
-                  <MapPin size={16} />
-                  {String(o.region)} · {String(o.state)} ·{" "}
-                  {String(o.basis_day).slice(0, 10)}
-                </p>
-                <strong>
-                  {money(Number(o.price_min))}–{money(Number(o.price_max))}원/
-                  {String(o.unit)}
-                </strong>
-                <a
-                  href={String(o.source_url)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {String(o.source_name)}
-                  <ArrowUpRight size={16} />
-                </a>
-              </article>
-            ))}
-          </div>
-        ) : (
-          <div className="official-empty">
-            <ChartLine size={26} />
+        <section aria-label={sources[tab].name}>
+          <div className="price-source">
             <div>
-              <strong>확인된 공식 자료가 아직 없습니다</strong>
+              <strong>{sources[tab].name}</strong>
               <p>
-                최신성과 제공 범위가 검증된 자료부터 연결합니다. 자료가 없는
-                날을 0원으로 표시하지 않습니다.
+                {tab === "mof"
+                  ? "수협 위판장 경매 가격 · 같은 상태·규격·단위끼리 비교하세요."
+                  : "전국 조사 평균 · 경매 낙찰가와 다른 도매·소매 판매가격입니다."}
               </p>
             </div>
+            <a
+              href={sources[tab].url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              출처 보기 ↗
+            </a>
           </div>
-        )}
-      </section>
+          {!user ? (
+            <LoginGate
+              next={href({})}
+              message="로그인하고 공식 시세와 가격 변화를 확인하세요"
+            />
+          ) : (
+            report && (
+              <>
+                <div className="price-caption">
+                  <span>
+                    기준일 {day}
+                    {report.total > 0 ? ` · ${money(report.total)}건` : ""}
+                  </span>
+                  <span>
+                    {tab === "mof"
+                      ? "물량은 별도 자료 확인 후 제공"
+                      : "원자료 조사 단위 기준"}
+                  </span>
+                </div>
+                {report.status === "error" && (
+                  <p className="notice subtle" role="status">
+                    자료 갱신이 지연되고 있습니다.
+                    {report.rows.length > 0 &&
+                      " 표시된 자료는 마지막으로 수집한 값입니다."}
+                  </p>
+                )}
+                {report.status === "empty" && report.rows.length > 0 && (
+                  <p className="notice subtle">
+                    제공처의 최근 응답에 자료가 없어 이전 수집 자료를
+                    표시합니다.
+                  </p>
+                )}
+                {report.rows.length ? (
+                  <>
+                    <div className="table-scroll">
+                      <table className="official-price-table">
+                        <thead>
+                          <tr>
+                            <th>
+                              어종 / {tab === "mof" ? "위판장" : "가격 구분"}
+                            </th>
+                            <th>상태 · 규격</th>
+                            <th>
+                              {tab === "mof" ? "위판 최저–최고가" : "조사 가격"}
+                            </th>
+                            {tab === "kamis" && <th>전일 / 전주 대비</th>}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {report.rows.map(({ data: r, fetched_at }) => (
+                            <tr key={r.key}>
+                              <td>
+                                <strong>{r.species}</strong>
+                                <small>
+                                  {tab === "mof"
+                                    ? `${r.region} · ${r.market}`
+                                    : r.kind === "wholesale"
+                                      ? "도매 · 전국"
+                                      : "소매 · 전국"}
+                                </small>
+                              </td>
+                              <td>
+                                {r.state}
+                                <small>{r.grade}</small>
+                              </td>
+                              <td>
+                                <strong>
+                                  {money(r.low)}
+                                  {r.high !== r.low ? `–${money(r.high)}` : ""}
+                                  원
+                                </strong>
+                                <small>/{r.unit}</small>
+                                <small className="price-collected">
+                                  수집{" "}
+                                  {new Date(fetched_at).toLocaleString(
+                                    "ko-KR",
+                                    {
+                                      timeZone: "Asia/Seoul",
+                                      month: "numeric",
+                                      day: "numeric",
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                      hour12: false,
+                                    },
+                                  )}
+                                </small>
+                              </td>
+                              {tab === "kamis" && (
+                                <td>
+                                  <Change
+                                    price={r.low}
+                                    previous={r.previous}
+                                    label="전일"
+                                  />
+                                  <Change
+                                    price={r.low}
+                                    previous={r.week}
+                                    label="전주"
+                                  />
+                                </td>
+                              )}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                    <div className="price-pagination">
+                      {page > 1 && (
+                        <Link
+                          className="button secondary"
+                          href={href({ page: String(page - 1) })}
+                        >
+                          이전
+                        </Link>
+                      )}
+                      <span>{page}페이지</span>
+                      {page * 50 < report.total && (
+                        <Link
+                          className="button secondary"
+                          href={href({ page: String(page + 1) })}
+                        >
+                          다음
+                        </Link>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <div className="official-empty">
+                    <div>
+                      <strong>
+                        {!report.configured && !report.latest
+                          ? "공식 시세 연결을 준비하고 있습니다"
+                          : "이 조건의 공식 자료가 없습니다"}
+                      </strong>
+                      <p>
+                        발표가 없거나 수집되지 않은 가격은 0원으로 표시하지
+                        않습니다.
+                      </p>
+                      {report.latest && report.latest !== day && (
+                        <Link href={href({ day: report.latest })}>
+                          최근 자료 보기 · {report.latest} →
+                        </Link>
+                      )}
+                      {page > 1 && (
+                        <Link href={href({ page: "1" })}>첫 페이지로 →</Link>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </>
+            )
+          )}
+        </section>
+      )}
     </>
   );
 }
-function MarketTable({
-  groups,
+function Change({
+  price,
+  previous,
+  label,
 }: {
-  groups: Awaited<ReturnType<typeof market>>["groups"];
+  price: number;
+  previous: number | null;
+  label: string;
 }) {
+  const change = previous ? ((price - previous) / previous) * 100 : null;
   return (
-    <div className="table-scroll">
-      <table>
-        <thead>
-          <tr>
-            <th>지역 / 어종</th>
-            <th>상태 · 규격</th>
-            <th>등록 가격대</th>
-            <th>등록 물량</th>
-            <th>표본</th>
-          </tr>
-        </thead>
-        <tbody>
-          {groups.map((g, i) => (
-            <tr key={i}>
-              <td>
-                <small>{g.region}</small>
-                <strong>{g.species}</strong>
-              </td>
-              <td>
-                {g.state} · {g.grade}
-                {g.weightKg && g.unit !== "kg"
-                  ? ` · ${g.weightKg}kg/${g.unit}`
-                  : ""}
-              </td>
-              <td>
-                <strong>
-                  {money(g.priceMin)}–{money(g.priceMax)}
-                </strong>
-                <small>원/{g.unit}</small>
-              </td>
-              <td>
-                약 {money(g.quantity)}
-                {g.unit}
-              </td>
-              <td>
-                {g.count}건 · 중매인 {g.brokers}명
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <small
+      className={
+        change === null || change === 0
+          ? ""
+          : change > 0
+            ? "price-up"
+            : "price-down"
+      }
+    >
+      {label}{" "}
+      {change === null
+        ? "비교 자료 없음"
+        : `${change > 0 ? "+" : ""}${change.toFixed(1)}%`}
+    </small>
   );
 }
