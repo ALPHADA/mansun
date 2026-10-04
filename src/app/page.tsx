@@ -75,7 +75,7 @@ export default async function Home({
             <span>
               바다에서 당신의 일터까지
               <br />
-              <strong>오늘도, 만선입니다.</strong>
+              <strong>오늘도, 풍어입니다.</strong>
             </span>
           </div>
         </div>
@@ -246,7 +246,7 @@ export default async function Home({
         </Link>
         <Link href="/guide">
           <div>
-            <span>중매인을 위한 만선</span>
+            <span>중매인을 위한 풍어</span>
             <h3>오늘 물건으로 새 거래처를 만나세요.</h3>
             <p>사진 한 장부터, 간편하게 시작합니다.</p>
           </div>

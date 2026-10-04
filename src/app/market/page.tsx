@@ -70,7 +70,7 @@ export default async function Market({
         <div className="summary-note">
           <ChartLine size={27} />
           <p>
-            만선 등록 상품 기준
+            풍어 등록 상품 기준
             <br />
             <strong>지역 전체 위판량과 다릅니다.</strong>
           </p>

@@ -27,12 +27,12 @@ export default async function Login({
         <p>
           수산업 종사자를 위한 새로운 연결.
           <br />
-          카카오 계정으로 만선을 시작하세요.
+          카카오 계정으로 풍어를 시작하세요.
         </p>
         <div className="auth-wave">滿船</div>
       </div>
       <div className="auth-panel">
-        <span className="eyebrow">만선에 오신 것을 환영합니다</span>
+        <span className="eyebrow">풍어에 오신 것을 환영합니다</span>
         <h2>로그인 · 회원가입</h2>
         <p className="muted">
           카카오로 로그인하고 오늘의 가격과 거래처를 만나보세요.

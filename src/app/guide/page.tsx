@@ -5,8 +5,8 @@ export default function Guide() {
   return (
     <div className="narrow prose">
       <Heading
-        eyebrow="WELCOME TO MANSUN"
-        title="좋은 거래의 시작, 만선"
+        eyebrow="WELCOME TO PUNGEO"
+        title="좋은 거래의 시작, 풍어"
         description="전국 산지의 중매인과 매입회원을 연결합니다."
       />
       <h2>매입회원이라면</h2>
@@ -32,7 +32,7 @@ export default function Guide() {
       <h2>지역 시세를 읽는 방법</h2>
       <p>
         등록 판매가는 중매인이 제시한 금액이며 실제 낙찰가나 최종 거래가와
-        다릅니다. 같은 상태·규격·단위끼리 비교해주세요. 만선의 등록 물량은 전체
+        다릅니다. 같은 상태·규격·단위끼리 비교해주세요. 풍어의 등록 물량은 전체
         위판량이나 현재 재고가 아닙니다.
       </p>
       <h2>보관업체라면</h2>
@@ -46,7 +46,7 @@ export default function Guide() {
         신고와 게시물을 확인하고 처리합니다.
       </p>
       <Link className="button" href="/login">
-        만선 시작하기
+        풍어 시작하기
       </Link>
     </div>
   );

@@ -148,7 +148,7 @@ export async function completeKakaoSignup(input: unknown) {
         await sql`INSERT INTO members(phone,role,profile,approval) VALUES(NULL,${data.role},${sql.json(data.profile)},${data.role === "broker" ? "pending" : "approved"}) RETURNING id`;
       id = member.id;
       await sql`INSERT INTO oauth_identities(provider,subject,user_id) VALUES('kakao',${pending.subject},${id})`;
-      await sql`INSERT INTO notifications(user_id,title,body,href) VALUES(${id},'만선에 오신 것을 환영합니다',${data.role === "broker" ? "중매인 승인 후 물건을 등록할 수 있습니다." : "관심 지역과 어종을 설정해보세요."},'/me/profile')`;
+      await sql`INSERT INTO notifications(user_id,title,body,href) VALUES(${id},'풍어에 오신 것을 환영합니다',${data.role === "broker" ? "중매인 승인 후 물건을 등록할 수 있습니다." : "관심 지역과 어종을 설정해보세요."},'/me/profile')`;
     }
     await sql`DELETE FROM oauth_signups WHERE subject=${pending.subject}`;
     return id as string;

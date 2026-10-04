@@ -15,7 +15,7 @@ import {
 import { Visit } from "@/components/actions";
 import "./globals.css";
 export const metadata: Metadata = {
-  title: { default: "만선 — 바다의 오늘, 거래의 시작", template: "%s | 만선" },
+  title: { default: "풍어 — 바다의 오늘, 거래의 시작", template: "%s | 풍어" },
   description:
     "전국 중매인의 오늘 물건과 수산물 가격을 확인하고 새로운 거래처를 만나세요.",
   robots: { index: false, follow: false },
@@ -34,9 +34,9 @@ export default async function Layout({
           본문으로 이동
         </a>
         <div className="top-strip">
-          <span>전국 수산물 거래처를 잇는 만선</span>
+          <span>전국 수산물 거래처를 잇는 풍어</span>
           <Link href="/guide">
-            만선 이용 안내 <span>↗</span>
+            풍어 이용 안내 <span>↗</span>
           </Link>
         </div>
         <header className="header">
@@ -80,7 +80,7 @@ export default async function Layout({
         </main>
         <footer className="footer">
           <Brand />
-          <p>바다에서 시작된 좋은 거래, 만선에서 이어집니다.</p>
+          <p>바다에서 시작된 좋은 거래, 풍어에서 이어집니다.</p>
           <div>
             <Link href="/guide">이용 안내</Link>
             <Link href="/privacy">개인정보 처리 안내</Link>
@@ -88,7 +88,7 @@ export default async function Layout({
             {user?.admin && <Link href="/admin">운영 관리</Link>}
           </div>
           <small>
-            만선은 거래 당사자 간 연락을 연결합니다. 가격·수량·인수 조건은 거래
+            풍어는 거래 당사자 간 연락을 연결합니다. 가격·수량·인수 조건은 거래
             전 직접 확인해주세요.
           </small>
         </footer>

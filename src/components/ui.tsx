@@ -85,7 +85,7 @@ export function LoginGate({
       <LockKey size={compact ? 17 : 26} />
       <div>
         <strong>{message}</strong>
-        {!compact && <p>수산업 종사자를 위한 만선 · 휴대폰 번호로 간편하게</p>}
+        {!compact && <p>수산업 종사자를 위한 풍어 · 휴대폰 번호로 간편하게</p>}
       </div>
       <Link className="button" href={"/login?next=" + encodeURIComponent(next)}>
         로그인
@@ -169,12 +169,12 @@ export function ProductCard({
 }
 export function Brand() {
   return (
-    <Link href="/" className="brand" aria-label="만선 홈">
+    <Link href="/" className="brand" aria-label="풍어 홈">
       <span className="brand-symbol">
         <Fish size={29} weight="bold" />
       </span>
       <span>
-        만선<span className="brand-caption">바다의 오늘, 거래의 시작</span>
+        풍어<span className="brand-caption">바다의 오늘, 거래의 시작</span>
       </span>
     </Link>
   );

@@ -36,7 +36,7 @@ pm2 logs mansun-market-web --lines 40 --nostream
 pm2 logs mansun-market-jobs --lines 40 --nostream
 ```
 
-임시 주소는 테스트용입니다. 안정적인 초대 링크가 필요해지면 고정 도메인과 정식 터널로 전환하고 `APP_ORIGIN`을 설정한 뒤 `PUBLIC_ORIGIN_FILE`을 비웁니다.
+임시 주소는 테스트용입니다. 안정적인 초대 링크가 필요해지면 고정 도메인과 정식 터널로 전환하고 `APP_ORIGIN`을 설정한 뒤 `PUBLIC_ORIGIN_FILE`을 비웁니다. 고정 도메인은 `pungeo.com`으로 정했습니다(2026-10-04 기준 미등록 확인, 구매·연결 전).
 
 ## 실제 가입 활성화
 
@@ -72,7 +72,7 @@ pg_restore --no-owner --no-acl -d mansun_market_restore /private/backup/database
 `/api/health`가 200이면 웹·DB 연결이 정상입니다. 로그인만 준비 중이면 카카오 키·운영자 환경 설정을 확인합니다. 이미지 오류는 UPLOAD_DIR 권한과 파일 보존 여부를, 알림 누락은 작업 프로세스 로그와 관심 조건·요약 시각을 확인합니다. 새 버전 롤백 시 코드와 DB 변경 내용을 함께 검토하고 기존 수협용 DB를 연결하지 않습니다.
 
 ## 카카오 로그인 설정
-카카오디벨로퍼스에서 만선 앱을 생성하고 카카오 로그인을 활성화합니다. REST API 키와 클라이언트 시크릿을 서버 `.env`의 `KAKAO_REST_API_KEY`, `KAKAO_CLIENT_SECRET`에 저장합니다. JavaScript 키와 Admin 키는 필요하지 않습니다. 추가 개인정보 동의 항목은 사용하지 않습니다.
+카카오디벨로퍼스에서 풍어 앱을 생성하고 카카오 로그인을 활성화합니다. REST API 키와 클라이언트 시크릿을 서버 `.env`의 `KAKAO_REST_API_KEY`, `KAKAO_CLIENT_SECRET`에 저장합니다. JavaScript 키와 Admin 키는 필요하지 않습니다. 추가 개인정보 동의 항목은 사용하지 않습니다.
 
 카카오에 등록할 Redirect URI는 공개 주소 + `/api/auth/kakao/callback`입니다. 임시 터널이 재시작되어 주소가 변경되면 카카오 Redirect URI 및 대표 도메인을 다시 등록해야 합니다. 운영용 고정 도메인으로 전환하는 것이 좋습니다. 로컬 검증 주소는 `http://localhost:3005/api/auth/kakao/callback`입니다.
 
@@ -82,7 +82,7 @@ pg_restore --no-owner --no-acl -d mansun_market_restore /private/backup/database
 
 
 ### 연결 완료 기록 (2026-10-04)
-- 카카오 앱: 만선, 앱 ID `1596957`, 회사명 `withD`
+- 카카오 앱: 만선(등록 당시 이름. 콘솔에서 풍어로 변경 필요), 앱 ID `1596957`, 회사명 `withD`
 - 공개 운영 문의: `coding199103@gmail.com`
 - 카카오 로그인 ON, OpenID Connect OFF, 추가 개인정보 동의 없음
 - 공개 콜백 등록 및 실제 카카오 인증 → 신규 회원 정보 화면 이동 확인

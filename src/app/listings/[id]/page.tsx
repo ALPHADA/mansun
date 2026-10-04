@@ -162,7 +162,7 @@ export default async function Detail({
                   item.seller.contact +
                   "?body=" +
                   encodeURIComponent(
-                    `[만선] ${d.species} ${d.grade} 문의드립니다.\n${publicOrigin()}/listings/${id}\n희망 수량: `,
+                    `[풍어] ${d.species} ${d.grade} 문의드립니다.\n${publicOrigin()}/listings/${id}\n희망 수량: `,
                   )
                 }
                 target={id}

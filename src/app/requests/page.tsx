@@ -86,7 +86,7 @@ export default async function Requests() {
                           r.contact +
                           "?body=" +
                           encodeURIComponent(
-                            `[만선] ${r.data.species} ${r.data.quantity}${r.data.unit} 매입 요청 문의드립니다.`,
+                            `[풍어] ${r.data.species} ${r.data.quantity}${r.data.unit} 매입 요청 문의드립니다.`,
                           )
                         }
                         target={r.id}
