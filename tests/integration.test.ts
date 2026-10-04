@@ -22,7 +22,7 @@ import {
   type ListingData,
 } from "../src/lib/model";
 import { POST, GET } from "../src/app/api/v1/[...path]/route";
-let broker: User, buyer: User, admin: User, pending: User;
+let broker: User, buyer: User, admin: User, other: User;
 let listingId = "";
 const image = randomUUID() + ".webp";
 const phone = "01099009901";
@@ -65,25 +65,22 @@ beforeAll(async () => {
     });
     const [u] = await sql<
       User[]
-    >`INSERT INTO members(phone,role,profile,approval,admin) VALUES(${"0109900990" + i},${i === 1 ? "buyer" : "broker"},${sql.json(profile)},${i === 3 ? "pending" : "approved"},${i === 2}) RETURNING *`;
+    >`INSERT INTO members(phone,role,profile,approval,admin) VALUES(${"0109900990" + i},${i === 1 ? "buyer" : "broker"},${sql.json(profile)},${"approved"},${i === 2}) RETURNING *`;
     members.push(u);
   }
-  [broker, buyer, admin, pending] = members;
+  [broker, buyer, admin, other] = members;
   await sql`INSERT INTO assets(id,owner_id) VALUES(${image},${broker.id})`;
   const stranger = profileSchema.parse({
-    ...pending.profile,
+    ...other.profile,
     interests: { regions: ["부산"], species: [] },
   });
-  await sql`UPDATE members SET profile=${sql.json(stranger)} WHERE id=${pending.id}`;
+  await sql`UPDATE members SET profile=${sql.json(stranger)} WHERE id=${other.id}`;
 });
 afterAll(async () => {
   await db().end();
 });
-it("rejects buyer and unapproved broker publication", async () => {
+it("rejects publication by non-brokers", async () => {
   await expect(mutate(buyer, "listings", data)).rejects.toMatchObject({
-    status: 403,
-  });
-  await expect(mutate(pending, "listings", data)).rejects.toMatchObject({
     status: 403,
   });
 });
@@ -143,10 +140,10 @@ it("generates one digest per member per day and respects interests", async () =>
     ...buyer.profile,
     interests: { regions: ["부산"], species: [] },
   });
-  await db()`UPDATE members SET profile=${db().json(strangerProfile)} WHERE id=${pending.id}`;
+  await db()`UPDATE members SET profile=${db().json(strangerProfile)} WHERE id=${other.id}`;
   await runJobs();
   const [no] =
-    await db()`SELECT count(*)::int AS n FROM notifications WHERE user_id=${pending.id} AND dedupe IS NOT NULL`;
+    await db()`SELECT count(*)::int AS n FROM notifications WHERE user_id=${other.id} AND dedupe IS NOT NULL`;
   expect(no.n).toBe(0);
 });
 it("blocks admin access, hides content and excludes it from statistics", async () => {
@@ -222,6 +219,35 @@ it("limits OTP retries, commits failures and prevents reuse", async () => {
   ).rejects.toBeTruthy();
   cookieStore.clear();
 });
+it("SMS-verified signup wins over a self-entered contact and flags the other account", async () => {
+  vi.stubEnv("DEV_SMS_PREVIEW", "true");
+  const number = "01099009977";
+  const [squatter] =
+    await db()`INSERT INTO members(phone,role,profile,approval) VALUES(NULL,'buyer',${db().json({ ...buyer.profile, contact: number })},'approved') RETURNING id`;
+  const req = new Request("http://localhost:3005/api/v1/auth/request", {
+    headers: { origin: "http://localhost:3005" },
+  });
+  const challenge = await requestOtp(number, req);
+  await verifyOtp({
+    challengeId: challenge.challengeId,
+    code: challenge.developmentCode!,
+    signup: {
+      role: "broker",
+      profile: { ...broker.profile, contact: number },
+      consent: true,
+    },
+  });
+  const user = await currentUser();
+  expect(user?.phone).toBe(number);
+  expect(user?.approval).toBe("approved");
+  const [flag] =
+    await db()`SELECT count(*)::int AS n FROM audit_log WHERE action='contact.conflict' AND target=${number} AND detail->>'member'=${squatter.id}`;
+  expect(flag.n).toBe(1);
+  const [note] =
+    await db()`SELECT count(*)::int AS n FROM notifications WHERE user_id=${squatter.id} AND title='연락처를 확인해주세요'`;
+  expect(note.n).toBe(1);
+  cookieStore.clear();
+});
 it("never exposes development OTP on public host or production", () => {
   vi.stubEnv("DEV_SMS_PREVIEW", "true");
   expect(
@@ -291,19 +317,57 @@ it("Kakao rejects forged state and consumes OAuth attempts once", async () => {
   expect(mock).toHaveBeenCalledTimes(2);
   mock.mockRestore();
 });
-it("Kakao signup keeps business contact separate from SMS identity and cannot replay", async () => {
+it("Kakao signup rejects a contact another member uses, then approves a broker immediately and cannot replay", async () => {
   const { completeKakaoSignup } = await import("../src/server/kakao");
+  await expect(
+    completeKakaoSignup({
+      role: "broker",
+      profile: broker.profile,
+      consent: true,
+    }),
+  ).rejects.toMatchObject({ status: 409 });
   await completeKakaoSignup({
     role: "broker",
-    profile: broker.profile,
+    profile: { ...broker.profile, contact: "01099009955" },
     consent: true,
   });
   const user = await currentUser();
   expect(user?.id).not.toBe(broker.id);
   expect(user?.phone).toBeNull();
-  expect(user?.approval).toBe("pending");
+  expect(user?.approval).toBe("approved");
   expect(user?.admin).toBe(false);
-  expect(user?.profile.contact).toBe(broker.profile.contact);
+  expect(user?.profile.contact).toBe("01099009955");
+  await expect(
+    mutate(user!, "profile", { ...user!.profile, contact: buyer.phone }),
+  ).rejects.toMatchObject({ status: 409 });
+  await expect(
+    mutate(user!, "profile", { ...user!.profile, contact: "01055555555" }),
+  ).rejects.toMatchObject({ status: 400 });
+  // 자기 연락처 그대로 저장, 비어 있는 번호로 변경은 허용된다.
+  await mutate(user!, "profile", user!.profile);
+  await mutate(user!, "profile", { ...user!.profile, contact: "01099009956" });
+  expect((await currentUser())?.profile.contact).toBe("01099009956");
+  // 선점 계정을 정지하면 실제 주인이 그 번호를 쓸 수 있고, 그 뒤에는 정지를 해제할 수 없다.
+  const [squatter] =
+    await db()`INSERT INTO members(phone,role,profile,approval) VALUES(NULL,'buyer',${db().json({ ...buyer.profile, contact: "01099009957" })},'approved') RETURNING id`;
+  await expect(
+    mutate(user!, "profile", { ...user!.profile, contact: "01099009957" }),
+  ).rejects.toMatchObject({ status: 409 });
+  await mutate(admin, "admin/member", { id: squatter.id, suspended: true });
+  await mutate(user!, "profile", { ...user!.profile, contact: "01099009957" });
+  await expect(
+    mutate(admin, "admin/member", { id: squatter.id, suspended: false }),
+  ).rejects.toMatchObject({ status: 409 });
+  // 운영자가 approval을 보내도 무시되고, 위판장·중매인 번호가 없는 중매인은 등록할 수 없다.
+  await mutate(admin, "admin/member", { id: user!.id, approval: "rejected" });
+  expect((await currentUser())?.approval).toBe("approved");
+  await expect(
+    mutate(
+      { ...user!, profile: { ...user!.profile, market: "", license: "" } },
+      "listings",
+      data,
+    ),
+  ).rejects.toMatchObject({ status: 403 });
   await expect(
     completeKakaoSignup({
       role: "buyer",

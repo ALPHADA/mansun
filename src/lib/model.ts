@@ -49,10 +49,27 @@ const line = (max = 100) =>
     .min(1, "필수 항목을 입력해주세요.")
     .max(max)
     .refine((v) => !/[\r\n]/.test(v), "한 줄로 입력해주세요.");
+// 문자 인증 없이 직접 입력한 연락처에만 적용한다. 같은 숫자 반복·연속 숫자는 가짜 번호로 본다.
+export function plausiblePhone(phone: string) {
+  const subscriber = phone.slice(3);
+  return (
+    !/^(\d)\1+$/.test(subscriber) &&
+    !"0123456789".includes(subscriber) &&
+    !"9876543210".includes(subscriber)
+  );
+}
 export const phoneSchema = z
   .string()
   .transform((s) => s.replace(/[-\s]/g, ""))
-  .pipe(z.string().regex(/^01[016789]\d{7,8}$/, "휴대폰 번호를 확인해주세요."));
+  // 010은 가운데 자리가 2~9로 시작하는 11자리만 발급된다.
+  .pipe(
+    z
+      .string()
+      .regex(
+        /^(010[2-9]\d{7}|01[16789]\d{7,8})$/,
+        "휴대폰 번호를 확인해주세요.",
+      ),
+  );
 const price = z.coerce
   .number()
   .int()

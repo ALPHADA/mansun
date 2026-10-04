@@ -1,8 +1,14 @@
 import { createHash, createHmac, randomBytes, randomInt } from "node:crypto";
 import { cookies } from "next/headers";
+import type postgres from "postgres";
 import { db } from "./db";
 import { publicOrigin } from "./config";
-import { phoneSchema, signupSchema, type User } from "../lib/model";
+import {
+  phoneSchema,
+  plausiblePhone,
+  signupSchema,
+  type User,
+} from "../lib/model";
 export class AppError extends Error {
   constructor(
     message: string,
@@ -33,6 +39,36 @@ export async function currentUser(): Promise<User | null> {
   const rows =
     await db()`SELECT m.* FROM sessions s JOIN members m ON m.id=s.user_id WHERE s.token_hash=${digest(token)} AND s.expires_at>now() AND NOT m.suspended`;
   return (rows[0] as User) || null;
+}
+const contactLock = (
+  sql: postgres.Sql | postgres.TransactionSql,
+  contact: string,
+) =>
+  sql`SELECT pg_advisory_xact_lock(hashtextextended(${"contact:" + contact},0))`;
+// 문자 인증 없이 직접 입력하는 연락처는 가짜로 보이는 번호이거나 다른 회원의 인증 번호·연락처와 겹치면 안 된다.
+// 이용 정지된 회원이 직접 입력해 둔 연락처는 점유로 치지 않아, 운영자가 선점 계정을 정지하면 실제 주인이 쓸 수 있다.
+export async function contactTaken(
+  sql: postgres.Sql | postgres.TransactionSql,
+  contact: string,
+  selfId: string | null,
+) {
+  await contactLock(sql, contact);
+  const [taken] =
+    await sql`SELECT id FROM members WHERE (phone=${contact} OR (profile->>'contact'=${contact} AND NOT suspended)) AND id IS DISTINCT FROM ${selfId}::uuid LIMIT 1`;
+  return !!taken;
+}
+export async function assertContactFree(
+  sql: postgres.Sql | postgres.TransactionSql,
+  contact: string,
+  selfId: string | null,
+) {
+  if (!plausiblePhone(contact))
+    throw new AppError("실제 사용하는 휴대폰 번호를 입력해주세요.");
+  if (await contactTaken(sql, contact, selfId))
+    throw new AppError(
+      "이미 다른 회원이 사용 중인 연락처입니다. 본인 번호가 맞다면 운영자에게 문의해주세요.",
+      409,
+    );
 }
 export async function requireUser() {
   const u = await currentUser();
@@ -168,9 +204,17 @@ export async function verifyOtp(input: {
       const data = signupSchema.parse(input.signup);
       if (data.profile.contact !== c.phone)
         throw new AppError("연락처는 인증한 휴대폰 번호를 사용해주세요.");
+      // 문자로 소유를 확인한 가입이 우선한다. 같은 번호를 직접 입력해 둔 회원은 운영자가 확인하도록 남긴다.
+      await contactLock(sql, c.phone);
+      const squatters =
+        await sql`SELECT id FROM members WHERE phone IS NULL AND NOT suspended AND profile->>'contact'=${c.phone}`;
+      for (const s of squatters) {
+        await sql`INSERT INTO audit_log(action,target,detail) VALUES('contact.conflict',${c.phone},${sql.json({ member: s.id, reason: "문자 인증으로 가입한 회원과 연락처가 같음" })})`;
+        await sql`INSERT INTO notifications(user_id,title,body,href) VALUES(${s.id},'연락처를 확인해주세요','입력하신 업무 연락처가 다른 회원이 문자로 인증한 번호와 같습니다. 내 정보에서 본인 번호로 고쳐주세요.','/me/profile')`;
+      }
       [u] =
-        await sql`INSERT INTO members(phone,role,profile,approval) VALUES(${c.phone},${data.role},${sql.json(data.profile)},${data.role === "broker" ? "pending" : "approved"}) RETURNING *`;
-      await sql`INSERT INTO notifications(user_id,title,body,href) VALUES(${u.id},'풍어에 오신 것을 환영합니다',${data.role === "broker" ? "운영자가 중매인 정보를 확인하면 물건을 올릴 수 있습니다." : "관심 지역과 어종을 설정하고 오늘 물건을 만나보세요."},'/me')`;
+        await sql`INSERT INTO members(phone,role,profile,approval) VALUES(${c.phone},${data.role},${sql.json(data.profile)},'approved') RETURNING *`;
+      await sql`INSERT INTO notifications(user_id,title,body,href) VALUES(${u.id},'풍어에 오신 것을 환영합니다',${data.role === "broker" ? "지금 바로 오늘 물건을 올릴 수 있습니다." : "관심 지역과 어종을 설정하고 오늘 물건을 만나보세요."},'/me')`;
     }
     if (u.suspended) return { error: "이용이 제한된 계정입니다." };
     await sql`UPDATE otp_challenges SET consumed=true WHERE phone=${c.phone} AND NOT consumed`;

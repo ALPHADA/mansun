@@ -45,13 +45,6 @@ export default async function Me({
           <ArrowUpRight size={18} />
         </Link>
       </div>
-      {u.role === "broker" && u.approval !== "approved" && (
-        <div className="notice">
-          {u.approval === "pending"
-            ? "중매인 정보를 확인하고 있습니다. 승인 후 물건을 올릴 수 있습니다."
-            : "중매인 정보를 다시 확인해주세요. 내 정보에서 수정한 뒤 검토받을 수 있습니다."}
-        </div>
-      )}
       <div className="me-shortcuts">
         <Link href="/me/profile">
           <Heart size={22} />
@@ -80,7 +73,7 @@ export default async function Me({
           <Link href="/admin">
             <ShieldCheck size={22} />
             <span>
-              운영 관리<strong>회원 승인 · 신고 · 이용 현황</strong>
+              운영 관리<strong>회원 관리 · 신고 · 이용 현황</strong>
             </span>
             <ArrowUpRight size={20} />
           </Link>

@@ -10,7 +10,7 @@
 | GET /taxonomy      | 활성 지역·어종                                                                  |
 | GET /listings      | 지역·어종·상태·검색어·페이지별 상품 (`region`, `species`, `state`, `q`, `page`) |
 | GET /listings/:id  | 상품 상세. 비로그인 가격·연락처·인수 위치 제거                                  |
-| GET /brokers/:id   | 승인된 중매인 소개. 비로그인 연락처 제거                                        |
+| GET /brokers/:id   | 중매인 소개. 비로그인 연락처 제거                                        |
 | GET /requests      | 로그인 회원용 매입 요청                                                         |
 | GET /storage       | 보관업체 소개. 비로그인 연락처·상세 주소 제거                                   |
 | GET /market        | 로그인 회원용 등록·공식 시세 (`day=YYYY-MM-DD`, `region`)                       |
@@ -28,8 +28,8 @@
 
 ## 회원 기능
 
-- `POST /profile`: 프로필·관심 조건·알림 설정. 중매인 식별 정보 변경 시 승인 대기.
-- `POST /upload`: multipart `file`, 승인된 중매인만. 최대 10MB, 최대 일 100장. 이미지 디코딩 후 최대 1600px WebP로 재인코딩하고 메타데이터 제거.
+- `POST /profile`: 프로필·관심 조건·알림 설정. 직접 입력한 연락처를 바꿀 때 다른 회원이 쓰는 번호면 409.
+- `POST /upload`: multipart `file`, 중매인만. 최대 10MB, 최대 일 100장. 이미지 디코딩 후 최대 1600px WebP로 재인코딩하고 메타데이터 제거.
 - `POST /listings`: 상품 스키마. `id`가 있으면 본인 활성 상품 수정. 본인 업로드 사진과 `confirmed:true` 필수.
 - `POST /listings/close`: `{id}`.
 - `POST /requests`: 매입 요청 스키마. 매입회원만 가능.

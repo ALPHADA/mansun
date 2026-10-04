@@ -12,15 +12,27 @@ export default async function NewListing({
 }) {
   const u = await currentUser();
   if (!u) return <LoginGate next="/listings/new" />;
-  if (u.role !== "broker" || u.approval !== "approved")
+  if (u.role !== "broker")
     return (
       <>
         <Heading
-          title="중매인 확인 후 물건을 올릴 수 있어요"
-          description="내 정보에서 소속 위판장과 중매인 번호를 확인해주세요. 운영자가 확인한 뒤 등록할 수 있습니다."
+          title="중매인 회원만 물건을 올릴 수 있어요"
+          description="매입회원·보관업체 회원은 물건을 등록할 수 없습니다. 역할 변경은 운영자에게 요청해주세요."
+        />
+        <a className="button" href="/me">
+          내 정보로 가기
+        </a>
+      </>
+    );
+  if (!u.profile.market || !u.profile.license)
+    return (
+      <>
+        <Heading
+          title="소속 위판장과 중매인 번호를 먼저 입력해주세요"
+          description="내 정보에 두 항목을 입력하면 바로 물건을 올릴 수 있습니다."
         />
         <a className="button" href="/me/profile">
-          내 정보 확인
+          내 정보 입력
         </a>
       </>
     );

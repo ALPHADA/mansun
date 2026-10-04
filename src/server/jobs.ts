@@ -24,7 +24,7 @@ export async function runJobs(now = new Date()) {
     for (const d of days) {
       const items = await tx<
         Listing[]
-      >`SELECT l.* FROM listings l JOIN members m ON m.id=l.owner_id WHERE (l.created_at AT TIME ZONE 'Asia/Seoul')::date=${d.day}::date AND NOT l.hidden AND NOT m.suspended AND m.approval='approved'`;
+      >`SELECT l.* FROM listings l JOIN members m ON m.id=l.owner_id WHERE (l.created_at AT TIME ZONE 'Asia/Seoul')::date=${d.day}::date AND NOT l.hidden AND NOT m.suspended`;
       await tx`INSERT INTO daily_snapshots(day,groups) VALUES(${d.day},${tx.json(groupMarket(items).map((g) => ({ ...g })))}) ON CONFLICT(day) DO NOTHING`;
     }
     const users = await tx<
@@ -32,7 +32,7 @@ export async function runJobs(now = new Date()) {
     >`SELECT * FROM members WHERE NOT suspended AND NOT demo AND (profile->>'notifications')::boolean=true AND (profile->>'digestHour')::int<=${hour}`;
     const items = await tx<
       Listing[]
-    >`SELECT l.* FROM listings l JOIN members m ON m.id=l.owner_id WHERE l.created_at>${now.toISOString()}::timestamptz-interval '1 day' AND l.created_at<=${now.toISOString()} AND NOT l.hidden AND NOT l.demo AND l.closed_at IS NULL AND l.expires_at>${now.toISOString()} AND NOT m.suspended AND m.approval='approved'`;
+    >`SELECT l.* FROM listings l JOIN members m ON m.id=l.owner_id WHERE l.created_at>${now.toISOString()}::timestamptz-interval '1 day' AND l.created_at<=${now.toISOString()} AND NOT l.hidden AND NOT l.demo AND l.closed_at IS NULL AND l.expires_at>${now.toISOString()} AND NOT m.suspended`;
     const requests = await tx<
       BuyRequest[]
     >`SELECT r.* FROM buy_requests r JOIN members m ON m.id=r.owner_id WHERE r.created_at>${now.toISOString()}::timestamptz-interval '1 day' AND r.created_at<=${now.toISOString()} AND NOT r.hidden AND NOT r.demo AND r.closed_at IS NULL AND r.data->>'deadline'>=${day} AND NOT m.suspended`;

@@ -45,12 +45,11 @@ test.beforeAll(async () => {
 test.afterAll(async () => {
   await sql.end();
 });
-test("approved broker uploads an image and publishes on mobile", async ({
+test("broker uploads an image and publishes right after signup on mobile", async ({
   page,
   context,
 }) => {
   await login(context, "01099008801", "broker");
-  await sql`UPDATE members SET approval='approved' WHERE phone='01099008801'`;
   await page.goto("/listings/new");
   await page
     .getByLabel("상품 사진 추가")

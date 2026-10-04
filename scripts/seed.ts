@@ -35,11 +35,12 @@ for (let i = 0; i < 4; i++) {
     region,
     market: ["신진도 위판장", "부산 위판장", "여수 위판장", "속초 위판장"][i],
     license: "시연",
-    contact: "0100000000" + i,
+    contact: "0109000000" + i,
     bio: "화면 검증용 시연 프로필입니다. 실제 판매자나 실제 시세가 아닙니다.",
     specialties: ["선어"],
     procurement: true,
   });
+  await sql`UPDATE members SET phone=${profile.contact} WHERE demo AND phone=${"0100000000" + i}`;
   const [u] =
     await sql`INSERT INTO members(phone,role,profile,approval,admin,demo) VALUES(${profile.contact},'broker',${sql.json(profile)},'approved',${i === 0},true) ON CONFLICT(phone) DO UPDATE SET profile=excluded.profile RETURNING id`;
   const [existing] =

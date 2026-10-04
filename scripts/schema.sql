@@ -29,3 +29,9 @@ ALTER TABLE members ALTER COLUMN phone DROP NOT NULL;
 CREATE TABLE IF NOT EXISTS oauth_identities(provider text NOT NULL CHECK(provider='kakao'),subject text NOT NULL,user_id uuid NOT NULL REFERENCES members(id),PRIMARY KEY(provider,subject),UNIQUE(provider,user_id));
 CREATE TABLE IF NOT EXISTS oauth_attempts(token_hash text PRIMARY KEY,next_path text NOT NULL,redirect_uri text NOT NULL,expires_at timestamptz NOT NULL);
 CREATE TABLE IF NOT EXISTS oauth_signups(token_hash text PRIMARY KEY,subject text NOT NULL,expires_at timestamptz NOT NULL);
+
+-- 중매인 사전 승인 절차 폐지: 가입 즉시 이용하고 운영자는 이용 정지로 제재한다.
+-- 반려해 둔 계정은 승인으로 바꾸기 전에 이용 정지로 옮겨 계속 막는다.
+ALTER TABLE members ALTER COLUMN approval SET DEFAULT 'approved';
+UPDATE members SET suspended=true WHERE approval='rejected';
+UPDATE members SET approval='approved' WHERE approval<>'approved';

@@ -1,6 +1,11 @@
 import { z } from "zod";
 import { db } from "./db";
-import { AppError, requireAdmin } from "./auth";
+import {
+  AppError,
+  assertContactFree,
+  contactTaken,
+  requireAdmin,
+} from "./auth";
 import {
   listingSchema,
   requestSchema,
@@ -23,20 +28,21 @@ export async function mutate(user: User, path: string, input: unknown) {
       throw new AppError("소속 위판장과 중매인 번호를 입력해주세요.");
     if (user.phone && p.contact !== user.phone)
       throw new AppError("업무 연락처는 인증된 휴대폰 번호를 사용해주세요.");
-    const recheck =
-      user.role === "broker" &&
-      (p.license !== user.profile.license ||
-        p.market !== user.profile.market ||
-        p.business !== user.profile.business);
     await sql.begin(async (tx) => {
-      await tx`UPDATE members SET profile=${tx.json(p)},approval=${recheck ? "pending" : user.approval} WHERE id=${user.id}`;
+      if (!user.phone) await assertContactFree(tx, p.contact, user.id);
+      await tx`UPDATE members SET profile=${tx.json(p)} WHERE id=${user.id}`;
       await tx`INSERT INTO audit_log(actor_id,action,target) VALUES(${user.id},'profile.update',${user.id})`;
     });
     return { ok: true };
   }
   if (path === "listings") {
-    if (user.role !== "broker" || user.approval !== "approved")
-      throw new AppError("승인된 중매인만 물건을 등록할 수 있습니다.", 403);
+    if (user.role !== "broker")
+      throw new AppError("중매인만 물건을 등록할 수 있습니다.", 403);
+    if (!user.profile.market || !user.profile.license)
+      throw new AppError(
+        "내 정보에서 소속 위판장과 중매인 번호를 먼저 입력해주세요.",
+        403,
+      );
     const data = listingSchema.parse(body);
     const existingId = body.id ? uuid.parse(body.id) : null;
     return await sql.begin(async (tx) => {
@@ -170,7 +176,6 @@ export async function mutate(user: User, path: string, input: unknown) {
         const d = z
           .object({
             id: uuid,
-            approval: z.enum(["pending", "approved", "rejected"]).optional(),
             suspended: z.boolean().optional(),
             role: z.enum(["broker", "buyer", "storage"]).optional(),
           })
@@ -181,15 +186,19 @@ export async function mutate(user: User, path: string, input: unknown) {
         if (!old) throw new AppError("회원을 찾을 수 없습니다.", 404);
         if (old.admin && d.suspended)
           throw new AppError("운영자 계정은 이 화면에서 정지할 수 없습니다.");
-        const approval =
-          d.role && d.role !== old.role
-            ? d.role === "broker"
-              ? "pending"
-              : "approved"
-            : d.approval || old.approval;
-        await tx`UPDATE members SET approval=${approval},suspended=${d.suspended ?? old.suspended},role=${d.role || old.role} WHERE id=${d.id}`;
+        if (
+          d.suspended === false &&
+          old.suspended &&
+          !old.phone &&
+          (await contactTaken(tx, old.profile.contact, old.id))
+        )
+          throw new AppError(
+            "이 회원이 직접 입력한 연락처를 지금 다른 회원이 쓰고 있어 정지를 해제할 수 없습니다.",
+            409,
+          );
+        await tx`UPDATE members SET suspended=${d.suspended ?? old.suspended},role=${d.role || old.role} WHERE id=${d.id}`;
         if (d.suspended) await tx`DELETE FROM sessions WHERE user_id=${d.id}`;
-        await tx`INSERT INTO notifications(user_id,title,body,href) VALUES(${d.id},'회원 상태 안내',${d.role ? "회원 역할이 변경되었습니다." : approval === "approved" ? "회원 확인이 완료되었습니다." : approval === "rejected" ? "회원 정보를 확인해주세요. 중매인 정보 수정 후 다시 검토받을 수 있습니다." : "회원 상태가 변경되었습니다."},'/me')`;
+        await tx`INSERT INTO notifications(user_id,title,body,href) VALUES(${d.id},'회원 상태 안내',${d.role ? "회원 역할이 변경되었습니다." : "회원 상태가 변경되었습니다."},'/me')`;
       } else if (path === "admin/content") {
         const d = z
           .object({

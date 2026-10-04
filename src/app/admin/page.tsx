@@ -47,7 +47,7 @@ export default async function Admin() {
         </div>
       </section>
       <section className="admin-section">
-        <h2>회원 승인과 관리</h2>
+        <h2>회원 관리</h2>
         <div className="admin-members">
           {d.members.map((m) => {
             const p = m.profile as Profile;
@@ -58,7 +58,10 @@ export default async function Admin() {
                     {p.business} <small>{p.name}</small>
                   </h3>
                   <p>
-                    {roleNames[m.role as Role]} · {p.region} · {m.phone}
+                    {roleNames[m.role as Role]} · {p.region} ·{" "}
+                    {m.phone
+                      ? `${m.phone} (문자 인증)`
+                      : `${p.contact} (직접 입력)`}
                   </p>
                   {m.role === "broker" && (
                     <p>
@@ -66,33 +69,10 @@ export default async function Admin() {
                     </p>
                   )}
                   <span className="state">
-                    {m.suspended
-                      ? "이용 정지"
-                      : m.approval === "approved"
-                        ? "승인"
-                        : m.approval === "rejected"
-                          ? "반려"
-                          : "확인 대기"}
+                    {m.suspended ? "이용 정지" : "이용 중"}
                   </span>
                 </div>
                 <div className="row wrap">
-                  {m.role === "broker" && m.approval !== "approved" && (
-                    <Action
-                      endpoint="admin/member"
-                      payload={{ id: m.id, approval: "approved" }}
-                    >
-                      승인
-                    </Action>
-                  )}
-                  {m.role === "broker" && (
-                    <Action
-                      endpoint="admin/member"
-                      payload={{ id: m.id, approval: "rejected" }}
-                      confirmMessage="중매인 승인을 반려할까요?"
-                    >
-                      반려
-                    </Action>
-                  )}
                   {!m.admin && (
                     <Action
                       endpoint="admin/member"

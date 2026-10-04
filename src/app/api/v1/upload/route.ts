@@ -8,8 +8,8 @@ export async function POST(request: Request) {
   try {
     assertOrigin(request);
     const user = await requireUser();
-    if (user.role !== "broker" || user.approval !== "approved")
-      throw new AppError("승인된 중매인만 사진을 올릴 수 있습니다.", 403);
+    if (user.role !== "broker")
+      throw new AppError("중매인만 사진을 올릴 수 있습니다.", 403);
     if (Number(request.headers.get("content-length") || 0) > 12 * 1024 * 1024)
       throw new AppError("사진은 10MB 이하로 올려주세요.", 413);
     const form = await request.formData(),

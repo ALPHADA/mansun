@@ -2,6 +2,8 @@ import { describe, it, expect } from "vitest";
 import {
   endOfDay,
   kstDay,
+  phoneSchema,
+  plausiblePhone,
   isOpen,
   publicListing,
   groupMarket,
@@ -47,6 +49,20 @@ const row: Listing = {
   },
 };
 describe("market rules", () => {
+  it("accepts real-looking mobile numbers and rejects malformed or fake ones", () => {
+    expect(phoneSchema.parse("010-9900-9901")).toBe("01099009901");
+    expect(phoneSchema.parse("011 987 1234")).toBe("0119871234");
+    for (const bad of [
+      "0101234567", // 010 is always 11 digits
+      "01012345678", // 010 middle block never starts with 0 or 1
+      "0212345678",
+    ])
+      expect(phoneSchema.safeParse(bad).success, bad).toBe(false);
+    // 직접 입력 연락처에만 쓰는 가짜 번호 검사
+    for (const fake of ["01055555555", "01023456789", "01098765432"])
+      expect(plausiblePhone(fake), fake).toBe(false);
+    expect(plausiblePhone("01099009901")).toBe(true);
+  });
   it("uses Korean midnight, not UTC midnight", () => {
     expect(kstDay(new Date("2026-10-03T15:00:00Z"))).toBe("2026-10-04");
     expect(endOfDay("2026-10-04")).toBe("2026-10-04T14:59:59.999Z");

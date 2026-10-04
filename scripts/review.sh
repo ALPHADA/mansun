@@ -15,12 +15,21 @@ $context"
 fi
 case "$reviewer" in
   codex)
-    exec codex exec --sandbox read-only "$prompt"
+    out="$(mktemp)"
+    trap 'rm -f "$out" "$out.log"' EXIT
+    # 진행 로그는 버리고 마지막 답변만 출력한다. 실패하면 로그 끝부분을 보여 준다.
+    if ! codex exec --sandbox read-only -o "$out" "$prompt" </dev/null >"$out.log" 2>&1; then
+      tail -20 "$out.log" >&2
+      rm -f "$out.log"
+      exit 1
+    fi
+    rm -f "$out.log"
+    cat "$out"
     ;;
   claude)
     exec claude -p "$prompt" --allowedTools "Read" "Grep" "Glob" \
       "Bash(git status:*)" "Bash(git diff:*)" "Bash(git log:*)" "Bash(git show:*)" \
-      --disallowedTools "Edit" "Write" "NotebookEdit"
+      --disallowedTools "Edit" "Write" "NotebookEdit" </dev/null
     ;;
   *)
     echo "usage: scripts/review.sh codex|claude [context]" >&2

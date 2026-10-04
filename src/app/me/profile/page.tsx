@@ -64,9 +64,6 @@ export default async function Profile() {
                 <input name="license" required defaultValue={p.license} />
               </label>
             </div>
-            <p className="form-note">
-              상호·소속 위판장·중매인 번호 변경 시 다시 확인받습니다.
-            </p>
             <label>
               주요 취급 어종
               <input
