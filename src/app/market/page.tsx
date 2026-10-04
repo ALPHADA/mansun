@@ -1,7 +1,6 @@
 import { taxonomy } from "@/server/queries";
 import Link from "next/link";
-import { currentUser } from "@/server/auth";
-import { Heading, LoginGate } from "@/components/ui";
+import { Heading } from "@/components/ui";
 import BrokerMarket from "@/components/broker-market";
 import { officialReport } from "@/server/official/queries";
 import { sources, validDay } from "@/server/official/providers";
@@ -20,7 +19,6 @@ export default async function Market({
       Array.isArray(value) ? value[0] : value,
     ]),
   );
-  const user = await currentUser();
   const tab = p.tab === "kamis" || p.tab === "broker" ? p.tab : "mof";
   const day = p.day && validDay(p.day) && p.day <= kstDay() ? p.day : kstDay();
   const regions = tab === "broker" ? (await taxonomy()).regions : provinces;
@@ -31,9 +29,9 @@ export default async function Market({
     : 1;
   const href = (changes: Record<string, string>) =>
     `/market?${new URLSearchParams({ tab, day, ...(region ? { region } : {}), ...(query ? { q: query } : {}), ...changes })}`;
-  // No official price data is queried or serialized for anonymous visitors.
+  // Official public-source prices are available without signing in.
   const report =
-    user && tab !== "broker"
+    tab !== "broker"
       ? await officialReport(tab, day, region, query, page)
       : null;
   return (
@@ -121,157 +119,145 @@ export default async function Market({
               출처 보기 ↗
             </a>
           </div>
-          {!user ? (
-            <LoginGate
-              next={href({})}
-              message="로그인하고 공식 시세와 가격 변화를 확인하세요"
-            />
-          ) : (
-            report && (
-              <>
-                <div className="price-caption">
-                  <span>
-                    기준일 {day}
-                    {report.total > 0 ? ` · ${money(report.total)}건` : ""}
-                  </span>
-                  <span>
-                    {tab === "mof"
-                      ? "물량은 별도 자료 확인 후 제공"
-                      : "원자료 조사 단위 기준"}
-                  </span>
-                </div>
-                {report.status === "error" && (
-                  <p className="notice subtle" role="status">
-                    자료 갱신이 지연되고 있습니다.
-                    {report.rows.length > 0 &&
-                      " 표시된 자료는 마지막으로 수집한 값입니다."}
-                  </p>
-                )}
-                {report.status === "empty" && report.rows.length > 0 && (
-                  <p className="notice subtle">
-                    제공처의 최근 응답에 자료가 없어 이전 수집 자료를
-                    표시합니다.
-                  </p>
-                )}
-                {report.rows.length ? (
-                  <>
-                    <div className="table-scroll">
-                      <table className="official-price-table">
-                        <thead>
-                          <tr>
-                            <th>
-                              어종 / {tab === "mof" ? "위판장" : "가격 구분"}
-                            </th>
-                            <th>상태 · 규격</th>
-                            <th>
-                              {tab === "mof" ? "위판 최저–최고가" : "조사 가격"}
-                            </th>
-                            {tab === "kamis" && <th>전일 / 전주 대비</th>}
+          {report && (
+            <>
+              <div className="price-caption">
+                <span>
+                  기준일 {day}
+                  {report.total > 0 ? ` · ${money(report.total)}건` : ""}
+                </span>
+                <span>
+                  {tab === "mof"
+                    ? "물량은 별도 자료 확인 후 제공"
+                    : "원자료 조사 단위 기준"}
+                </span>
+              </div>
+              {report.status === "error" && (
+                <p className="notice subtle" role="status">
+                  자료 갱신이 지연되고 있습니다.
+                  {report.rows.length > 0 &&
+                    " 표시된 자료는 마지막으로 수집한 값입니다."}
+                </p>
+              )}
+              {report.status === "empty" && report.rows.length > 0 && (
+                <p className="notice subtle">
+                  제공처의 최근 응답에 자료가 없어 이전 수집 자료를 표시합니다.
+                </p>
+              )}
+              {report.rows.length ? (
+                <>
+                  <div className="table-scroll">
+                    <table className="official-price-table">
+                      <thead>
+                        <tr>
+                          <th>
+                            어종 / {tab === "mof" ? "위판장" : "가격 구분"}
+                          </th>
+                          <th>상태 · 규격</th>
+                          <th>
+                            {tab === "mof" ? "위판 최저–최고가" : "조사 가격"}
+                          </th>
+                          {tab === "kamis" && <th>전일 / 전주 대비</th>}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {report.rows.map(({ data: r, fetched_at }) => (
+                          <tr key={r.key}>
+                            <td>
+                              <strong>{r.species}</strong>
+                              <small>
+                                {tab === "mof"
+                                  ? `${r.region} · ${r.market}`
+                                  : r.kind === "wholesale"
+                                    ? "도매 · 전국"
+                                    : "소매 · 전국"}
+                              </small>
+                            </td>
+                            <td>
+                              {r.state}
+                              <small>{r.grade}</small>
+                            </td>
+                            <td>
+                              <strong>
+                                {money(r.low)}
+                                {r.high !== r.low ? `–${money(r.high)}` : ""}원
+                              </strong>
+                              <small>/{r.unit}</small>
+                              <small className="price-collected">
+                                수집{" "}
+                                {new Date(fetched_at).toLocaleString("ko-KR", {
+                                  timeZone: "Asia/Seoul",
+                                  month: "numeric",
+                                  day: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                  hour12: false,
+                                })}
+                              </small>
+                            </td>
+                            {tab === "kamis" && (
+                              <td>
+                                <Change
+                                  price={r.low}
+                                  previous={r.previous}
+                                  label="전일"
+                                />
+                                <Change
+                                  price={r.low}
+                                  previous={r.week}
+                                  label="전주"
+                                />
+                              </td>
+                            )}
                           </tr>
-                        </thead>
-                        <tbody>
-                          {report.rows.map(({ data: r, fetched_at }) => (
-                            <tr key={r.key}>
-                              <td>
-                                <strong>{r.species}</strong>
-                                <small>
-                                  {tab === "mof"
-                                    ? `${r.region} · ${r.market}`
-                                    : r.kind === "wholesale"
-                                      ? "도매 · 전국"
-                                      : "소매 · 전국"}
-                                </small>
-                              </td>
-                              <td>
-                                {r.state}
-                                <small>{r.grade}</small>
-                              </td>
-                              <td>
-                                <strong>
-                                  {money(r.low)}
-                                  {r.high !== r.low ? `–${money(r.high)}` : ""}
-                                  원
-                                </strong>
-                                <small>/{r.unit}</small>
-                                <small className="price-collected">
-                                  수집{" "}
-                                  {new Date(fetched_at).toLocaleString(
-                                    "ko-KR",
-                                    {
-                                      timeZone: "Asia/Seoul",
-                                      month: "numeric",
-                                      day: "numeric",
-                                      hour: "2-digit",
-                                      minute: "2-digit",
-                                      hour12: false,
-                                    },
-                                  )}
-                                </small>
-                              </td>
-                              {tab === "kamis" && (
-                                <td>
-                                  <Change
-                                    price={r.low}
-                                    previous={r.previous}
-                                    label="전일"
-                                  />
-                                  <Change
-                                    price={r.low}
-                                    previous={r.week}
-                                    label="전주"
-                                  />
-                                </td>
-                              )}
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                    <div className="price-pagination">
-                      {page > 1 && (
-                        <Link
-                          className="button secondary"
-                          href={href({ page: String(page - 1) })}
-                        >
-                          이전
-                        </Link>
-                      )}
-                      <span>{page}페이지</span>
-                      {page * 50 < report.total && (
-                        <Link
-                          className="button secondary"
-                          href={href({ page: String(page + 1) })}
-                        >
-                          다음
-                        </Link>
-                      )}
-                    </div>
-                  </>
-                ) : (
-                  <div className="official-empty">
-                    <div>
-                      <strong>
-                        {!report.configured && !report.latest
-                          ? "공식 시세 연결을 준비하고 있습니다"
-                          : "이 조건의 공식 자료가 없습니다"}
-                      </strong>
-                      <p>
-                        발표가 없거나 수집되지 않은 가격은 0원으로 표시하지
-                        않습니다.
-                      </p>
-                      {report.latest && report.latest !== day && (
-                        <Link href={href({ day: report.latest })}>
-                          최근 자료 보기 · {report.latest} →
-                        </Link>
-                      )}
-                      {page > 1 && (
-                        <Link href={href({ page: "1" })}>첫 페이지로 →</Link>
-                      )}
-                    </div>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
-                )}
-              </>
-            )
+                  <div className="price-pagination">
+                    {page > 1 && (
+                      <Link
+                        className="button secondary"
+                        href={href({ page: String(page - 1) })}
+                      >
+                        이전
+                      </Link>
+                    )}
+                    <span>{page}페이지</span>
+                    {page * 50 < report.total && (
+                      <Link
+                        className="button secondary"
+                        href={href({ page: String(page + 1) })}
+                      >
+                        다음
+                      </Link>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <div className="official-empty">
+                  <div>
+                    <strong>
+                      {!report.configured && !report.latest
+                        ? "공식 시세 연결을 준비하고 있습니다"
+                        : "이 조건의 공식 자료가 없습니다"}
+                    </strong>
+                    <p>
+                      발표가 없거나 수집되지 않은 가격은 0원으로 표시하지
+                      않습니다.
+                    </p>
+                    {report.latest && report.latest !== day && (
+                      <Link href={href({ day: report.latest })}>
+                        최근 자료 보기 · {report.latest} →
+                      </Link>
+                    )}
+                    {page > 1 && (
+                      <Link href={href({ page: "1" })}>첫 페이지로 →</Link>
+                    )}
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </section>
       )}

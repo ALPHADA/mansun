@@ -242,7 +242,7 @@ export function LoginForm({
       </button>
       <p className="login-reassurance">
         <ShieldCheck size={17} />
-        가격과 연락처는 로그인한 회원에게만 공개됩니다.
+        중매인 등록 상품의 가격과 연락처는 로그인한 회원에게만 공개됩니다.
       </p>
     </form>
   );

@@ -77,7 +77,7 @@ test("broker uploads an image and publishes right after signup on mobile", async
   );
   expect(overflow).toBe(false);
 });
-test("anonymous HTML and API never contain prices or contact details", async ({
+test("anonymous listing HTML and API never contain broker prices or contact details", async ({
   page,
   request,
 }) => {
@@ -157,9 +157,8 @@ test("storage member registers a facility and mobile navigation works", async ({
   await expect(page.locator("table").first()).toContainText("31,001");
 });
 
-test("official prices stay private and filters work on narrow screens", async ({
+test("official prices are public while broker prices stay private on narrow screens", async ({
   page,
-  context,
 }) => {
   const data = {
     key: "official-e2e",
@@ -178,13 +177,10 @@ test("official prices stay private and filters work on narrow screens", async ({
   };
   await sql`INSERT INTO official_observations(provider,basis_day,item_key,region,species,market,data) VALUES('mof','2026-01-02','official-e2e','부산','검증고등어','검증위판장',${sql.json(data)})`;
   await page.goto("/market?day=2026-01-02&q=&q=꽃게");
-  await expect(
-    page.getByText("로그인하고 공식 시세와 가격 변화를 확인하세요"),
-  ).toBeVisible();
-  expect(await page.content()).not.toContain("827341");
-  expect(await page.content()).not.toContain("827,341");
-  expect(await page.content()).not.toContain("검증고등어");
-  await login(context, "01099008804");
+  await expect(page.locator(".official-price-table")).toContainText("827,341");
+  await expect(page.locator(".official-price-table")).toContainText(
+    "검증고등어",
+  );
   await page.setViewportSize({ width: 320, height: 740 });
   await page.goto("/market?day=2026-01-02&region=부산");
   await expect(page.locator(".official-price-table")).toContainText("827,341");
@@ -200,7 +196,17 @@ test("official prices stay private and filters work on narrow screens", async ({
   await expect(page.locator(".official-price-table")).toContainText(
     "검증고등어",
   );
+  const kamisData = {
+    ...data,
+    key: "kamis-public-e2e",
+    kind: "retail",
+    low: 12345,
+    high: 12345,
+    region: "전국",
+  };
+  await sql`INSERT INTO official_observations(provider,basis_day,item_key,region,species,market,data) VALUES('kamis','2026-01-02','kamis-public-e2e','전국','검증고등어','전국 조사 평균',${sql.json(kamisData)})`;
   await page.getByRole("link", { name: "도·소매 참고", exact: true }).click();
+  await expect(page.locator(".official-price-table")).toContainText("12,345");
   await expect(
     page.getByText(
       "전국 조사 평균 · 경매 낙찰가와 다른 도매·소매 판매가격입니다.",
@@ -210,4 +216,9 @@ test("official prices stay private and filters work on narrow screens", async ({
   await expect(
     page.getByRole("heading", { name: "중매인 등록 판매가" }),
   ).toBeVisible();
+  await page.goto("/market?tab=broker");
+  await expect(page.locator(".login-gate")).toBeVisible();
+  await expect(page.locator("table")).toHaveCount(0);
+  expect(await page.content()).not.toContain("31,001");
+  expect(await page.content()).not.toContain("31001");
 });

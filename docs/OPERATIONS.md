@@ -91,7 +91,7 @@ pg_restore --no-owner --no-acl -d mansun_market_restore /private/backup/database
 
 ## 공식 시세 자동 수집
 
-공식 위판·KAMIS·중매인 판매가는 `/market` 탭으로 구분한다. 가격은 기존 정책대로 로그인 후 제공하며, 공식 자료는 `official_observations`에 별도로 저장한다. 기존 운영자 확인 자료(`official_prices`)는 중매인 탭 아래 참고자료로 유지한다.
+공식 위판·KAMIS·중매인 판매가는 `/market` 탭으로 구분한다. 공식 위판·KAMIS 시세는 로그인 없이 공개하며, 중매인 판매가와 연락처는 로그인 후 제공한다. 공식 자료는 `official_observations`에 별도로 저장한다. 기존 운영자 확인 자료(`official_prices`)는 중매인 탭 아래 참고자료로 유지한다.
 
 1. `pnpm db:migrate`로 수집 테이블을 추가한다(기존 자료 삭제 없음).
 2. 공공데이터포털에서 [위판 집계](https://www.data.go.kr/data/15059417/openapi.do)와 [위판장 위치](https://www.data.go.kr/data/15056511/openapi.do) API를 모두 활용 신청한다. 발급 키를 서버 `.env`의 `MOF_SERVICE_KEY`에 설정한다.

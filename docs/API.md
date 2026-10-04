@@ -13,7 +13,7 @@
 | GET /brokers/:id   | 중매인 소개. 비로그인 연락처 제거                                        |
 | GET /requests      | 로그인 회원용 매입 요청                                                         |
 | GET /storage       | 보관업체 소개. 비로그인 연락처·상세 주소 제거                                   |
-| GET /market        | 로그인 회원용 등록·공식 시세 (`day=YYYY-MM-DD`, `region`)                       |
+| GET /market        | 공식 위판·KAMIS 시세는 공개, 중매인 등록 시세는 로그인 회원용 (`day=YYYY-MM-DD`, `region`)                       |
 | GET /notifications | 내 알림 100개                                                                   |
 | GET /api/health    | 웹·DB 연결 상태 (v1 밖)                                                         |
 
