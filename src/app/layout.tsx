@@ -14,9 +14,8 @@ import {
 import { Visit } from "@/components/actions";
 import "./globals.css";
 export const metadata: Metadata = {
-  title: { default: "풍어 — 바다의 오늘, 거래의 시작", template: "%s | 풍어" },
-  description:
-    "전국 중매인의 오늘 물건과 수산물 가격을 확인하고 새로운 거래처를 만나세요.",
+  title: { default: "풍어", template: "%s | 풍어" },
+  description: "전국 수산물 위판 시세, 중매인 판매 상품과 매입 요청.",
   robots: { index: false, follow: false },
 };
 export default async function Layout({
@@ -32,12 +31,6 @@ export default async function Layout({
         <a className="skip" href="#main">
           본문으로 이동
         </a>
-        <div className="top-strip">
-          <span>전국 수산물 거래처를 잇는 풍어</span>
-          <Link href="/guide">
-            풍어 이용 안내 <span>↗</span>
-          </Link>
-        </div>
         <header className="header">
           <div className="header-inner">
             <Brand homeTitle />
@@ -80,7 +73,6 @@ export default async function Layout({
         </main>
         <footer className="footer">
           <Brand />
-          <p>바다에서 시작된 좋은 거래, 풍어에서 이어집니다.</p>
           <div>
             <Link href="/guide">이용 안내</Link>
             <Link href="/privacy">개인정보 처리 안내</Link>

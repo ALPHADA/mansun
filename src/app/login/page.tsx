@@ -3,7 +3,6 @@ import { currentUser } from "@/server/auth";
 import { smsReady } from "@/server/config";
 import { kakaoReady, safeNext } from "@/server/kakao";
 import { LoginForm } from "@/components/login-form";
-import { Fish } from "@/components/icons";
 export const metadata = { title: "로그인" };
 export default async function Login({
   searchParams,
@@ -17,26 +16,9 @@ export default async function Login({
   const sms = smsReady() || process.env.NODE_ENV !== "production";
   return (
     <section className="auth-layout">
-      <div className="auth-story">
-        <Fish size={48} />
-        <h1>
-          오늘의 물건,
-          <br />
-          내일의 거래처.
-        </h1>
-        <p>
-          수산업 종사자를 위한 새로운 연결.
-          <br />
-          카카오 계정으로 풍어를 시작하세요.
-        </p>
-        <div className="auth-wave">滿船</div>
-      </div>
       <div className="auth-panel">
-        <span className="eyebrow">풍어에 오신 것을 환영합니다</span>
-        <h2>로그인 · 회원가입</h2>
-        <p className="muted">
-          카카오로 로그인하고 오늘의 가격과 거래처를 만나보세요.
-        </p>
+        <h1>로그인 · 회원가입</h1>
+        <p className="muted">중매인 가격과 연락처를 보려면 로그인하세요.</p>
         {p.error && (
           <p className="notice error" role="alert">
             {p.error === "kakao_unavailable"

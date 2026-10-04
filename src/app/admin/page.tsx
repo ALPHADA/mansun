@@ -15,7 +15,6 @@ export default async function Admin() {
   return (
     <>
       <Heading
-        eyebrow="PUNGEO OPERATIONS"
         title="운영 관리"
         description="회원 확인과 게시물 관리 내역은 처리자와 함께 기록됩니다."
       />

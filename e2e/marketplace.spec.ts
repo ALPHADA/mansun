@@ -225,3 +225,35 @@ test("official prices are public while broker prices stay private on narrow scre
   expect(await page.content()).not.toContain("31,001");
   expect(await page.content()).not.toContain("31001");
 });
+
+test("tablet navigation stays inside the header above the content", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 900, height: 900 });
+  await page.goto("/");
+  await expect(page.locator(".market-search")).toBeVisible();
+  const bounds = await page.evaluate(() => ({
+    header: document.querySelector("header")!.getBoundingClientRect().bottom,
+    nav: document.querySelector(".desktop-nav")!.getBoundingClientRect().bottom,
+    content: document.querySelector("main")!.getBoundingClientRect().top,
+    overflow: document.documentElement.scrollWidth > innerWidth,
+  }));
+  expect(bounds.nav).toBeLessThanOrEqual(bounds.header);
+  expect(bounds.content).toBeGreaterThanOrEqual(bounds.header);
+  expect(bounds.overflow).toBe(false);
+});
+
+test("tablet footer remains readable above the fixed navigation", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 768, height: 900 });
+  await page.goto("/");
+  await expect(page.locator(".market-search")).toBeVisible();
+  await page.evaluate(() =>
+    window.scrollTo(0, document.documentElement.scrollHeight),
+  );
+  await page.locator("footer small").scrollIntoViewIfNeeded();
+  const footer = await page.locator("footer small").boundingBox();
+  const nav = await page.locator(".mobile-nav").boundingBox();
+  expect(footer!.y + footer!.height).toBeLessThanOrEqual(nav!.y);
+});

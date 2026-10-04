@@ -19,7 +19,7 @@ export default async function Requests() {
       <>
         <Heading
           title="매입 요청"
-          description="필요한 물건과 조건을 남기고 새로운 거래처를 만나세요."
+          description="필요한 어종·수량·지역을 등록하세요."
         />
         <LoginGate
           next="/requests"
@@ -31,9 +31,8 @@ export default async function Requests() {
   return (
     <>
       <Heading
-        eyebrow="BUYING REQUESTS"
         title="이런 물건을 찾고 있어요"
-        description="필요한 물건과 조건을 남기고, 새로운 거래처를 만나세요."
+        description="필요한 어종·수량·지역을 등록하세요."
         action={
           <Link href="/requests/new" className="button">
             <Plus size={20} />

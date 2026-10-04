@@ -36,11 +36,7 @@ export default async function Market({
       : null;
   return (
     <>
-      <Heading
-        eyebrow="MARKET REPORT"
-        title="전국 수산물 가격 정보"
-        description="위판 시세부터 도·소매 참고가격, 중매인 판매가까지 확인하세요."
-      />
+      <Heading title="전국 수산물 가격 정보" />
       <nav className="price-tabs" aria-label="시세 구분">
         {(
           [

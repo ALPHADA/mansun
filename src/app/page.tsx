@@ -9,10 +9,7 @@ import {
   MagnifyingGlass,
   MapPin,
   SlidersHorizontal,
-  ShieldCheck,
-  Anchor,
 } from "@/components/icons";
-import { kstDay, dateLabel } from "@/lib/model";
 export const metadata = { title: { absolute: "전국 수산물 경매 정보방" } };
 export default async function Home({
   searchParams,
@@ -43,63 +40,10 @@ export default async function Home({
   }
   return (
     <>
-      <section className="hero">
-        <div className="hero-copy">
-          <div className="hero-kicker">
-            <span className="live-dot" />
-            {dateLabel(kstDay() + "T00:00:00+09:00")} · 바다의 오늘을 만나다
-          </div>
-          <h1>
-            좋은 물건이 있는 곳,
-            <br />
-            <em>좋은 거래가 시작되는 곳.</em>
-          </h1>
-          <p>
-            전국 중매인의 오늘 물건을 확인하고
-            <br className="mobile-only" /> 믿을 수 있는 새 거래처를 만나보세요.
-          </p>
-          <div className="hero-links">
-            <a href="#today">
-              오늘 올라온 물건
-              <ArrowRight size={19} />
-            </a>
-            <Link href="/requests">
-              찾는 물건 요청하기
-              <ArrowUpRight size={19} />
-            </Link>
-          </div>
-        </div>
-        <div className="hero-visual" aria-hidden="true">
-          <div className="sea-letter">滿船</div>
-          <div className="hero-note">
-            <Anchor size={20} />
-            <span>
-              바다에서 당신의 일터까지
-              <br />
-              <strong>오늘도, 풍어입니다.</strong>
-            </span>
-          </div>
-        </div>
-      </section>
-      <div className="trust-line">
-        <span>
-          <ShieldCheck size={18} />
-          운영자가 확인한 중매인
-        </span>
-        <span>
-          <MapPin size={18} />
-          전국 산지의 오늘 물건
-        </span>
-        <span>
-          <Anchor size={18} />
-          직접 연락하고 현장에서 픽업
-        </span>
-      </div>
       <section id="today" className="section">
         <div className="section-heading">
           <div>
-            <div className="eyebrow">TODAY’S CATCH</div>
-            <h2>오늘 올라온 물건</h2>
+            <h1>오늘 올라온 물건</h1>
           </div>
           <Link href="/market" className="text-link">
             지역별 가격대 보기
@@ -112,7 +56,7 @@ export default async function Home({
             <input
               name="q"
               defaultValue={p.q}
-              placeholder="어종, 규격, 위판장 또는 중매인 검색"
+              placeholder="어종·위판장 검색"
               aria-label="상품 검색"
             />
           </div>
@@ -123,7 +67,7 @@ export default async function Home({
             <label>
               <MapPin size={18} />
               <select name="region" defaultValue={region} aria-label="지역">
-                <option value="">전국 모든 지역</option>
+                <option value="">전국</option>
                 {region && !tax.regions.includes(region) && (
                   <option>{region}</option>
                 )}
@@ -147,7 +91,7 @@ export default async function Home({
                 defaultValue={p.state || ""}
                 aria-label="상품 상태"
               >
-                <option value="">선어 · 활어 · 냉동</option>
+                <option value="">모든 상태</option>
                 <option>선어</option>
                 <option>활어</option>
                 <option>냉동</option>
@@ -221,31 +165,6 @@ export default async function Home({
           </>
         )}
       </section>
-      <section className="request-banner">
-        <div>
-          <span className="eyebrow">원하는 물건이 보이지 않나요?</span>
-          <h2>
-            찾는 물건을 남기면,
-            <br />
-            새로운 거래가 찾아옵니다.
-          </h2>
-          <p>필요한 어종과 수량, 지역을 중매인에게 알려주세요.</p>
-        </div>
-        <Link href="/requests/new" className="button">
-          매입 요청 남기기
-          <ArrowRight size={20} />
-        </Link>
-      </section>
-      <div className="service-links">
-        <Link href="/guide">
-          <div>
-            <span>중매인을 위한 풍어</span>
-            <h3>오늘 물건으로 새 거래처를 만나세요.</h3>
-            <p>사진 한 장부터, 간편하게 시작합니다.</p>
-          </div>
-          <ArrowUpRight size={28} />
-        </Link>
-      </div>
     </>
   );
 }

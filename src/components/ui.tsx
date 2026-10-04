@@ -5,7 +5,6 @@ import {
   ArrowRight,
   MapPin,
   LockKey,
-  Package,
   ArrowLeft,
   ShieldCheck,
 } from "./icons";
@@ -46,9 +45,6 @@ export function Empty({
 }) {
   return (
     <div className="empty">
-      <div className="empty-icon">
-        <Package size={36} />
-      </div>
       <h3>{title}</h3>
       <p>{description}</p>
       <Link href={href} className="button secondary">
@@ -86,7 +82,6 @@ export function LoginGate({
       <LockKey size={compact ? 17 : 26} />
       <div>
         <strong>{message}</strong>
-        {!compact && <p>수산업 종사자를 위한 풍어 · 휴대폰 번호로 간편하게</p>}
       </div>
       <Link className="button" href={"/login?next=" + encodeURIComponent(next)}>
         로그인
@@ -174,13 +169,7 @@ export function Brand({ homeTitle = false }: { homeTitle?: boolean }) {
       <span className="brand-symbol">
         <Fish size={29} weight="bold" />
       </span>
-      {homeTitle ? (
-        <BrandName />
-      ) : (
-        <span>
-          풍어<span className="brand-caption">바다의 오늘, 거래의 시작</span>
-        </span>
-      )}
+      {homeTitle ? <BrandName /> : <span>풍어</span>}
     </Link>
   );
 }

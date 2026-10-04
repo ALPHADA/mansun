@@ -5,8 +5,7 @@ export default function Guide() {
   return (
     <div className="narrow prose">
       <Heading
-        eyebrow="WELCOME TO PUNGEO"
-        title="좋은 거래의 시작, 풍어"
+        title="이용 안내"
         description="전국 산지의 중매인과 매입회원을 연결합니다."
       />
       <h2>매입회원이라면</h2>
