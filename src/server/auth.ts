@@ -70,6 +70,23 @@ export async function assertContactFree(
       409,
     );
 }
+// 상품·요청·프로필(가입 포함)·보관업체의 어종은 운영 중인 어종 목록에 있어야 관심 어종 알림·검색과 이어진다.
+export async function assertSpecies(
+  sql: postgres.Sql | postgres.TransactionSql,
+  names: string[],
+) {
+  const unique = [...new Set(names)];
+  if (!unique.length) return;
+  const rows = await sql<
+    { name: string }[]
+  >`SELECT name FROM taxonomy WHERE kind='species' AND active AND name IN ${sql(unique)}`;
+  const known = new Set(rows.map((r) => r.name));
+  const missing = unique.filter((n) => !known.has(n));
+  if (missing.length)
+    throw new AppError(
+      `목록에 없는 어종입니다: ${missing.join(", ")}. 목록에서 고르거나 직접 추가한 뒤 선택해주세요.`,
+    );
+}
 export async function requireUser() {
   const u = await currentUser();
   if (!u) throw new AppError("로그인이 필요합니다.", 401);
@@ -204,6 +221,10 @@ export async function verifyOtp(input: {
       const data = signupSchema.parse(input.signup);
       if (data.profile.contact !== c.phone)
         throw new AppError("연락처는 인증한 휴대폰 번호를 사용해주세요.");
+      await assertSpecies(sql, [
+        ...data.profile.specialties,
+        ...data.profile.interests.species,
+      ]);
       // 문자로 소유를 확인한 가입이 우선한다. 같은 번호를 직접 입력해 둔 회원은 운영자가 확인하도록 남긴다.
       await contactLock(sql, c.phone);
       const squatters =

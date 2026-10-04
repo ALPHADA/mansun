@@ -2,6 +2,7 @@ import { currentUser } from "@/server/auth";
 import { taxonomy } from "@/server/queries";
 import { Back, Heading, LoginGate } from "@/components/ui";
 import { ActionForm } from "@/components/actions";
+import { SpeciesPicker } from "@/components/species-picker";
 import { roleNames } from "@/lib/model";
 export const metadata = { title: "내 정보 수정" };
 export default async function Profile() {
@@ -64,14 +65,13 @@ export default async function Profile() {
                 <input name="license" required defaultValue={p.license} />
               </label>
             </div>
-            <label>
-              주요 취급 어종
-              <input
-                name="specialties"
-                defaultValue={p.specialties.join(", ")}
-                placeholder="꽃게, 우럭, 오징어"
-              />
-            </label>
+            <SpeciesPicker
+              label="주요 취급 어종"
+              name="specialties"
+              options={tax.species}
+              selected={p.specialties}
+              multiple
+            />
             <label className="check">
               <input
                 name="procurement"
@@ -111,22 +111,13 @@ export default async function Profile() {
             ))}
           </div>
         </fieldset>
-        <fieldset>
-          <legend>관심 어종</legend>
-          <div className="check-grid">
-            {tax.species.map((s) => (
-              <label className="check" key={s}>
-                <input
-                  type="checkbox"
-                  name="species"
-                  value={s}
-                  defaultChecked={p.interests.species.includes(s)}
-                />
-                {s}
-              </label>
-            ))}
-          </div>
-        </fieldset>
+        <SpeciesPicker
+          label="관심 어종"
+          name="species"
+          options={tax.species}
+          selected={p.interests.species}
+          multiple
+        />
         <div className="form-divider">
           <h3>웹 알림함</h3>
         </div>

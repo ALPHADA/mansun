@@ -50,6 +50,8 @@ beforeAll(async () => {
   await sql.unsafe(
     "TRUNCATE members,otp_challenges,daily_snapshots,official_prices RESTART IDENTITY CASCADE",
   );
+  await sql`DELETE FROM taxonomy WHERE name LIKE '테스트%'`;
+  await sql`INSERT INTO taxonomy(kind,name) VALUES('species','테스트꽃게')`;
   const members = [];
   for (let i = 0; i < 4; i++) {
     const profile = profileSchema.parse({
@@ -83,6 +85,83 @@ it("rejects publication by non-brokers", async () => {
   await expect(mutate(buyer, "listings", data)).rejects.toMatchObject({
     status: 403,
   });
+});
+it("accepts only listed species and lets members add missing ones", async () => {
+  await expect(
+    mutate(broker, "listings", { ...data, species: "테스트없는어종" }),
+  ).rejects.toMatchObject({ status: 400 });
+  await expect(
+    mutate(broker, "profile", {
+      ...broker.profile,
+      specialties: ["테스트없는어종"],
+    }),
+  ).rejects.toMatchObject({ status: 400 });
+  await expect(
+    mutate(buyer, "taxonomy/species", { name: "테스트꽃게, 테스트우럭" }),
+  ).rejects.toBeTruthy();
+  expect(
+    await mutate(buyer, "taxonomy/species", { name: "  테스트   추가어 " }),
+  ).toEqual({ name: "테스트 추가어" });
+  // 이미 있는 어종을 다시 추가해도 그대로 돌려준다.
+  expect(
+    await mutate(broker, "taxonomy/species", { name: "테스트 추가어" }),
+  ).toEqual({ name: "테스트 추가어" });
+  await mutate(broker, "profile", {
+    ...broker.profile,
+    specialties: ["테스트 추가어", "테스트꽃게"],
+  });
+  // 운영자가 숨긴 어종은 다시 추가하거나 고를 수 없다.
+  await mutate(admin, "admin/taxonomy", {
+    kind: "species",
+    name: "테스트 추가어",
+    active: false,
+  });
+  await expect(
+    mutate(buyer, "taxonomy/species", { name: "테스트 추가어" }),
+  ).rejects.toMatchObject({ status: 409 });
+  await expect(
+    mutate(broker, "listings", { ...data, species: "테스트 추가어" }),
+  ).rejects.toMatchObject({ status: 400 });
+  // 전화번호 같은 긴 숫자는 어종 이름으로 받지 않는다.
+  await expect(
+    mutate(buyer, "taxonomy/species", { name: "문의 01099009901" }),
+  ).rejects.toBeTruthy();
+  // 매입 요청과 보관업체도 목록의 어종만 받는다.
+  const request = {
+    species: "테스트없는어종",
+    grade: "대",
+    region: "충남",
+    quantity: 1,
+    unit: "kg",
+    budget: 1000,
+    receiveDate: kstDay(),
+    deadline: kstDay(),
+  };
+  await expect(mutate(buyer, "requests", request)).rejects.toMatchObject({
+    status: 400,
+  });
+  const keeper = { ...other, role: "storage" as const };
+  const facility = {
+    name: "테스트창고",
+    region: "충남",
+    address: "테스트 주소",
+    kind: "냉동",
+    conditions: "테스트",
+    hours: "09:00",
+  };
+  for (const species of [[], ["테스트없는어종"], "테스트꽃게"])
+    await expect(
+      mutate(keeper, "storage", { ...facility, species }),
+    ).rejects.toBeTruthy();
+  await mutate(keeper, "storage", { ...facility, species: ["테스트꽃게"] });
+  // 회원당 하루 20개까지만 새 어종을 추가할 수 있다.
+  for (let i = 0; i < 19; i++)
+    await mutate(buyer, "taxonomy/species", {
+      name: "테스트한도" + "가나다라마바사아자차카타파하거너더러머"[i],
+    });
+  await expect(
+    mutate(buyer, "taxonomy/species", { name: "테스트한도초과" }),
+  ).rejects.toMatchObject({ status: 429 });
 });
 it("publishes, protects API data, and keeps price history", async () => {
   const result = (await mutate(broker, "listings", data)) as { id: string };

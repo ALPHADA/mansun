@@ -27,20 +27,69 @@ export const provinces = [
 ];
 export const defaultSpecies = [
   "꽃게",
+  "대게",
+  "홍게",
+  "킹크랩",
   "오징어",
+  "갑오징어",
+  "한치",
+  "주꾸미",
+  "낙지",
+  "문어",
   "고등어",
   "갈치",
   "조기",
+  "굴비",
+  "민어",
+  "병어",
+  "삼치",
+  "방어",
+  "부시리",
+  "참치",
   "광어",
   "우럭",
-  "대구",
-  "새우",
-  "문어",
-  "낙지",
-  "전복",
-  "삼치",
+  "도다리",
   "가자미",
   "참돔",
+  "감성돔",
+  "돌돔",
+  "농어",
+  "숭어",
+  "전어",
+  "멸치",
+  "꽁치",
+  "청어",
+  "대구",
+  "명태",
+  "아귀",
+  "장어",
+  "붕장어",
+  "연어",
+  "송어",
+  "복어",
+  "쥐치",
+  "임연수",
+  "볼락",
+  "노래미",
+  "새우",
+  "대하",
+  "흰다리새우",
+  "랍스터",
+  "전복",
+  "소라",
+  "굴",
+  "바지락",
+  "꼬막",
+  "가리비",
+  "홍합",
+  "키조개",
+  "해삼",
+  "멍게",
+  "개불",
+  "성게",
+  "미역",
+  "김",
+  "다시마",
 ];
 const line = (max = 100) =>
   z
@@ -58,6 +107,22 @@ export function plausiblePhone(phone: string) {
     !"9876543210".includes(subscriber)
   );
 }
+// 회원이 직접 추가하는 어종 이름. 쉼표·기호를 막아 여러 어종을 한 이름으로 넣지 못하게 한다.
+export const speciesName = z
+  .string()
+  .transform((s) => s.trim().replace(/\s+/g, " "))
+  .pipe(
+    z
+      .string()
+      .min(1, "어종 이름을 입력해주세요.")
+      .max(30)
+      .regex(
+        /^[가-힣A-Za-z0-9 ]+$/,
+        "어종 이름은 한글·영문·숫자만 쓸 수 있습니다. 여러 어종은 하나씩 추가해주세요.",
+      )
+      // 목록은 비로그인 화면에도 나오므로 전화번호 같은 긴 숫자는 받지 않는다.
+      .refine((v) => !/\d{4,}/.test(v), "어종 이름을 확인해주세요."),
+  );
 export const phoneSchema = z
   .string()
   .transform((s) => s.replace(/[-\s]/g, ""))
@@ -156,7 +221,10 @@ export const storageSchema = z.object({
   region: line(60),
   address: line(160),
   kind: z.enum(["냉동", "냉장", "냉동·냉장"]),
-  species: line(150),
+  species: z
+    .array(line(30))
+    .min(1, "취급 어종을 하나 이상 선택해주세요.")
+    .max(30),
   conditions: z.string().trim().min(1).max(1500),
   hours: line(80),
 });

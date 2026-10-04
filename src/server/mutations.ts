@@ -3,10 +3,12 @@ import { db } from "./db";
 import {
   AppError,
   assertContactFree,
+  assertSpecies,
   contactTaken,
   requireAdmin,
 } from "./auth";
 import {
+  speciesName,
   listingSchema,
   requestSchema,
   storageSchema,
@@ -28,6 +30,7 @@ export async function mutate(user: User, path: string, input: unknown) {
       throw new AppError("소속 위판장과 중매인 번호를 입력해주세요.");
     if (user.phone && p.contact !== user.phone)
       throw new AppError("업무 연락처는 인증된 휴대폰 번호를 사용해주세요.");
+    await assertSpecies(sql, [...p.specialties, ...p.interests.species]);
     await sql.begin(async (tx) => {
       if (!user.phone) await assertContactFree(tx, p.contact, user.id);
       await tx`UPDATE members SET profile=${tx.json(p)} WHERE id=${user.id}`;
@@ -44,6 +47,7 @@ export async function mutate(user: User, path: string, input: unknown) {
         403,
       );
     const data = listingSchema.parse(body);
+    await assertSpecies(sql, [data.species]);
     const existingId = body.id ? uuid.parse(body.id) : null;
     return await sql.begin(async (tx) => {
       for (const photo of data.photos) {
@@ -89,6 +93,7 @@ export async function mutate(user: User, path: string, input: unknown) {
     if (user.role !== "buyer")
       throw new AppError("매입회원만 매입 요청을 등록할 수 있습니다.", 403);
     const data = requestSchema.parse(body);
+    await assertSpecies(sql, [data.species]);
     for (const d of [data.deadline, data.receiveDate])
       if (
         Number.isNaN(Date.parse(d)) ||
@@ -113,9 +118,28 @@ export async function mutate(user: User, path: string, input: unknown) {
     if (user.role !== "storage")
       throw new AppError("보관업체 회원만 등록할 수 있습니다.", 403);
     const data = storageSchema.parse(body);
+    await assertSpecies(sql, data.species);
     const [r] =
       await sql`INSERT INTO warehouses(owner_id,data) VALUES(${user.id},${sql.json(data)}) ON CONFLICT(owner_id) DO UPDATE SET data=excluded.data RETURNING id`;
     return { id: r.id };
+  }
+  if (path === "taxonomy/species") {
+    const name = speciesName.parse(body.name);
+    return await sql.begin(async (tx) => {
+      await tx`SELECT pg_advisory_xact_lock(hashtext(${user.id}))`;
+      const [existing] =
+        await tx`SELECT active FROM taxonomy WHERE kind='species' AND name=${name}`;
+      if (existing?.active) return { name };
+      if (existing)
+        throw new AppError("운영자가 사용을 중지한 어종입니다.", 409);
+      const [count] =
+        await tx`SELECT count(*)::int AS n FROM audit_log WHERE actor_id=${user.id} AND action='taxonomy.add' AND created_at>now()-interval '1 day'`;
+      if (count.n >= 20)
+        throw new AppError("하루에 추가할 수 있는 어종 수를 넘었습니다.", 429);
+      await tx`INSERT INTO taxonomy(kind,name) VALUES('species',${name}) ON CONFLICT DO NOTHING`;
+      await tx`INSERT INTO audit_log(actor_id,action,target) VALUES(${user.id},'taxonomy.add',${name})`;
+      return { name };
+    });
   }
   if (path === "favorites") {
     return await sql.begin(async (tx) => {
@@ -229,6 +253,10 @@ export async function mutate(user: User, path: string, input: unknown) {
             active: z.boolean().default(true),
           })
           .parse(body);
+        // 새 어종은 회원 추가와 같은 이름 규칙을 따른다. 이미 있는 이름의 숨김·표시는 그대로 허용한다.
+        const [known] =
+          await tx`SELECT 1 FROM taxonomy WHERE kind=${d.kind} AND name=${d.name}`;
+        if (d.kind === "species" && !known) speciesName.parse(d.name);
         await tx`INSERT INTO taxonomy(kind,name,active) VALUES(${d.kind},${d.name},${d.active}) ON CONFLICT(kind,name) DO UPDATE SET active=excluded.active`;
       } else if (path === "admin/official") {
         const d = z

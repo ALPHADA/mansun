@@ -187,7 +187,38 @@ export default async function Admin() {
         <details>
           <summary>현재 목록</summary>
           <p>{tax.regions.join(" · ")}</p>
-          <p>{tax.species.join(" · ")}</p>
+          <p className="muted">
+            어종은 회원도 직접 추가할 수 있습니다. 잘못된 항목은 숨기면 더
+            이상 고를 수 없습니다.
+          </p>
+          <div className="row wrap">
+            {tax.species.map((s) => (
+              <Action
+                key={s}
+                endpoint="admin/taxonomy"
+                payload={{ kind: "species", name: s, active: false }}
+                confirmMessage={`'${s}' 어종을 목록에서 숨길까요?`}
+              >
+                {s} 숨김
+              </Action>
+            ))}
+          </div>
+          {d.hiddenSpecies.length > 0 && (
+            <>
+              <p className="muted">숨긴 어종</p>
+              <div className="row wrap">
+                {d.hiddenSpecies.map((s) => (
+                  <Action
+                    key={s}
+                    endpoint="admin/taxonomy"
+                    payload={{ kind: "species", name: s, active: true }}
+                  >
+                    {s} 다시 표시
+                  </Action>
+                ))}
+              </div>
+            </>
+          )}
         </details>
       </section>
       <section className="admin-section">

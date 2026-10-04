@@ -1,6 +1,7 @@
 import { currentUser } from "@/server/auth";
 import { taxonomy } from "@/server/queries";
 import { Heading, Back, LoginGate } from "@/components/ui";
+import { SpeciesPicker } from "@/components/species-picker";
 import { ActionForm } from "@/components/actions";
 import { kstDay } from "@/lib/model";
 export const metadata = { title: "매입 요청하기" };
@@ -29,15 +30,7 @@ export default async function NewRequest() {
         submitLabel="매입 요청 올리기"
       >
         <div className="field-pair">
-          <label>
-            어종
-            <input name="species" required list="species" />
-            <datalist id="species">
-              {tax.species.map((s) => (
-                <option key={s}>{s}</option>
-              ))}
-            </datalist>
-          </label>
+          <SpeciesPicker label="어종" name="species" options={tax.species} />
           <label>
             희망 지역
             <input

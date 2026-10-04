@@ -34,7 +34,8 @@
 - `POST /listings/close`: `{id}`.
 - `POST /requests`: 매입 요청 스키마. 매입회원만 가능.
 - `POST /requests/close`: `{id}`.
-- `POST /storage`: 보관업체 소개. 회원당 하나를 생성/수정.
+- `POST /storage`: 보관업체 소개. 회원당 하나를 생성/수정. `species`는 어종 이름 배열(1개 이상).
+- `POST /taxonomy/species`: `{name}`. 로그인 회원이 목록에 없는 어종을 추가하고 `{name}`(공백 정리된 이름)을 받습니다. 한글·영문·숫자만, 회원당 하루 20개, 운영자가 숨긴 이름은 409. 상품·매입 요청·프로필(주요 취급 어종, 관심 어종)·보관업체의 어종은 모두 활성 어종 목록에 있어야 하며 아니면 400.
 - `POST /favorites`: `{id}` → `{saved:boolean}`.
 - `POST /notifications/read`: `{id?}`. 미지정 시 내 알림 모두 읽음.
 - `POST /reports`: `{kind,id,reason}`. `kind=listing|request|storage|broker`, 사유 5자 이상, 일 10회 제한.

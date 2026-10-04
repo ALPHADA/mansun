@@ -37,7 +37,7 @@ for (let i = 0; i < 4; i++) {
     license: "시연",
     contact: "0109000000" + i,
     bio: "화면 검증용 시연 프로필입니다. 실제 판매자나 실제 시세가 아닙니다.",
-    specialties: ["선어"],
+    specialties: ["고등어"],
     procurement: true,
   });
   await sql`UPDATE members SET phone=${profile.contact} WHERE demo AND phone=${"0100000000" + i}`;
@@ -53,7 +53,7 @@ for (let i = 0; i < 4; i++) {
     .toFile(path.join(dir, image));
   await sql`INSERT INTO assets(id,owner_id) VALUES(${image},${u.id})`;
   const data = listingSchema.parse({
-    species: i === 1 ? "연어" : "선어 모둠",
+    species: i === 1 ? "연어" : "고등어",
     state: "선어",
     grade: [
       "모둠 · 규격 확인",

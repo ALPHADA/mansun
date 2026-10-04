@@ -1,7 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { cookies } from "next/headers";
 import { db } from "./db";
-import { AppError, assertContactFree, digest } from "./auth";
+import { AppError, assertContactFree, assertSpecies, digest } from "./auth";
 import { publicOrigin } from "./config";
 import { signupSchema } from "../lib/model";
 
@@ -145,6 +145,10 @@ export async function completeKakaoSignup(input: unknown) {
     let id = existing?.id;
     if (!id) {
       await assertContactFree(sql, data.profile.contact, null);
+      await assertSpecies(sql, [
+        ...data.profile.specialties,
+        ...data.profile.interests.species,
+      ]);
       const [member] =
         await sql`INSERT INTO members(phone,role,profile,approval) VALUES(NULL,${data.role},${sql.json(data.profile)},'approved') RETURNING id`;
       id = member.id;

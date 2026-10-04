@@ -1,6 +1,8 @@
 import { currentUser } from "@/server/auth";
 import { db } from "@/server/db";
+import { taxonomy } from "@/server/queries";
 import { Heading, Back, LoginGate } from "@/components/ui";
+import { SpeciesPicker } from "@/components/species-picker";
 import { ActionForm } from "@/components/actions";
 import type { Warehouse } from "@/lib/model";
 export const metadata = { title: "보관업체 등록" };
@@ -17,7 +19,8 @@ export default async function NewStorage() {
   const [row] = await db()<
     Warehouse[]
   >`SELECT * FROM warehouses WHERE owner_id=${u.id}`;
-  const d = row?.data;
+  const d = row?.data,
+    tax = await taxonomy();
   return (
     <div className="narrow">
       <Back href="/storage" label="보관업체" />
@@ -27,6 +30,7 @@ export default async function NewStorage() {
       />
       <ActionForm
         endpoint="storage"
+        mode="storage"
         redirect="/storage"
         submitLabel="업체 소개 저장"
       >
@@ -60,15 +64,13 @@ export default async function NewStorage() {
           상세 주소
           <input name="address" required defaultValue={d?.address} />
         </label>
-        <label>
-          취급 품목
-          <input
-            name="species"
-            required
-            defaultValue={d?.species}
-            placeholder="선어, 냉동 수산물 등"
-          />
-        </label>
+        <SpeciesPicker
+          label="취급 어종"
+          name="species"
+          options={tax.species}
+          selected={d ? [d.species].flat() : []}
+          multiple
+        />
         <label>
           운영 시간
           <input

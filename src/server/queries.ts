@@ -123,7 +123,15 @@ export async function market(
 }
 export async function adminData() {
   const sql = db();
-  const [members, reports, audit, activity, pendingContent, official] =
+  const [
+    members,
+    reports,
+    audit,
+    activity,
+    pendingContent,
+    official,
+    hiddenSpecies,
+  ] =
     await Promise.all([
       sql`SELECT id,phone,role,profile,suspended,admin FROM members ORDER BY created_at DESC LIMIT 150`,
       sql`SELECT r.*,m.profile->>'business' AS reporter FROM reports r JOIN members m ON m.id=r.user_id ORDER BY created_at DESC LIMIT 100`,
@@ -131,6 +139,7 @@ export async function adminData() {
       sql`SELECT day::text AS day,count(DISTINCT user_id) FILTER(WHERE kind='visit')::int AS visitors,count(*) FILTER(WHERE kind='contact')::int AS contacts,(SELECT count(*) FROM listings l WHERE (l.created_at AT TIME ZONE 'Asia/Seoul')::date=a.day AND NOT l.demo)::int AS listings FROM activity a GROUP BY day ORDER BY day DESC LIMIT 14`,
       sql`SELECT id,'listing' AS kind,data->>'species' AS title,hidden FROM listings UNION ALL SELECT id,'request',data->>'species',hidden FROM buy_requests UNION ALL SELECT id,'storage',data->>'name',hidden FROM warehouses LIMIT 200`,
       sql`SELECT * FROM official_prices ORDER BY verified_at DESC LIMIT 50`,
+      sql`SELECT name FROM taxonomy WHERE kind='species' AND NOT active ORDER BY name`,
     ]);
   return {
     members,
@@ -139,5 +148,6 @@ export async function adminData() {
     activity,
     content: pendingContent,
     official,
+    hiddenSpecies: hiddenSpecies.map((x) => x.name as string),
   };
 }

@@ -175,7 +175,7 @@ export function ActionForm({
   submitLabel?: string;
   redirect?: string;
   success?: string;
-  mode?: "plain" | "listing" | "request" | "profile" | "official";
+  mode?: "plain" | "listing" | "request" | "profile" | "official" | "storage";
 }) {
   const [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
@@ -206,10 +206,7 @@ export function ActionForm({
           body.confirmed = fd.has("confirmed");
         }
         if (mode === "profile") {
-          body.specialties = String(body.specialties || "")
-            .split(",")
-            .map((x) => x.trim())
-            .filter(Boolean);
+          body.specialties = fd.getAll("specialties");
           body.interests = {
             regions: fd.getAll("regions"),
             species: fd.getAll("species"),
@@ -217,6 +214,7 @@ export function ActionForm({
           body.procurement = fd.has("procurement");
           body.notifications = fd.has("notifications");
         }
+        if (mode === "storage") body.species = fd.getAll("species");
         if (mode === "official") body.verified = fd.has("verified");
         try {
           const result = await api(endpoint, body);

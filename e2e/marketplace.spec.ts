@@ -40,6 +40,7 @@ test.beforeAll(async () => {
   await sql.unsafe(
     "TRUNCATE members,otp_challenges,daily_snapshots,official_prices RESTART IDENTITY CASCADE",
   );
+  await sql`DELETE FROM taxonomy WHERE name LIKE '테스트%'`;
   await sql`INSERT INTO taxonomy(kind,name) VALUES('region','충남'),('region','부산'),('species','꽃게') ON CONFLICT DO NOTHING`;
 });
 test.afterAll(async () => {
@@ -51,11 +52,12 @@ test("broker uploads an image and publishes right after signup on mobile", async
 }) => {
   await login(context, "01099008801", "broker");
   await page.goto("/listings/new");
+  await page.waitForLoadState("networkidle");
   await page
     .getByLabel("상품 사진 추가")
     .setInputFiles("public/demo/market.jpg");
   await expect(page.locator(".photo-preview")).toHaveCount(1);
-  await page.locator("input[name=species]").fill("꽃게");
+  await page.locator("select[name=species]").selectOption("꽃게");
   await page.locator("input[name=grade]").fill("대 3~4미");
   await page.locator("input[name=priceMin]").fill("31001");
   await page.locator("input[name=priceMax]").fill("35001");
@@ -106,7 +108,7 @@ test("buyer sees price, saves a product and posts a buying request", async ({
     page.getByRole("button", { name: "관심 상품 해제", exact: true }),
   ).toBeVisible();
   await page.goto("/requests/new");
-  await page.locator("input[name=species]").fill("꽃게");
+  await page.locator("select[name=species]").selectOption("꽃게");
   await page.locator("input[name=grade]").fill("대");
   await page.locator("input[name=quantity]").fill("30");
   await page.locator("input[name=budget]").fill("1000000");
@@ -126,7 +128,12 @@ test("storage member registers a facility and mobile navigation works", async ({
   await login(context, "01099008803", "storage");
   await page.goto("/storage/new");
   await page.locator("input[name=address]").fill("테스트 전용 시설주소");
-  await page.locator("input[name=species]").fill("선어, 냉동 수산물");
+  await page.getByLabel("취급 어종: 목록에 없는 어종 직접 추가").fill("테스트냉동어");
+  await page.getByRole("button", { name: "추가", exact: true }).click();
+  await expect(
+    page.locator('input[name=species][value="테스트냉동어"]'),
+  ).toBeChecked();
+  await page.locator('input[name=species][value="꽃게"]').check();
   await page
     .locator("textarea[name=conditions]")
     .fill("검증용 보관 조건 · 실제 운영 시설 아님");

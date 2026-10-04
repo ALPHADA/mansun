@@ -60,8 +60,8 @@ export default async function Storage({
               </p>
               <dl className="specs">
                 <div>
-                  <dt>취급 품목</dt>
-                  <dd>{w.data.species}</dd>
+                  <dt>취급 어종</dt>
+                  <dd>{[w.data.species].flat().join(" · ")}</dd>
                 </div>
                 <div>
                   <dt>운영 시간</dt>

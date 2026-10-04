@@ -3,6 +3,7 @@ import { currentUser } from "@/server/auth";
 import { ownedListing } from "@/server/mutations";
 import { taxonomy } from "@/server/queries";
 import { Heading, LoginGate, Back } from "@/components/ui";
+import { SpeciesPicker } from "@/components/species-picker";
 import { ActionForm, Photos } from "@/components/actions";
 export const metadata = { title: "물건 올리기" };
 export default async function NewListing({
@@ -67,22 +68,12 @@ export default async function NewListing({
           <h3>어떤 물건인가요?</h3>
         </div>
         <div className="field-pair">
-          <label>
-            어종
-            <input
-              name="species"
-              list="species"
-              defaultValue={d?.species}
-              required
-              maxLength={30}
-              placeholder="예: 꽃게"
-            />
-            <datalist id="species">
-              {tax.species.map((s) => (
-                <option key={s}>{s}</option>
-              ))}
-            </datalist>
-          </label>
+          <SpeciesPicker
+            label="어종"
+            name="species"
+            options={tax.species}
+            selected={d ? [d.species] : []}
+          />
           <label>
             상태
             <select name="state" defaultValue={d?.state || "선어"}>
