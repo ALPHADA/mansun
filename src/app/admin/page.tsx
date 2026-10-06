@@ -1,3 +1,4 @@
+import { dataStatus, sourceNames } from "@/server/marine/queries";
 import Link from "next/link";
 import { boardAdmin } from "@/server/board";
 import { officialSyncStatus } from "@/server/official/queries";
@@ -11,6 +12,7 @@ export const metadata = { title: "운영 관리" };
 export default async function Admin() {
   const u = await currentUser();
   if (!u?.admin) notFound();
+  const marine = await dataStatus();
   const board = await boardAdmin(u);
   const feedStatus = await officialSyncStatus();
   const d = await adminData(),
@@ -25,6 +27,84 @@ export default async function Admin() {
         문의 버튼 사용은 거래 성사 수가 아닙니다. 시연 상품은 등록 성과 집계에서
         제외합니다.
       </div>
+      <section className="admin-section">
+        <h2>바다정보 · 위판 동향 자동 수집</h2>
+        <p>
+          작업 프로세스 최근 확인:{" "}
+          {marine.heartbeat
+            ? new Date(marine.heartbeat).toLocaleString("ko-KR", {
+                timeZone: "Asia/Seoul",
+              })
+            : "아직 실행되지 않음"}
+        </p>
+        {marine.sources.map((s) => (
+          <p key={s.id}>
+            <a href={s.url}>{s.name}</a> ·{" "}
+            {s.configured
+              ? "키 설정됨 · 승인 여부는 수집 결과 확인"
+              : "활용신청·승인 및 키 설정 대기"}{" "}
+            · {s.env} · {s.schedule}
+          </p>
+        ))}
+        <p className="muted">
+          조석은 KHOA_STATIONS 관측소 매핑, 물량은 AUCTION_WEIGHT_UNIT=kg 확인이
+          필요합니다. 키는 서버 환경 파일에만 설정하세요.
+        </p>
+        <details>
+          <summary>
+            작업별 결과 · 누락 기간 · 재시도 ({marine.jobs.length})
+          </summary>
+          <div className="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>자료 / 범위</th>
+                  <th>상태</th>
+                  <th>마지막 성공</th>
+                  <th>다음 실행</th>
+                  <th>관리</th>
+                </tr>
+              </thead>
+              <tbody>
+                {marine.jobs.map((j) => (
+                  <tr key={j.id}>
+                    <td>
+                      {sourceNames(j.source)}
+                      <small>
+                        {j.scope} {j.basis_day}
+                      </small>
+                    </td>
+                    <td>
+                      {j.status} · {j.page} 페이지<small>{j.message}</small>
+                    </td>
+                    <td>
+                      {j.last_success
+                        ? new Date(j.last_success).toLocaleString("ko-KR", {
+                            timeZone: "Asia/Seoul",
+                          })
+                        : "미수집"}
+                    </td>
+                    <td>
+                      {new Date(j.next_run).toLocaleString("ko-KR", {
+                        timeZone: "Asia/Seoul",
+                      })}
+                    </td>
+                    <td>
+                      <Action
+                        key={String(j.next_run)}
+                        endpoint="admin/data/retry"
+                        payload={{ id: j.id }}
+                      >
+                        재시도 예약
+                      </Action>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </details>
+      </section>
       <section className="admin-section">
         <h2>공식 시세 수집 상태</h2>
         <p className="muted">

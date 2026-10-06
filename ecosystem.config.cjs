@@ -2,6 +2,16 @@ const cwd = __dirname;
 module.exports = {
   apps: [
     {
+      name: "mansun-market-data",
+      cwd,
+      script: "node_modules/tsx/dist/cli.mjs",
+      args: "scripts/marine-worker.ts",
+      env: { NODE_ENV: "production" },
+      restart_delay: 10000,
+      kill_timeout: 35000,
+      time: true,
+    },
+    {
       name: "mansun-market-web",
       cwd,
       script: "node_modules/next/dist/bin/next",

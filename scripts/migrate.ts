@@ -6,6 +6,9 @@ const sql = db();
 await sql.unsafe(
   await readFile(new URL("./schema.sql", import.meta.url), "utf8"),
 );
+await sql.unsafe(
+  await readFile(new URL("./marine-schema.sql", import.meta.url), "utf8"),
+);
 for (const [kind, names] of [
   ["region", provinces],
   ["species", defaultSpecies],

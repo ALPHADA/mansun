@@ -1,3 +1,4 @@
+import { retryJob } from "./marine/worker";
 import { mutateBoard, boardPost } from "./board";
 import { z } from "zod";
 import { db } from "./db";
@@ -25,6 +26,14 @@ export async function mutate(user: User, path: string, input: unknown) {
   const sql = db();
   const body = z.record(z.string(), z.unknown()).parse(input);
   const id = () => uuid.parse(body.id);
+  if (path === "admin/data/retry") {
+    requireAdmin(user);
+    const jobId = z.string().min(1).max(160).parse(body.id);
+    if (!(await retryJob(jobId)))
+      throw new AppError("작업이 실행 중이거나 없습니다.");
+    await sql`INSERT INTO audit_log(actor_id,action,target) VALUES(${user.id},'marine.retry',${jobId})`;
+    return { ok: true };
+  }
   if (path === "profile") {
     const p = profileSchema.parse(body);
     if (user.role === "broker" && (!p.market || !p.license))

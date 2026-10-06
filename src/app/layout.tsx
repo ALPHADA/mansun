@@ -10,6 +10,7 @@ import {
   Fish,
   ChatCircleText,
   ChartLine,
+  Compass,
 } from "@/components/icons";
 import { Visit } from "@/components/actions";
 import "./globals.css";
@@ -37,6 +38,7 @@ export default async function Layout({
             <nav className="desktop-nav" aria-label="주 메뉴">
               <Link href="/">오늘 물건</Link>
               <Link href="/market">지역 시세</Link>
+              <Link href="/sea">바다정보</Link>
               <Link href="/board">자유게시판</Link>
             </nav>
             <div className="header-actions">
@@ -81,15 +83,16 @@ export default async function Layout({
         <nav className="mobile-nav" aria-label="모바일 메뉴">
           <Link href="/">
             <Fish size={23} />
-            오늘 물건
+            <span aria-label="오늘 물건">물건</span>
           </Link>
           <Link href="/market">
             <ChartLine size={23} />
-            지역 시세
+            <span aria-label="지역 시세">시세</span>
           </Link>
+          <Link href="/sea"><Compass size={23} />바다정보</Link>
           <Link href="/board">
             <ChatCircleText size={23} />
-            자유게시판
+            <span aria-label="자유게시판">게시판</span>
           </Link>
           <Link href="/me">
             <UserCircle size={23} />내 정보

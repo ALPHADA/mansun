@@ -1,3 +1,5 @@
+import { conditions, cachedTrends } from "@/server/marine/queries";
+import { ports } from "@/server/marine/model";
 import { boardList, boardPost, boardComments } from "@/server/board";
 import { completeKakaoSignup } from "@/server/kakao";
 import { z } from "zod";
@@ -35,6 +37,17 @@ export async function GET(
   try {
     const path = (await params).path.join("/"),
       u = await currentUser();
+    const marineParams = new URL(request.url).searchParams;
+    if (path === "sea/ports") return json({ items: ports });
+    if (path === "sea/conditions")
+      return json(
+        await conditions(
+          marineParams.get("port") || undefined,
+          marineParams.get("day") || undefined,
+        ),
+      );
+    if (path === "market/trends")
+      return json(await cachedTrends(Object.fromEntries(marineParams)));
     if (path === "board/posts") {
       const p = new URL(request.url).searchParams;
       const rows = await boardList(

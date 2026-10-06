@@ -40,6 +40,14 @@ export default async function Home({
   }
   return (
     <>
+      <div className="marine-home">
+        <Link href="/sea">
+          바다정보 <span>물때 · 해상 날씨</span>
+        </Link>
+        <Link href="/market?view=trends">
+          위판 동향 <span>일간 · 주간 변화</span>
+        </Link>
+      </div>
       <section id="today" className="section">
         <div className="section-heading">
           <div>

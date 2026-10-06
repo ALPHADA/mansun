@@ -2589,3 +2589,31 @@ button, .chip, .filter-apply, .reset, .text-link, .back { min-height: 44px; }
 .board-comments .action-wrap, .board-admin-item .action-wrap { margin:4px 8px 4px 0; }
 .board-comments textarea { width:100%; }
 .board-settings { padding-bottom:16px; border-bottom:1px solid var(--line); }
+
+/* Marine information and official auction trends */
+.marine-home { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+.marine-home a { border-bottom: 1px solid var(--line, #dce4e8); padding: 12px 0; flex: 1; min-width: 180px; font-weight: 700; }
+.marine-home span { display: block; font-size: 13px; font-weight: 400; color: #586b77; }
+.marine-warning { background: #fff8e8; border-left: 3px solid #b07818; padding: 18px; margin: 24px 0; }
+.marine-warning p { margin: 8px 0; }
+.marine-days { display: flex; gap: 6px; overflow-x: auto; margin: 24px 0; }
+.marine-days a { flex: 1; min-width: 48px; padding: 12px 6px; text-align: center; border-bottom: 2px solid #dce4e8; white-space: nowrap; }
+.marine-days a[aria-current] { border-color: #07616c; color: #07616c; font-weight: 700; }
+.marine-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.marine-panel { min-width: 0; border-top: 1px solid #dce4e8; padding: 24px 0; margin: 12px 0; }
+.marine-title { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.marine-panel h2 { font-size: 21px; margin: 0 0 12px; }
+.marine-panel small { color: #586b77; line-height: 1.7; }
+.marine-empty { padding: 32px 0; color: #586b77; }
+.marine-empty p { font-size: 14px; margin-top: 8px; }
+.tide-list { padding: 0; list-style: none; }
+.tide-list li { display: flex; justify-content: space-between; padding: 16px 0; border-bottom: 1px solid #e4ebee; }
+.tide-list strong { font-size: 24px; font-variant-numeric: tabular-nums; }
+.marine-number { font-size: clamp(24px, 4vw, 38px); font-weight: 700; font-variant-numeric: tabular-nums; margin: 16px 0; overflow-wrap: anywhere; }
+.marine-chart { height: 180px; display: flex; align-items: end; gap: 3px; margin: 24px 0 40px; }
+.marine-chart > div { flex: 1; height: 100%; position: relative; display: flex; align-items: end; }
+.marine-chart span { width: 100%; background: #287584; border-radius: 2px 2px 0 0; }
+.marine-chart small { position: absolute; top: 100%; font-size: 10px; }
+@media (max-width: 700px) { .marine-columns { grid-template-columns: 1fr; gap: 0; } .mobile-nav { display: grid; grid-template-columns: repeat(5, 1fr); } .mobile-nav a { min-width: 0; } .marine-title { flex-wrap: wrap; } }
+
+@media (max-width: 700px) { .mobile-nav a { font-size: 13px; white-space: nowrap; line-height: 1.5; } }

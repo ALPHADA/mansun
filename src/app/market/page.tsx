@@ -1,3 +1,4 @@
+import MarketTrends, { MarketViewTabs } from "@/components/market-trends";
 import { taxonomy } from "@/server/queries";
 import Link from "next/link";
 import { Heading } from "@/components/ui";
@@ -19,6 +20,21 @@ export default async function Market({
       Array.isArray(value) ? value[0] : value,
     ]),
   );
+  if (p.view === "trends")
+    return (
+      <MarketTrends
+        params={{
+          ...p,
+          day:
+            p.day &&
+            validDay(p.day) &&
+            p.day <= kstDay() &&
+            p.day >= "2000-01-01"
+              ? p.day
+              : undefined,
+        }}
+      />
+    );
   const tab = p.tab === "kamis" || p.tab === "broker" ? p.tab : "mof";
   const day = p.day && validDay(p.day) && p.day <= kstDay() ? p.day : kstDay();
   const regions = tab === "broker" ? (await taxonomy()).regions : provinces;
@@ -37,6 +53,7 @@ export default async function Market({
   return (
     <>
       <Heading title="전국 수산물 가격 정보" />
+      <MarketViewTabs view="prices" />
       <nav className="price-tabs" aria-label="시세 구분">
         {(
           [
