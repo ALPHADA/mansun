@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { boardAdmin } from "@/server/board";
 import { officialSyncStatus } from "@/server/official/queries";
 import { notFound } from "next/navigation";
 import { currentUser } from "@/server/auth";
@@ -9,6 +11,7 @@ export const metadata = { title: "운영 관리" };
 export default async function Admin() {
   const u = await currentUser();
   if (!u?.admin) notFound();
+  const board = await boardAdmin(u);
   const feedStatus = await officialSyncStatus();
   const d = await adminData(),
     tax = await taxonomy();
@@ -105,6 +108,7 @@ export default async function Admin() {
                   <h3>
                     {p.business} <small>{p.name}</small>
                   </h3>
+                  {m.nickname && <p>게시판 별명: {String(m.nickname)}</p>}
                   <p>
                     {roleNames[m.role as Role]} · {p.region} ·{" "}
                     {m.phone
@@ -152,6 +156,27 @@ export default async function Admin() {
         </div>
       </section>
       <section className="admin-section">
+        <h2>자유게시판 관리 · 최근 100개</h2>
+        {board.map((p) => (
+          <article className="board-admin-item" key={p.id}>
+            <h3>{p.kind === "board_post" ? p.title : "댓글"}</h3>
+            <p>게시판 별명: {p.nickname}</p>
+            <p className="board-body">{p.body}</p>
+            <small>대상 {p.id}</small>
+            <Action
+              key={String(p.hidden)}
+              endpoint="board/moderate"
+              payload={{ id: p.id, kind: p.kind, hidden: !p.hidden }}
+              confirmMessage={
+                p.hidden ? "다시 공개할까요?" : "이 게시물을 숨길까요?"
+              }
+            >
+              {p.hidden ? "복구" : "숨김"}
+            </Action>
+          </article>
+        ))}
+      </section>
+      <section className="admin-section">
         <h2>신고 접수</h2>
         {!d.reports.length && <p className="muted">접수된 신고가 없습니다.</p>}
         {d.reports.map((r) => (
@@ -160,6 +185,46 @@ export default async function Admin() {
               {r.kind} · {r.status === "open" ? "미처리" : "처리 완료"}
             </h3>
             <p>{r.reason}</p>
+            {["board_post", "board_comment"].includes(r.kind) && (
+              <details>
+                <summary>신고 대상 내용 확인</summary>
+                <p>
+                  {r.board_author} ·{" "}
+                  {r.board_deleted_at
+                    ? "작성자 삭제"
+                    : r.board_hidden
+                      ? "숨김"
+                      : "공개"}
+                </p>
+                {r.board_title && <h4>{r.board_title}</h4>}
+                <p className="board-body">
+                  {r.board_body ?? "대상 자료가 없습니다."}
+                </p>
+                {r.board_post_id && (
+                  <Link href={`/board/${r.board_post_id}`}>게시글 주소</Link>
+                )}
+              </details>
+            )}
+            {["board_post", "board_comment"].includes(r.kind) && (
+              <div className="row wrap">
+                <Action
+                  key={`hide-${r.board_hidden}`}
+                  endpoint="board/moderate"
+                  payload={{ id: r.target_id, kind: r.kind, hidden: true }}
+                  confirmMessage="신고된 게시물을 숨길까요?"
+                >
+                  숨김
+                </Action>
+                <Action
+                  key={`show-${r.board_hidden}`}
+                  endpoint="board/moderate"
+                  payload={{ id: r.target_id, kind: r.kind, hidden: false }}
+                  confirmMessage="다시 공개할까요?"
+                >
+                  복구
+                </Action>
+              </div>
+            )}
             <small>
               {r.reporter} · 대상 {r.target_id}
             </small>

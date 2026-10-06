@@ -58,3 +58,20 @@ CREATE TABLE IF NOT EXISTS official_sync_runs (
   attempted_at timestamptz NOT NULL DEFAULT now(),
   PRIMARY KEY(provider,basis_day)
 );
+
+-- Public community: identities and settings are independent of business profiles.
+ALTER TABLE members ADD COLUMN IF NOT EXISTS nickname text;
+ALTER TABLE members ADD COLUMN IF NOT EXISTS board_notifications boolean NOT NULL DEFAULT true;
+CREATE UNIQUE INDEX IF NOT EXISTS members_nickname_unique ON members(lower(nickname)) WHERE nickname IS NOT NULL;
+CREATE TABLE IF NOT EXISTS board_posts (
+ id uuid PRIMARY KEY DEFAULT gen_random_uuid(), author_id uuid NOT NULL REFERENCES members(id),
+ title text NOT NULL, body text NOT NULL, hidden boolean NOT NULL DEFAULT false,
+ deleted_at timestamptz, created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS board_posts_recent ON board_posts(created_at DESC,id DESC);
+CREATE TABLE IF NOT EXISTS board_comments (
+ id uuid PRIMARY KEY DEFAULT gen_random_uuid(), post_id uuid NOT NULL REFERENCES board_posts(id),
+ author_id uuid NOT NULL REFERENCES members(id), body text NOT NULL, hidden boolean NOT NULL DEFAULT false,
+ deleted_at timestamptz, created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS board_comments_post ON board_comments(post_id,created_at,id);

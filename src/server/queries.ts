@@ -121,8 +121,8 @@ export async function adminData() {
     official,
     hiddenSpecies,
   ] = await Promise.all([
-    sql`SELECT id,phone,role,profile,suspended,admin FROM members ORDER BY created_at DESC LIMIT 150`,
-    sql`SELECT r.*,m.profile->>'business' AS reporter FROM reports r JOIN members m ON m.id=r.user_id ORDER BY created_at DESC LIMIT 100`,
+    sql`SELECT id,phone,role,profile,suspended,admin,nickname FROM members ORDER BY created_at DESC LIMIT 150`,
+    sql`SELECT r.*,m.profile->>'business' AS reporter,p.title AS board_title,coalesce(p.body,c.body) AS board_body,coalesce(p.id,c.post_id) AS board_post_id,coalesce(p.hidden,c.hidden) AS board_hidden,coalesce(p.deleted_at,c.deleted_at) AS board_deleted_at,a.nickname AS board_author FROM reports r JOIN members m ON m.id=r.user_id LEFT JOIN board_posts p ON r.kind='board_post' AND p.id=r.target_id LEFT JOIN board_comments c ON r.kind='board_comment' AND c.id=r.target_id LEFT JOIN members a ON a.id=coalesce(p.author_id,c.author_id) ORDER BY r.created_at DESC LIMIT 100`,
     sql`SELECT a.*,m.profile->>'name' AS actor FROM audit_log a LEFT JOIN members m ON m.id=a.actor_id ORDER BY a.created_at DESC LIMIT 80`,
     sql`SELECT day::text AS day,count(DISTINCT user_id) FILTER(WHERE kind='visit')::int AS visitors,count(*) FILTER(WHERE kind='contact')::int AS contacts,(SELECT count(*) FROM listings l WHERE (l.created_at AT TIME ZONE 'Asia/Seoul')::date=a.day AND NOT l.demo)::int AS listings FROM activity a GROUP BY day ORDER BY day DESC LIMIT 14`,
     sql`SELECT id,'listing' AS kind,data->>'species' AS title,hidden FROM listings UNION ALL SELECT id,'request',data->>'species',hidden FROM buy_requests LIMIT 200`,

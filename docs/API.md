@@ -51,3 +51,20 @@
 - `POST /api/v1/auth/kakao/signup`: 카카오 인증 후 30분 이내 역할·프로필·약관 동의 입력. 기존 signupSchema를 사용합니다. Origin 검증과 일회용 가입 쿠키가 필요합니다.
 - 카카오 ID는 서버에서만 확인합니다. 브라우저에서 보내는 ID, 이메일 또는 업무 연락처로 기존 계정을 연결하지 않습니다. 카카오 회원이 직접 입력한 업무 연락처는 SMS 로그인 번호와 별개입니다.
 - 카카오 토큰은 사용자 확인 요청에만 사용하고 DB/브라우저/로그에 저장하지 않습니다.
+
+## 자유게시판
+
+읽기는 공개, 쓰기는 로그인한 정상 회원만 가능하다. 공개 응답의 작성자 정보는 별명만 포함하며 업무 프로필·연락처·작성자 회원 ID를 포함하지 않는다.
+
+- `GET /board/posts?q=&page=1`: 제목·본문 검색, 최신순 20개 `{items,hasMore}`.
+- `GET /board/posts/:id`: 글 상세와 현재 사용자 소유 여부 `own`. 숨김·삭제·정지 회원 글은 404.
+- `GET /board/posts/:id/comments?page=1`: 최신순 댓글 50개 `{items,hasMore}`. 글 접근 불가 시 404.
+- `POST /board/settings`: `{nickname,notifications:"true"|"false"}`. 별명 NFKC 정규화·앞뒤 공백 제거, 2~20자 한글·영문·숫자·공백·밑줄. 영문 대소문자 무시 중복 금지.
+- `POST /board/posts`: `{title,body,id?}`. 제목 1~100자, 본문 1~10000자. ID가 있으면 본인 글 수정.
+- `POST /board/posts/delete`: `{id}`. 본인 글 비공개 삭제. 댓글도 읽기·쓰기가 차단된다.
+- `POST /board/comments`: `{postId,body}` 생성 또는 `{id,body}` 본인 댓글 수정. 본문 1~2000자.
+- `POST /board/comments/delete`: `{id}`. 본인 댓글 비공개 삭제.
+- `POST /board/moderate`: 운영자 전용 `{id,kind:"board_post"|"board_comment",hidden:boolean}`. 숨김·복구 및 운영 이력 기록. 삭제한 콘텐츠는 복구하지 않는다.
+- 기존 `POST /reports`에 `board_post`, `board_comment` 종류를 추가한다. 공개 중인 대상만 신고 가능하다.
+
+신규 작성은 글·댓글 각각 10초 간격, 최근 24시간 글 20개·댓글 100개까지다. 삭제해도 한도 집계에 포함된다. 자기 글 댓글과 알림을 끈 작성자에게는 댓글 알림을 만들지 않는다. 알림은 게시글 링크와 고정 안내 문구만 저장한다.

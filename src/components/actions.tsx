@@ -169,6 +169,7 @@ export function ActionForm({
   redirect,
   success = "저장되었습니다.",
   mode = "plain",
+  resetOnSuccess = false,
 }: {
   endpoint: string;
   children: ReactNode;
@@ -176,6 +177,7 @@ export function ActionForm({
   redirect?: string;
   success?: string;
   mode?: "plain" | "listing" | "request" | "profile" | "official";
+  resetOnSuccess?: boolean;
 }) {
   const [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
@@ -189,7 +191,8 @@ export function ActionForm({
         setBusy(true);
         setError("");
         setDone(false);
-        const fd = new FormData(e.currentTarget);
+        const form = e.currentTarget;
+        const fd = new FormData(form);
         const body: Record<string, unknown> = Object.fromEntries(fd.entries());
         for (const key of [
           "priceMin",
@@ -217,6 +220,7 @@ export function ActionForm({
         if (mode === "official") body.verified = fd.has("verified");
         try {
           const result = await api(endpoint, body);
+          if (resetOnSuccess) form.reset();
           setDone(true);
           if (redirect) router.push(redirect.replace(":id", result.id || ""));
           router.refresh();

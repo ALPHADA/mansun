@@ -1,3 +1,4 @@
+import { mutateBoard, boardPost } from "./board";
 import { z } from "zod";
 import { db } from "./db";
 import {
@@ -20,6 +21,7 @@ import {
 } from "../lib/model";
 const uuid = z.string().uuid();
 export async function mutate(user: User, path: string, input: unknown) {
+  if (path.startsWith("board/")) return mutateBoard(user, path, input);
   const sql = db();
   const body = z.record(z.string(), z.unknown()).parse(input);
   const id = () => uuid.parse(body.id);
@@ -154,7 +156,13 @@ export async function mutate(user: User, path: string, input: unknown) {
   if (path === "reports") {
     const data = z
       .object({
-        kind: z.enum(["listing", "request", "broker"]),
+        kind: z.enum([
+          "listing",
+          "request",
+          "broker",
+          "board_post",
+          "board_comment",
+        ]),
         id: uuid,
         reason: z
           .string()
@@ -163,6 +171,13 @@ export async function mutate(user: User, path: string, input: unknown) {
           .max(1000),
       })
       .parse(body);
+    if (data.kind === "board_post" && !(await boardPost(data.id, user)))
+      throw new AppError("게시글이 없습니다.", 404);
+    if (data.kind === "board_comment") {
+      const [c] =
+        await sql`SELECT c.id FROM board_comments c JOIN board_posts p ON p.id=c.post_id JOIN members m ON m.id=c.author_id JOIN members a ON a.id=p.author_id WHERE c.id=${data.id} AND NOT c.hidden AND c.deleted_at IS NULL AND NOT p.hidden AND p.deleted_at IS NULL AND NOT m.suspended AND NOT a.suspended`;
+      if (!c) throw new AppError("댓글이 없습니다.", 404);
+    }
     const [count] =
       await sql`SELECT count(*)::int AS n FROM reports WHERE user_id=${user.id} AND created_at>now()-interval '1 day'`;
     if (count.n >= 10)

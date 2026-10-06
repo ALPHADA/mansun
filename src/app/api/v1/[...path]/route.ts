@@ -1,3 +1,4 @@
+import { boardList, boardPost, boardComments } from "@/server/board";
 import { completeKakaoSignup } from "@/server/kakao";
 import { z } from "zod";
 import {
@@ -34,6 +35,36 @@ export async function GET(
   try {
     const path = (await params).path.join("/"),
       u = await currentUser();
+    if (path === "board/posts") {
+      const p = new URL(request.url).searchParams;
+      const rows = await boardList(
+        p.get("q") || "",
+        Number(p.get("page")) || 1,
+      );
+      return json({
+        items: rows.slice(0, 20),
+        hasMore: rows.length > 20 && (Number(p.get("page")) || 1) < 1000,
+      });
+    }
+    if (/^board\/posts\/[^/]+(?:\/comments)?$/.test(path)) {
+      const id = path.split("/")[2],
+        post = await boardPost(id, u);
+      if (!post) return json({ error: "게시글이 없습니다." }, 404);
+      if (path.endsWith("/comments")) {
+        const rows = await boardComments(
+          id,
+          u,
+          Number(new URL(request.url).searchParams.get("page")) || 1,
+        );
+        return json({
+          items: rows.slice(0, 50),
+          hasMore:
+            rows.length > 50 &&
+            (Number(new URL(request.url).searchParams.get("page")) || 1) < 1000,
+        });
+      }
+      return json(post);
+    }
     if (path === "taxonomy") return json(await q.taxonomy());
     if (path === "market") {
       await requireUser();

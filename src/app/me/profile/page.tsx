@@ -1,3 +1,5 @@
+import { boardSettings } from "@/server/board";
+import { BoardSettings } from "@/components/board-settings";
 import { currentUser } from "@/server/auth";
 import { taxonomy } from "@/server/queries";
 import { Back, Heading, LoginGate } from "@/components/ui";
@@ -8,6 +10,7 @@ export const metadata = { title: "내 정보 수정" };
 export default async function Profile() {
   const u = await currentUser();
   if (!u) return <LoginGate next="/me/profile" />;
+  const board = await boardSettings(u);
   const p = u.profile,
     tax = await taxonomy();
   return (
@@ -16,6 +19,10 @@ export default async function Profile() {
       <Heading
         title="내 정보와 관심 조건"
         description={`${roleNames[u.role]} · 역할 변경은 운영자에게 요청해주세요.`}
+      />
+      <BoardSettings
+        nickname={board.nickname}
+        enabled={board.board_notifications}
       />
       <ActionForm endpoint="profile" mode="profile">
         <div className="field-pair">

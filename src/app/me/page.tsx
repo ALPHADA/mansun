@@ -46,6 +46,8 @@ export default async function Me({
         </Link>
       </div>
       <div className="me-shortcuts">
+        <Link href="/requests">매입 요청 보기</Link>
+        <Link href="/board">자유게시판</Link>
         <Link href="/me/profile">
           <Heart size={22} />
           <span>
