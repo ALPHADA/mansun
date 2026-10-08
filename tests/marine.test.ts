@@ -509,3 +509,19 @@ it("collects seven exact forecast zones despite the upstream page-local totalCou
       fetchPage(job("zones"), undefined, reserve, async () => response(rows)),
     ).rejects.toThrow();
 });
+
+it("retains distinct source rows that reuse purchase numbers without double-counting exact repeats", () => {
+  const rows = [
+    raw,
+    { ...raw, mprcStdCodeNm: "꽃게" },
+    { ...raw, csmtWt: "12", csmtAmount: "12000" },
+  ];
+  rows.push({ ...raw, csmtQy: "2" } as typeof raw);
+  rows.push({ ...raw, fshrCode: "172" } as typeof raw);
+  const normalized = normalizeAuction(rows, day);
+  expect(new Set(normalized.map((r) => r.row_key)).size).toBe(5);
+  expect(normalized.reduce((sum, r) => sum + r.amount, 0)).toBe(52000);
+  expect(() => normalizeAuction([...rows, { ...rows[1] }], day)).toThrow(
+    "식별자 중복",
+  );
+});

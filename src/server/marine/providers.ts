@@ -232,9 +232,32 @@ export function normalizeAuction(
           required(r.csmtmktCode),
           required(r.prchasNo),
           required(r.prchasSn),
+          // Purchase numbers repeat even within one market/day. This key is a
+          // fingerprint of a source row in a full daily snapshot, not a stable
+          // transaction ID. The worker replaces the whole day on correction.
+          ...[
+            "fshrCode",
+            "mprcStdCode",
+            "mprcStdCodeNm",
+            "kdfshSttusCode",
+            "kdfshSttusNm",
+            "goodsStndrdCode",
+            "goodsStndrdNm",
+            "goodsUnitCode",
+            "goodsUnitNm",
+            "orgplceSeCode",
+            "orgplceSeNm",
+            "csmtQy",
+            "csmtUnqt",
+            "csmtUntpc",
+          ].map((field) => text(r[field])),
+          number(r.csmtWt),
+          number(r.csmtAmount),
         ]),
       )
       .digest("hex");
+    // Exact repeats fail the whole day: without a provider transaction ID we
+    // cannot distinguish two identical trades from overlapping API pages.
     if (seen.has(rowKey))
       throw new FeedError("error", "위판 원자료 식별자 중복");
     seen.add(rowKey);
