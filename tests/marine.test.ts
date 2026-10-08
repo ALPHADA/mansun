@@ -440,3 +440,72 @@ it("requeues the full backfill only when the unit or market mapping changes", as
     )[0].n,
   ).toBe(0);
 });
+
+it("accepts provider decimals without a leading zero but rejects invalid weights", () => {
+  vi.stubEnv("AUCTION_WEIGHT_UNIT", "kg");
+  expect(normalizeAuction([{ ...raw, csmtWt: ".9" }], day)[0].weight).toBe(0.9);
+  for (const csmtWt of ["-.9", ".", "1e3", "", "NaN"])
+    expect(() => normalizeAuction([{ ...raw, csmtWt }], day)).toThrow();
+});
+
+it("collects seven exact forecast zones despite the upstream page-local totalCount", async () => {
+  vi.stubEnv("KMA_SERVICE_KEY", "test-key");
+  const zones = [
+    ["12A20100", "서해중부앞바다"],
+    ["12A30100", "서해남부앞바다"],
+    ["12B10100", "남해서부앞바다"],
+    ["12B20100", "남해동부앞바다"],
+    ["12C10100", "동해남부앞바다"],
+    ["12C20100", "동해중부앞바다"],
+    ["12B10300", "제주도앞바다"],
+  ];
+  const reserve = vi.fn(async () => {});
+  const seenPages: (string | null)[] = [];
+  const fetcher = vi.fn(async (input: string | URL | Request) => {
+    const url = new URL(String(input));
+    seenPages.push(url.searchParams.get("pageNo"));
+    const zone = zones.find(
+      ([code]) => code === url.searchParams.get("regId"),
+    )!;
+    return response([{ regId: zone[0], regName: zone[1] }]);
+  }) as typeof fetch;
+  for (let page = 1; page <= 7; page++) {
+    const result = await fetchPage(
+      { ...job("zones"), page },
+      undefined,
+      reserve,
+      fetcher,
+    );
+    expect(result).toEqual({
+      rows: [{ regId: zones[page - 1][0], regName: zones[page - 1][1] }],
+      total: 7,
+    });
+  }
+  expect(reserve).toHaveBeenCalledTimes(7);
+  expect(seenPages).toEqual(Array(7).fill("1"));
+  await insert(job("zones"));
+  for (let page = 1; page <= 7; page++) {
+    const claimed = await claimJob("weather");
+    expect(claimed?.page).toBe(page);
+    await processJob(claimed!, fetcher);
+    if (page < 7)
+      expect(
+        await db()`SELECT * FROM marine_snapshots WHERE source='zones'`,
+      ).toHaveLength(0);
+  }
+  const [snapshot] =
+    await db()`SELECT data FROM marine_snapshots WHERE source='zones'`;
+  expect(snapshot.data).toEqual(zones.map(([code, name]) => ({ code, name })));
+  expect(await db()`SELECT * FROM marine_pages`).toHaveLength(0);
+  await expect(
+    fetchPage({ ...job("zones"), page: 8 }, undefined, reserve, fetcher),
+  ).rejects.toThrow();
+  for (const rows of [
+    [],
+    [{ regId: "12A20100", regName: "다른구역" }],
+    [{ regId: "wrong", regName: "서해중부앞바다" }],
+  ])
+    await expect(
+      fetchPage(job("zones"), undefined, reserve, async () => response(rows)),
+    ).rejects.toThrow();
+});

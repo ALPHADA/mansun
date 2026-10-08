@@ -15,6 +15,17 @@ import {
 } from "./model";
 
 export type Row = Record<string, unknown>;
+// Verified against getFcstZoneCd on 2026-10-08. Query exact codes because the
+// unfiltered endpoint reports the page size as totalCount, truncating the list.
+const seaZones = [
+  ["12A20100", "서해중부앞바다"],
+  ["12A30100", "서해남부앞바다"],
+  ["12B10100", "남해서부앞바다"],
+  ["12B20100", "남해동부앞바다"],
+  ["12C10100", "동해남부앞바다"],
+  ["12C20100", "동해중부앞바다"],
+  ["12B10300", "제주도앞바다"],
+] as const;
 export type Job = {
   id: string;
   source: Source;
@@ -41,7 +52,7 @@ const text = (v: unknown) =>
 function number(v: unknown, min = 0, max = 1e15) {
   const s = text(v).replaceAll(",", "");
   if (
-    !/^-?\d+(\.\d+)?$/.test(s) ||
+    !/^-?(?:\d+(?:\.\d+)?|\.\d+)$/.test(s) ||
     !Number.isFinite(Number(s)) ||
     Number(s) < min ||
     Number(s) > max
@@ -122,6 +133,10 @@ export async function fetchPage(
     params.dataType = "JSON";
     if (job.source === "zones") {
       endpoint = "1360000/FcstZoneInfoService/getFcstZoneCd";
+      const zone = seaZones[job.page - 1];
+      if (!zone) throw new FeedError("error", "예보구역 조회 순번 오류");
+      params.regId = zone[0];
+      params.pageNo = "1";
     } else if (job.source === "warning") {
       endpoint = "1360000/WthrWrnInfoService/getPwnStatus";
     } else if (job.source === "sea") {
@@ -185,6 +200,18 @@ export async function fetchPage(
     );
   }
   const page = parsePage(payload, job.source);
+  if (job.source === "zones") {
+    const [code, name] = seaZones[job.page - 1];
+    if (
+      page.total !== 1 ||
+      page.rows.length !== 1 ||
+      text(page.rows[0].regId) !== code ||
+      text(page.rows[0].regName) !== name
+    )
+      throw new FeedError("error", "공식 해상 예보구역 코드·이름 불일치");
+    // One verified zone per persisted worker page; publish all seven atomically.
+    return { rows: page.rows, total: seaZones.length };
+  }
   if (job.source === "sea" && page.rows.some((r) => text(r.regId) !== zoneCode))
     throw new FeedError("error", "해상 예보구역 불일치");
   return page;
