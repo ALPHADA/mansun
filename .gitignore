@@ -31,3 +31,4 @@ data/
 artifacts/
 .next-ui/
 dogfood-output/
+design/brand-concepts/**/*.png
