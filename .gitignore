@@ -29,3 +29,5 @@ playwright-report/
 data/
 .next-e2e/
 artifacts/
+.next-ui/
+dogfood-output/

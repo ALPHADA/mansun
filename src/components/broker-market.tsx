@@ -49,7 +49,7 @@ export default async function BrokerMarket({
         <div className="summary-note">
           <ChartLine size={27} />
           <p>
-            풍어 등록 상품 기준
+            전국 수산물 경매 정보방 등록 상품 기준
             <br />
             <strong>지역 전체 위판량과 다릅니다.</strong>
           </p>

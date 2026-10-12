@@ -1,0 +1,13 @@
+Generated with the built-in image_gen tool. Concept presentations only; no production assets replaced. Scale samples in generated boards are illustrative, not literal 16px tests.
+
+Shared prompt (prepend to each concept):
+Use case: logo-brand. Create one refined logo concept presentation image for Korean brand 만선 (MANSUN), a nationwide seafood wholesale information and broker/buyer connection service. Landscape clean ivory presentation sheet. Flat vector-like original identity, professional and friendly, practical not luxury, extremely clear bold silhouette suitable for 16px favicon. Palette deep navy #102E38, ocean teal #007D78, ivory #F6F5EF. Present ONE concept only: left a very large standalone symbol, right same identical symbol in one rounded-square app icon, underneath three identical small favicon scale samples on light and dark backgrounds. Modest typography: exact Korean wordmark '만선', tiny English 'MANSUN', concept letter at top left. Generous whitespace, crisp geometry. No gradients, no shadows, no photography, no elaborate illustration, no stock anchors, no fine lines, no extraneous symbols. Keep icon symbol itself free of text.
+
+A:
+Concept A: '만선의 뱃머리'. Design one clever compact symbol that merges a full fishing boat hull with a single fish silhouette through negative space. Broad rounded rising hull, simple tail or fish cue, restrained wave underside. A strong filled mark with at most three bold geometric pieces; approachable and clearly maritime. Top left text 'A'. Avoid detailed boats, masts, nets, eyes or scales. App icon deep teal background, warm white symbol.
+
+B:
+Concept B: '파도 M'. Design a compact bold geometric lowercase or uppercase M monogram whose two broad rounded crests also read as ocean waves. One continuous substantial shape, interesting asymmetric upward ending, purposeful cutout, not generic sine wave or stock mountain logo. Symbol teal, app icon deep navy with ivory symbol and one restrained teal accent if necessary. Top left text 'B'. Small-size recognition is the priority; sophisticated business tool.
+
+C:
+Concept C: '물고기 연결'. Design an original compact emblem of two simplified fish forms interlocking around a small negative-space center to suggest exchange, trusted connection and seafood. Large substantial forms, no thin circles, no little scales, no eyes required; visually calm and unique, not yin-yang and not recycling arrows. One fish teal, the other navy; app icon ivory tile using same two colors. Top left text 'C'. At tiny sizes the two-piece silhouette remains clearly recognizable.

@@ -3,6 +3,7 @@ import { currentUser } from "@/server/auth";
 import { smsReady } from "@/server/config";
 import { kakaoReady, safeNext } from "@/server/kakao";
 import { LoginForm } from "@/components/login-form";
+
 export const metadata = { title: "로그인" };
 export default async function Login({
   searchParams,

@@ -169,7 +169,7 @@ export async function requestOtp(raw: unknown, request: Request) {
               {
                 to: phone,
                 from: process.env.SOLAPI_FROM,
-                text: `[풍어] 인증번호 ${code} (5분 이내 입력)`,
+                text: `[전국 수산물 경매 정보방] 인증번호 ${code} (5분 이내 입력)`,
                 type: "SMS",
               },
             ],
@@ -235,7 +235,7 @@ export async function verifyOtp(input: {
       }
       [u] =
         await sql`INSERT INTO members(phone,role,profile,approval) VALUES(${c.phone},${data.role},${sql.json(data.profile)},'approved') RETURNING *`;
-      await sql`INSERT INTO notifications(user_id,title,body,href) VALUES(${u.id},'풍어에 오신 것을 환영합니다',${data.role === "broker" ? "지금 바로 오늘 물건을 올릴 수 있습니다." : "관심 지역과 어종을 설정하고 오늘 물건을 만나보세요."},'/me')`;
+      await sql`INSERT INTO notifications(user_id,title,body,href) VALUES(${u.id},'전국 수산물 경매 정보방에 오신 것을 환영합니다',${data.role === "broker" ? "지금 바로 오늘 물건을 올릴 수 있습니다." : "관심 지역과 어종을 설정하고 오늘 물건을 만나보세요."},'/me')`;
     }
     if (u.suspended) return { error: "이용이 제한된 계정입니다." };
     await sql`UPDATE otp_challenges SET consumed=true WHERE phone=${c.phone} AND NOT consumed`;

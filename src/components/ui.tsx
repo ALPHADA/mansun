@@ -1,13 +1,6 @@
 import { BrandName } from "./brand-name";
 import Link from "next/link";
-import {
-  Fish,
-  ArrowRight,
-  MapPin,
-  LockKey,
-  ArrowLeft,
-  ShieldCheck,
-} from "./icons";
+import { ArrowRight, MapPin, LockKey, ArrowLeft, ShieldCheck } from "./icons";
 import { Favorite } from "./actions";
 import { money, type PublicListing, type User } from "@/lib/model";
 export function Heading({
@@ -163,13 +156,13 @@ export function ProductCard({
     </article>
   );
 }
-export function Brand({ homeTitle = false }: { homeTitle?: boolean }) {
+export function Brand() {
   return (
     <Link href="/" className="brand" aria-label="홈">
       <span className="brand-symbol">
-        <Fish size={29} weight="bold" />
+        <img src="/brand/symbol.svg" width="52" height="39" alt="" />
       </span>
-      {homeTitle ? <BrandName /> : <span>풍어</span>}
+      <BrandName />
     </Link>
   );
 }

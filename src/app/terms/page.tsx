@@ -3,12 +3,12 @@ export default function Terms() {
   return (
     <div className="narrow prose">
       <Heading
-        title="풍어 이용약관"
+        title="전국 수산물 경매 정보방 이용약관"
         description="초기 테스트 서비스 이용 안내"
       />
       <h2>서비스의 역할</h2>
       <p>
-        풍어는 수산업 종사자의 상품·가격·매입 요청 정보를 제공하고 거래
+        전국 수산물 경매 정보방은 수산업 종사자의 상품·가격·매입 요청 정보를 제공하고 거래
         당사자의 연락을 연결합니다. 주문 확정·대금 결제·배송·정산은 서비스
         밖에서 당사자가 협의합니다.
       </p>

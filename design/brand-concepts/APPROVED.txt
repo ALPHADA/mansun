@@ -1,0 +1,19 @@
+Approved: concept A, color direction 07 (blue + orange).
+Service name shown everywhere: 전국 수산물 경매 정보방 (internal identifier stays mansun/pungeo).
+
+Main blue: #2459D3
+Hover blue: #1945AD
+Dark ink: #182C4C
+Orange accent: #F28A3A
+Subtle surface: #EDF2FC
+Page tint: #F8FAFD
+
+Production vector interpretation: public/brand/symbol.svg
+Inverse symbol: public/brand/symbol-inverse.svg
+App icon: src/app/icon.svg
+Apple touch icon: src/app/apple-icon.png
+Multi-resolution favicon: src/app/favicon.ico (16,32,48)
+PNG exports: public/brand/icon-{16,32,48,128,180,192,512}.png
+Rebuild assets: node scripts/brand-assets.mjs
+
+Use blue for primary actions, active filters and links. Use orange for the symbol wave, notification dots and focus outlines; avoid orange as small text on white. Kakao login retains its required yellow branding.

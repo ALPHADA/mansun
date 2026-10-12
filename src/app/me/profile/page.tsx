@@ -147,7 +147,7 @@ export default async function Profile() {
           </select>
         </label>
         <p className="form-note">
-          알림은 풍어 안에서만 확인합니다. 카카오·문자 상품 알림은 보내지
+          알림은 전국 수산물 경매 정보방 안에서만 확인합니다. 카카오·문자 상품 알림은 보내지
           않습니다.
         </p>
       </ActionForm>
