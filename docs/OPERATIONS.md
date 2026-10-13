@@ -149,3 +149,13 @@ pg_restore --no-owner --no-acl -d mansun_market_restore /private/backup/database
 - 새 SQL 변경은 없다. 서버의 별도 stage에서 빌드 후 해당 웹과 데이터 수집 프로세스만 재시작했다. 기존 jobs·백업·다른 서비스는 재시작하지 않았다. `.env`는 0600이며 의도한 4개 설정 외 환경변수 변경이 없음을 백업과 비교했다. 기존 layout·globals·UI 브랜딩 파일도 백업과 동일하다. 업로드는 변경하지 않았다.
 - 10개 항구의 공개 API에서 물때·해상예보·육상예보·특보가 모두 ready/200임을 확인했다. 신진도 당일·제주 다음 날 물때와 예보를 브라우저로 확인하고 320px 모바일 가로 넘침 없음·5개 하단 메뉴를 확인했다. 별도 테스트 계정·가짜 데이터를 생성하지 않았다.
 - 위판 최근 30일은 일자별 모든 페이지 수집·검증 후 순차 게시한다. 비교 기간 전체가 완료되기 전에는 주간 증감을 표시하지 않는다. 공식 중량 단위가 명시되지 않아 kg 수치와 kg당 가격은 계속 보류한다. 상세 근거와 수집 주기는 `docs/MARINE-DATA.md` 참조.
+
+### 서비스 이름 통일·브랜드 리디자인 반영 (2026-10-13)
+
+- 구현 커밋 `b14d6b2`(이름 통일 + 브랜드 리디자인), `611e995`(콘셉트 PNG 무시). 화면·메타 title·약관/개인정보/안내 문구·SMS 접두어·환영 알림에서 `풍어`를 `전국 수산물 경매 정보방`으로 통일했고, 승인 팔레트·심볼·앱 아이콘·NavLink를 함께 반영했다. 내부 식별자(`mansun`, `pungeo` 패키지명, localStorage 키)는 유지한다.
+- 독립 Codex·Claude 리뷰 1회차 모두 APPROVE. minor 지적(디자인 메모 문구, 푸터 심볼 크기 규칙, 중복 미디어 쿼리)만 반영했다. 타입 검사·린트·단위 테스트 75개 통과. SQL 변경 없음.
+- 푸시 전 원격의 `a605766`(PR #1, 구 통합 테스트 수정) 위로 rebase했다. 해당 테스트 파일은 재구축 커밋에서 이미 삭제된 파일이라 삭제를 유지했다.
+- 백업: `/Users/dana/srv/backups/mansun-market-brand-20261013/` — `code.tar.gz`(운영 환경 파일 포함, 비공개), `2026-10-13T03-15-38.342Z/database.dump`·`uploads.tar.gz`(pg_restore 목록 검증), 교체 전 빌드 `previous-next/`(BUILD_ID `EWXy9Hcy9MfCa8era1pOc`).
+- 서버 `package.json`·`pnpm-lock.yaml`은 배포본과 동일했다. `/Users/dana/srv/mansun-market-brand-stage-20261013`에 `git archive`로 소스를 풀고 운영 `.env`를 복사해 빌드했다(Turbopack은 심볼릭 링크 `node_modules`를 거부하므로 stage에서 `pnpm install --frozen-lockfile` 실행). 새 BUILD_ID `6YjucwV_ORx7FxcFNYr-r`. 소스(`.env`·`data`·`node_modules` 제외)와 `.next`를 운영 디렉터리에 반영하고 `mansun-market-web`만 재시작했다. jobs·data·백업·`mansun-web`·공유 터널은 건드리지 않았다.
+- 검증: `.env` SHA-256 배포 전후 동일(0600). 공개 주소에서 `/`, `/board`, `/guide`, `/terms`, `/privacy`, `/login`, `/market`, `/sea`, `/requests` 모두 200이며 `풍어` 0건, title이 `… | 전국 수산물 경매 정보방`. `/api/health`, `/icon.svg`, `/brand/symbol.svg`, `/apple-icon.png` 200. 재시작 후 오류 로그 없음. 테스트 계정·가짜 데이터는 만들지 않았다.
+- 롤백: `mansun-market-web` 중지 후 `previous-next/`를 `.next`로 되돌리고 `code.tar.gz`에서 변경 소스만 복구한다. `.env`·업로드·DB는 보존한다.
